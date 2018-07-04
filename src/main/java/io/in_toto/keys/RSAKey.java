@@ -1,10 +1,12 @@
 package io.in_toto.keys;
 
-import java.io.FileReader;
-import java.io.Reader;
 import java.io.IOException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FileNotFoundException;
+import java.io.Reader;
 import java.io.StringWriter;
+import java.io.Writer;
 
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -24,44 +26,12 @@ import java.security.PublicKey;
 import org.bouncycastle.util.io.pem.PemObject;
 
 
-/*
- * future reference:
- *
- * Signatures made with in-toto keys should have the form:
- *
- * {
- *    "signed" : "<ROLE>",
- *    "signatures" : [
- *        { "keyid" : "<KEYID>",
- *          "method" : "<METHOD>",
- *          "sig" : "<SIGNATURE>" },
- *    "..."
- *    ]
- *  }
- *
- */
-
-
 /**
- * Hello world!
+ * RSA implementation of an in-toto key.
  *
  */
 public class RSAKey
 {
-
-    /* we are aiming to compute these exact values
-     *
-     * {"keyid_hash_algorithms":["sha256","sha512"],"keytype":"rsa","keyval":{"public":"-----BEGIN PUBLIC KEY-----
-     * MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAymN61u0IJ9nY+eQmUqie
-     * RHnjDTNUQ/ArPJiXJ9nMVv3ASD3pHDdJfsLLiradP75Ll86uE9CgSITrtgkoBTqV
-     * hAGL+xtB+hYIbG1T3InSQK8t3RmR76yG4XYHRjnTvg0kYnZubYeKLeFn9Rg8mD8D
-     * xcL3OwL4BSairNYdAtu6aozO8uDQSvMV9IGpPB9T2Vo4mONQZ0YM2+y/K2+WVBjy
-     * hHbPt9I2X+pbP4JJ1cuIUk/QNfVSIMJDvtNf3+C4VmF/ouRjHv9Ee71Io9AGgHIH
-     * eWJDSVl3zdXiUMz1HsXEhxcrJHN7g4M5HCHBOxMyiMDZLBGW1uqzvtOwcWEc20JB
-     * lwIDAQAB
-     * -----END PUBLIC KEY-----"},"scheme":"rsassa-pss-sha256"}
-     *  0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7
-     */
 
     PEMKeyPair kpr;
     String keyid;
@@ -73,13 +43,17 @@ public class RSAKey
         this.kpr = kpr;
     }
 
-    public static RSAKey readPem(String filename)
+    public static RSAKey read(String filename) {
+        return RSAKey.readPem(filename);
+    }
+
+    private static RSAKey readPem(String filename)
     {
         FileReader pemfile = null;
         try {
             pemfile = new FileReader(filename);
         } catch (IOException e) {
-            System.out.println("didn't work :{");
+            throw new RuntimeException("Couldn't read key");
         }
 
         return readPemBuffer(pemfile);
@@ -106,9 +80,17 @@ public class RSAKey
     public AsymmetricKeyParameter getPublic() throws IOException {
         if (this.kpr == null)
             return null;
-
         return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
     }
+
+    public void write(String filename) {
+        try {
+            FileWriter out = new FileWriter(filename); 
+            encodePem(out);
+        } catch (IOException e) {
+            throw new RuntimeException(e.toString());
+        }
+    } 
 
     public String computeKeyId() {
         if (this.kpr == null)
@@ -130,21 +112,27 @@ public class RSAKey
         return Hex.toHexString(result);
     }
 
-    private String getKeyval() {
-        final String type = "PUBLIC KEY";
-        StringWriter out = new StringWriter();
+    private void encodePem(Writer out) {
         JcaPEMWriter pemWriter = new JcaPEMWriter(out);
         try {
-            //PublicKey pubkey = new KeyFactorySpi().generatePublic(this.kpr.getPublicKeyInfo());
             pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
             pemWriter.flush();
         } catch (IOException e) {
-            out.write("ono: " + e.toString());
+            throw new RuntimeException(e.toString());
         }
+    }
+
+    private String getKeyval() {
+        StringWriter out = new StringWriter();
+        encodePem(out);
         String result = out.toString();
+
+        // We need to truncate any trailing '\n' as different implementations
+        // may or may not add it as a consequence keyids.
         if (result.charAt(result.length() -1) == '\n')
             result = result.substring(0, result.length() - 1);
-
         return result;
     }
+
+
 }
