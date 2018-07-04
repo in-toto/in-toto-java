@@ -1,5 +1,7 @@
 package io.in_toto.keys;
 
+import java.lang.System;
+
 import java.io.IOException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -13,18 +15,14 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.MiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Hex;
 
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyFactorySpi;
-import java.security.PublicKey;
-
-import org.bouncycastle.util.io.pem.PemObject;
-
 
 /**
  * RSA implementation of an in-toto key.
@@ -66,13 +64,25 @@ public class RSAKey
         PEMKeyPair kpr  = null;
         // FIXME: some proper exception handling here is in order
         try {
-            kpr = (PEMKeyPair)pemReader.readObject();
+            Object pem = pemReader.readObject();
+
+            if (pem instanceof PEMKeyPair) {
+                kpr = (PEMKeyPair)pem;
+            } else if (pem instanceof SubjectPublicKeyInfo) {
+                kpr = new PEMKeyPair((SubjectPublicKeyInfo)pem, null);
+            } else {
+                throw new RuntimeException("Couldn't parse PEM object: " +
+                        pem.toString());
+            }
+
         } catch (IOException e) {}
         return new RSAKey(kpr);
     }
 
     public AsymmetricKeyParameter getPrivate() throws IOException{
         if (this.kpr == null)
+            return null;
+        if (this.kpr.getPrivateKeyInfo() == null)
             return null;
         return PrivateKeyFactory.createKey(this.kpr.getPrivateKeyInfo());
     }
