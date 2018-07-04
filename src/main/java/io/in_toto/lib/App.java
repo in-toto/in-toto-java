@@ -5,10 +5,10 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 
 
-import io.in_toto.lib.RSAKey;
-import io.in_toto.lib.Link;
-import io.in_toto.lib.Metablock;
-import io.in_toto.lib.Artifact;
+import io.in_toto.keys.RSAKey;
+import io.in_toto.models.Link;
+import io.in_toto.models.Metablock;
+import io.in_toto.models.Artifact;
 
 /**
  * Hello world!

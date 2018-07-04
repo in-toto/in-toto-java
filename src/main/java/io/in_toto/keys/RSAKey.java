@@ -1,4 +1,4 @@
-package io.in_toto.lib;
+package io.in_toto.keys;
 
 import java.io.FileReader;
 import java.io.Reader;

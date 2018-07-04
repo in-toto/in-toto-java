@@ -1,6 +1,6 @@
-package io.in_toto.lib;
+package io.in_toto.models;
 
-import io.in_toto.lib.Artifact;
+import io.in_toto.models.Artifact;
 import java.util.ArrayList;
 
 /**

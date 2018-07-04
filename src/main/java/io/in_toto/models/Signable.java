@@ -1,4 +1,4 @@
-package io.in_toto.lib;
+package io.in_toto.models;
 
 /**
  * A signable class is an abstract superclass that provides a representation method

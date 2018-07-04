@@ -1,9 +1,9 @@
-package io.in_toto.lib;
+package io.in_toto.models;
 
 import java.util.ArrayList;
 
-import io.in_toto.lib.RSAKey;
-import io.in_toto.lib.Signable;
+import io.in_toto.keys.RSAKey;
+import io.in_toto.models.Signable;
 
 /**
  * A metablock class contains two elements:
