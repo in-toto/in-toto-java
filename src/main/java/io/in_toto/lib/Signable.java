@@ -8,7 +8,7 @@ package io.in_toto.lib;
 // FIXME: public or protected? do check
 public abstract class Signable
 {
-    /** 
+    /**
      * Subclasses must define the _type field appropriately for serialization
      */
     protected String _type;
@@ -26,5 +26,3 @@ public abstract class Signable
      */
     public abstract String encode_canonical();
 }
-
-

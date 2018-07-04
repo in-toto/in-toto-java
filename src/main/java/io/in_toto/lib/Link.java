@@ -4,9 +4,9 @@ import io.in_toto.lib.Artifact;
 import java.util.ArrayList;
 
 /**
- * Implementation of the in-toto Link metadata type. 
+ * Implementation of the in-toto Link metadata type.
  *
- * 
+ *
  * @param materials a list of material artifact objects
  * @param products a list of product artifact objects
  * @param name the name of the link used for lookup
@@ -27,7 +27,7 @@ public class Link extends Signable
 
     public Link(ArrayList<Artifact> materials, ArrayList<Artifact> products, String name, String env,
             String run) {
-     
+
         super();
 
         if (materials == null)

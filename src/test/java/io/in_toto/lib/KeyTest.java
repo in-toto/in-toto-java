@@ -11,7 +11,7 @@ import io.in_toto.lib.RSAKey;
 /**
  * Unit test for simple App.
  */
-public class KeyTest 
+public class KeyTest
     extends TestCase
 {
     /**

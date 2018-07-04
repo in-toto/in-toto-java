@@ -7,7 +7,7 @@ import io.in_toto.lib.Signable;
 
 /**
  * A metablock class contains two elements:
- * 
+ *
  * @param signed An in-toto compliant link or layout metadata object
  * @param signature: an array of signature objects over the canonical-json encoded
  *                       representation of the signed field.
@@ -40,11 +40,11 @@ public class Metablock
      * @param filepath the location in the FS of the file to load.
      */
     public static Metablock read(String filepath) {
-        return new Metablock(null, null); 
+        return new Metablock(null, null);
     }
 
     /**
-     * Signs the current signed payload using the key provided 
+     * Signs the current signed payload using the key provided
      *
      * @param privatekey the key used to sign the payload.
      */

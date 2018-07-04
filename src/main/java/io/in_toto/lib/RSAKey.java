@@ -21,10 +21,6 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyFactorySpi;
 import java.security.PublicKey;
 
-
-
-
-
 import org.bouncycastle.util.io.pem.PemObject;
 
 
@@ -38,7 +34,7 @@ import org.bouncycastle.util.io.pem.PemObject;
  *    "signatures" : [
  *        { "keyid" : "<KEYID>",
  *          "method" : "<METHOD>",
- *          "sig" : "<SIGNATURE>" }, 
+ *          "sig" : "<SIGNATURE>" },
  *    "..."
  *    ]
  *  }
@@ -67,7 +63,7 @@ public class RSAKey
      *  0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7
      */
 
-    PEMKeyPair kpr; 
+    PEMKeyPair kpr;
     String keyid;
     // TODO: fixme to have RSA-PSS using sha256 for now;
     public static final String method = "rsassa-pss-sha256";
@@ -85,16 +81,16 @@ public class RSAKey
         } catch (IOException e) {
             System.out.println("didn't work :{");
         }
-        
+
         return readPemBuffer(pemfile);
     }
 
-    private static RSAKey readPemBuffer(Reader reader) 
+    private static RSAKey readPemBuffer(Reader reader)
     {
 
         PEMParser pemReader  = new PEMParser(reader);
         PEMKeyPair kpr  = null;
-        // FIXME: some proper exception handling here is in order 
+        // FIXME: some proper exception handling here is in order
         try {
             kpr = (PEMKeyPair)pemReader.readObject();
         } catch (IOException e) {}
@@ -115,9 +111,9 @@ public class RSAKey
     }
 
     public String computeKeyId() {
-        if (this.kpr == null) 
+        if (this.kpr == null)
             return null;
-        
+
         // FIXME: need a canonical representation of the key in order to get the keyid.
         // right now we are hardcoding this, as we don't have much metadata to work with
         // and template strings are easy to fine-tune...
