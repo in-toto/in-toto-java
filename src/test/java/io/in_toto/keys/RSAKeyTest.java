@@ -6,7 +6,7 @@ import java.lang.System;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-//import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;
 
 import io.in_toto.keys.RSAKey;
 
@@ -43,6 +43,23 @@ class RSAKeyTest
             throw new RuntimeException(e);
         }
 
+    }
+
+    /**
+     * test keyid computation
+     */
+    @Test
+    public void testGetKeyID()
+    {
+        final String targetKeyID = "0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7";
+
+        // load a privatekey pem and compare the keyid
+        RSAKey testKey = RSAKey.read(private_key_path);
+        assertTrue(targetKeyID.equals(testKey.computeKeyId()));
+
+        // load a public key pem and compare the keyid
+        testKey = RSAKey.read(public_key_path);
+        assertTrue(targetKeyID.equals(testKey.computeKeyId()));
     }
 
     /**
