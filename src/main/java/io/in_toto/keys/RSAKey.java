@@ -29,11 +29,19 @@ import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 
+import org.bouncycastle.crypto.signers.RSADigestSigner;
+import org.bouncycastle.crypto.signers.PSSSigner;
+import org.bouncycastle.crypto.engines.RSAEngine;
+
+
+import org.bouncycastle.crypto.Signer;
+
 /**
  * RSA implementation of an in-toto RSA key.
  *
  */
 public class RSAKey
+    extends Key
     implements JSONEncoder
 {
 
@@ -107,14 +115,14 @@ public class RSAKey
 
     public void write(String filename) {
         try {
-            FileWriter out = new FileWriter(filename); 
+            FileWriter out = new FileWriter(filename);
             // XXX: right now we are *not* serializing public keys, although
             // that should be trivial
             encodePem(out, false);
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }
-    } 
+    }
 
     public String computeKeyId() {
         if (this.kpr == null)
@@ -173,5 +181,20 @@ public class RSAKey
         if (result.charAt(result.length() -1) == '\n')
             result = result.substring(0, result.length() - 1);
         return result;
+    }
+
+    public Signer getSigner() {
+        // XXX theoretically we should be able to use any digest that's listed
+        // on the method, but we are using sha256 as it is the default now.
+        RSAEngine engine = new RSAEngine();
+        try {
+            engine.init(false, getPrivate());
+        } catch (IOException e) {
+            throw new RuntimeException(e.toString());
+        }
+        SHA256Digest digest = new SHA256Digest();
+        return new PSSSigner(engine, digest, digest.getDigestSize());
+
+        //return new RSADigestSigner(new SHA256Digest());
     }
 }

@@ -5,11 +5,17 @@ import java.util.ArrayList;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import io.in_toto.keys.RSAKey;
+import io.in_toto.keys.Key;
+import io.in_toto.keys.Signature;
 import io.in_toto.models.Signable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import org.bouncycastle.crypto.Signer;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.CryptoException;
 
 /**
  * A metablock class contains two elements:
@@ -22,16 +28,16 @@ import com.google.gson.GsonBuilder;
 public class Metablock
 {
     Signable signed;
-    ArrayList<String> signatures;
+    ArrayList<Signature> signatures;
 
     /**
      * Dummy constructor
      */
-    public Metablock(Signable signed, ArrayList<String> signatures) {
+    public Metablock(Signable signed, ArrayList<Signature> signatures) {
         this.signed = signed;
 
         if (signatures == null)
-            signatures = new ArrayList<String>();
+            signatures = new ArrayList<Signature>();
         this.signatures = signatures;
     }
 
@@ -66,7 +72,39 @@ public class Metablock
      *
      * @param privatekey the key used to sign the payload.
      */
-    public void sign(RSAKey privatekey) {}
+    public void sign(Key privateKey) {
+
+        String sig;
+        String keyid;
+        byte[] payload;
+        AsymmetricKeyParameter keyParameters;
+
+        try {
+            keyParameters = privateKey.getPrivate();
+            if (keyParameters == null || keyParameters.isPrivate() == false) {
+                System.out.println("Can't sign with a public key!");
+                return;
+            }
+        } catch (IOException e) {
+            System.out.println("Can't sign with this key!");
+            return;
+        }
+
+        keyid = privateKey.computeKeyId();
+        payload = this.signed.JSONEncode().getBytes();
+        System.out.println("About to sign" + new String(payload));
+
+        Signer signer = privateKey.getSigner();
+        signer.init(true, keyParameters);
+        signer.update(payload, 0, payload.length);
+        try {
+            sig = Hex.toHexString(signer.generateSignature());
+        } catch (CryptoException e) {
+            System.out.println("Coudln't sign payload!");
+            return;
+        }
+
+        this.signatures.add(new Signature(keyid, sig));
+
+    }
 }
-
-
