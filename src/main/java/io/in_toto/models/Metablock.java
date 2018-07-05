@@ -2,8 +2,14 @@ package io.in_toto.models;
 
 import java.util.ArrayList;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 import io.in_toto.keys.RSAKey;
 import io.in_toto.models.Signable;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * A metablock class contains two elements:
@@ -32,7 +38,19 @@ public class Metablock
     /**
      * Serialize the current metadata into a JSON file
      */
-    public void dump() {}
+    public void dump(String filename) {
+        FileWriter writer = null;
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        try{
+            writer = new FileWriter(filename);
+            writer.write(gson.toJson(this));
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Couldn't serialize object: " + e.toString());
+        }
+    }
 
     /**
      * Loads a JSON file and populates the right object
