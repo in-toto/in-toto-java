@@ -1,5 +1,8 @@
 package io.in_toto.models;
 
+import io.in_toto.lib.JSONEncoder;
+
+
 /**
  * A signable class is an abstract superclass that provides a representation method
  * to prepare for signing
@@ -7,6 +10,7 @@ package io.in_toto.models;
  */
 // FIXME: public or protected? do check
 public abstract class Signable
+    implements JSONEncoder
 {
     /**
      * Subclasses must define the _type field appropriately for serialization
@@ -25,4 +29,5 @@ public abstract class Signable
      * This abstract method is to be populated by the subclasses in order to verify them
      */
     public abstract String encode_canonical();
+
 }

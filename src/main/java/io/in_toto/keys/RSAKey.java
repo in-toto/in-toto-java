@@ -2,6 +2,8 @@ package io.in_toto.keys;
 
 import java.lang.System;
 
+import io.in_toto.lib.JSONEncoder;
+
 import java.io.IOException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -9,6 +11,9 @@ import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -25,20 +30,27 @@ import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 
 /**
- * RSA implementation of an in-toto key.
+ * RSA implementation of an in-toto RSA key.
  *
  */
 public class RSAKey
+    implements JSONEncoder
 {
 
     PEMKeyPair kpr;
-    String keyid;
+
     // TODO: fixme to have RSA-PSS using sha256 for now;
-    public static final String method = "rsassa-pss-sha256";
-    public static final String keyid_hash_algorithms = "\"keyid_hash_algorithms\":[\"sha256\",\"sha512\"]";
+    private final String scheme = "rsassa-pss-sha256";
+    private final String[] keyid_hash_algorithms = {"sha256", "sha512"};
+    private final String keytype = "rsa";
+
+    private HashMap<String,String> keyval;
 
     public RSAKey(PEMKeyPair kpr) {
         this.kpr = kpr;
+        this.keyval = new HashMap<String, String>();
+        this.keyval.put("private", getKeyval(true));
+        this.keyval.put("public", getKeyval(false));
     }
 
     public static RSAKey read(String filename) {
@@ -96,7 +108,9 @@ public class RSAKey
     public void write(String filename) {
         try {
             FileWriter out = new FileWriter(filename); 
-            encodePem(out);
+            // XXX: right now we are *not* serializing public keys, although
+            // that should be trivial
+            encodePem(out, false);
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }
@@ -106,12 +120,20 @@ public class RSAKey
         if (this.kpr == null)
             return null;
 
-        // FIXME: need a canonical representation of the key in order to get the keyid.
-        // right now we are hardcoding this, as we don't have much metadata to work with
-        // and template strings are easy to fine-tune...
-        byte[] JSONrepr = String.format(
-                "{%s,\"keytype\":\"rsa\",\"keyval\":{\"public\":\"%s\"},\"scheme\":\"%s\"}",
-                keyid_hash_algorithms, getKeyval(), method).getBytes();
+        // if we have a private portion, exclude it from the keyid computation
+        String privateBackup = null;
+        if (this.keyval.containsKey("private")) {
+            privateBackup = this.keyval.get("private");
+            this.keyval.remove("private");
+        }
+
+        PEMKeyPair keyPairBackup = null;
+        if (this.kpr != null ) {
+            keyPairBackup = this.kpr;
+            this.kpr = null;
+        }
+
+        byte[] JSONrepr = this.JSONEncode().getBytes();
 
         // initialize digest
         SHA256Digest digest =  new SHA256Digest();
@@ -119,22 +141,31 @@ public class RSAKey
         digest.update(JSONrepr, 0, JSONrepr.length);
         digest.doFinal(result, 0);
 
+        if (privateBackup != null)
+            this.keyval.put("private", privateBackup);
+
+        if (keyPairBackup != null)
+            this.kpr = keyPairBackup;
+
         return Hex.toHexString(result);
     }
 
-    private void encodePem(Writer out) {
+    private void encodePem(Writer out, boolean privateKey) {
         JcaPEMWriter pemWriter = new JcaPEMWriter(out);
         try {
-            pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
+            if (privateKey && getPrivate() != null)
+                pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
+            else
+                pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
             pemWriter.flush();
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }
     }
 
-    private String getKeyval() {
+    private String getKeyval(boolean privateKey) {
         StringWriter out = new StringWriter();
-        encodePem(out);
+        encodePem(out, privateKey);
         String result = out.toString();
 
         // We need to truncate any trailing '\n' as different implementations
@@ -143,6 +174,4 @@ public class RSAKey
             result = result.substring(0, result.length() - 1);
         return result;
     }
-
-
 }

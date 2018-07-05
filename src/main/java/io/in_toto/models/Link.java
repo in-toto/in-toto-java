@@ -18,7 +18,6 @@ import java.util.ArrayList;
 // FIXME: public or protected? do check
 public class Link extends Signable
 {
-
     private ArrayList<Artifact> materials;
     private ArrayList<Artifact> products;
     private String name;
