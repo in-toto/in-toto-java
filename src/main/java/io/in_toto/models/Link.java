@@ -1,7 +1,9 @@
 package io.in_toto.models;
 
 import io.in_toto.models.Artifact;
+import io.in_toto.models.Artifact.ArtifactHash;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Implementation of the in-toto Link metadata type.
@@ -18,38 +20,45 @@ import java.util.ArrayList;
 // FIXME: public or protected? do check
 public class Link extends Signable
 {
-    private ArrayList<Artifact> materials;
-    private ArrayList<Artifact> products;
+    private HashMap<String, ArtifactHash> materials;
+    private HashMap<String, ArtifactHash> products;
+    private HashMap<String, String>  byproducts;
+    private HashMap<String, String>  environment;
+    private ArrayList command;
     private String name;
-    private String env;
-    private String run;
 
-    public Link(ArrayList<Artifact> materials, ArrayList<Artifact> products, String name, String env,
-            String run) {
+    public Link(HashMap<String, ArtifactHash> materials,
+                HashMap<String, ArtifactHash> products, String name,
+                HashMap<String, String> environment, ArrayList<String> command,
+                HashMap<String, String> byproducts) {
 
         super();
 
         if (materials == null)
-            materials = new ArrayList<Artifact>();
+            materials = new HashMap<String, ArtifactHash>();
 
         if (products == null)
-            products = new ArrayList<Artifact>();
+            products = new HashMap<String, ArtifactHash>();
 
         //FIXME: probably warn about this would be a good idea
         if (name == null)
            name = "step";
 
-        if (env == null)
-            env = "";
+        if (environment == null)
+            environment = new HashMap<String, String>();
 
-        if (run == null)
-            run = "";
+        if (command == null)
+            command = new ArrayList<String>();
+
+        if (byproducts == null)
+            byproducts = new HashMap<String, String>();
 
         this.materials = materials;
         this.products = products;
         this.name = name;
-        this.env = env;
-        this.run = run;
+        this.environment = environment;
+        this.command = command;
+        this.byproducts = byproducts;
 
     }
 
