@@ -39,6 +39,15 @@ import org.bouncycastle.crypto.Signer;
 /**
  * RSA implementation of an in-toto RSA key.
  *
+ * @property kpr: A PEMKeypair conatining the private and public key information
+ * @property scheme: a hardcoded string indicating the signature scheme used with this key
+ * @property keyid_hash_algorithms: the hash algorithms supported to compute
+ * the keyid of this key
+ * @property: keytype: a hardcoded string representing the type of key used for this key.
+ * @property: keyval: the public/private pairs as required by the in-toto key
+ * specification. This field is only used for serialization and to compute the
+ * keyid.
+ *
  */
 public class RSAKey
     extends Key

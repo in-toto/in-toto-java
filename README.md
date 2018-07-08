@@ -16,9 +16,9 @@ to your mvn project edit the pom.xml file to add:
 ```xml
     ...
     <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.8.5</version>
+      <groupId>io.in-toto</groupId>
+      <artifactId>in-toto</artifactId>
+      <version>0.1</version>
       <scope>compile</scope>
     </dependency>
     ...
@@ -43,21 +43,16 @@ for example create a link as follows:
 This will create a link object that you can operate with. 
 
 You can populate a link and track artifacts using the Artifact class and the
-ArtifactHash subclass. You can, for example track materials as follows:
+ArtifactHash subclass. You can also use the link's convenience method:
 
 ```java
-    Artifact a = new Artifact("alice");
-    HashMap<String, ArtifactHash> materials = new HashMap<String, ArtifactHash>();
-    materials.put(a.getURI(), a.getArtifactHashes());
-    Link link = new Link(materials, null, "test", null, null, null);
+    link.addArtifact("alice");
 ```
 
 Once the artfifact is populated, it hashes the target artifact with any of the
-supported hashes. You can then populate an artifact dicitonary with it and
-instantiate the Link object as before.
+supported hashes.
 
-Finally, you can sign and dump a link by adding it to a metablock and then
-calling sign and dump on it:
+Finally, you can sign and dump a link by calling sign and dump respectively.
 
 ```java
 import io.in_toto.keys.Key;
@@ -67,12 +62,11 @@ import io.in_toto.keys.RSAKey;
     System.out.println("Loaded key: " + thiskey.computeKeyId());
 
     ...
-    Link link = new Link(materials, null, "test", null, null, null);
-    Metablock mb = new Metablock(link, null);
+    Link link = new Link(null, null, "test", null, null, null);
+    link.addArtifact("alice");
 
-    System.out.println("dumping file...");
-    mb.sign(thiskey);
-    mb.dump("somelink.link");
+    link.signe(thiskey);
+    link.dump(somelink);
 ```
 
 You can see a complete example on `src/java/io/in\_toto/lib/App.java`.
@@ -84,7 +78,7 @@ provided is proven to work, some aspects are still yet to be polished. Namely,
 I intend to add the following in the forseeable future:
 
 - A more user-friendly API to create and interact with metadata.
-- Layout metadata support
+- Layout metadata support, including full supply chain verification.
 - DSA (and possibly GPG) key support.
 - A more thorough test suite that includes integration tests.
 

@@ -8,8 +8,7 @@ import io.in_toto.lib.JSONEncoder;
  * to prepare for signing
  *
  */
-// FIXME: public or protected? do check
-public abstract class Signable
+abstract class Signable
     implements JSONEncoder
 {
     /**
@@ -22,12 +21,5 @@ public abstract class Signable
     }
 
     public abstract String getType();
-
-    /**
-     * Serialize the current metadata into a JSON file
-     *
-     * This abstract method is to be populated by the subclasses in order to verify them
-     */
-    public abstract String encode_canonical();
 
 }

@@ -25,7 +25,7 @@ import org.bouncycastle.crypto.CryptoException;
  *                       representation of the signed field.
  *
  */
-public class Metablock
+class Metablock
 {
     Signable signed;
     ArrayList<Signature> signatures;
@@ -92,7 +92,6 @@ public class Metablock
 
         keyid = privateKey.computeKeyId();
         payload = this.signed.JSONEncode().getBytes();
-        System.out.println("About to sign" + new String(payload));
 
         Signer signer = privateKey.getSigner();
         signer.init(true, keyParameters);
