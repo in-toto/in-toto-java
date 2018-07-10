@@ -39,15 +39,7 @@ import org.bouncycastle.crypto.Signer;
 /**
  * RSA implementation of an in-toto RSA key.
  *
- * @property kpr: A PEMKeypair conatining the private and public key information
- * @property scheme: a hardcoded string indicating the signature scheme used with this key
- * @property keyid_hash_algorithms: the hash algorithms supported to compute
- * the keyid of this key
- * @property: keytype: a hardcoded string representing the type of key used for this key.
- * @property: keyval: the public/private pairs as required by the in-toto key
- * specification. This field is only used for serialization and to compute the
- * keyid.
- *
+
  */
 public class RSAKey
     extends Key
@@ -56,13 +48,37 @@ public class RSAKey
 
     PEMKeyPair kpr;
 
-    // TODO: fixme to have RSA-PSS using sha256 for now;
+    /**
+     *
+     * Hardcoded method string. used to compute the keyid and to indicate
+     * which signing mechanism was used to compute this signature.
+     */
     private final String scheme = "rsassa-pss-sha256";
+
+    /**
+     * Hardcoded hashing algorithms. used to compute the keyid, as well as to
+     * indicate which hash algorithms can be used to compute the keyid itself.
+     */
     private final String[] keyid_hash_algorithms = {"sha256", "sha512"};
+
+    /**
+     * Hardcoded keytype. This field exists for backwards compatibility, as the scheme
+     * field is more descriptive.
+     */
     private final String keytype = "rsa";
 
+    /**
+     * HashMap containing the public and (if available) private portions of the key.
+     */
     private HashMap<String,String> keyval;
 
+    /**
+     * Default constructor for the RSAKey.
+     *
+     * You most likely want to use the static method {@link #read read} to instantiate this class.
+     *
+     * @param kpr: A PEMKeypair conatining the private and public key information
+     */
     public RSAKey(PEMKeyPair kpr) {
         this.kpr = kpr;
         this.keyval = new HashMap<String, String>();
@@ -70,6 +86,13 @@ public class RSAKey
         this.keyval.put("public", getKeyval(false));
     }
 
+    /**
+     * Static method to de-serialize a keypair from a PEM in disk.
+     *
+     * @param filename the location of the pem to de-serialize.
+     *
+     * @return An instance of an RSAKey that corresponds to the pem located in the filename parameter.
+     */
     public static RSAKey read(String filename) {
         return RSAKey.readPem(filename);
     }
@@ -86,7 +109,14 @@ public class RSAKey
         return readPemBuffer(pemfile);
     }
 
-    private static RSAKey readPemBuffer(Reader reader)
+    /**
+     * Static method to de-serialize a keypair from a reader.
+     *
+     * @param reader the reader that will be used to de-serialize the key
+     *
+     * @return An instance of an RSAKey contained in the reader instance
+     */
+    public static RSAKey readPemBuffer(Reader reader)
     {
 
         PEMParser pemReader  = new PEMParser(reader);
@@ -108,6 +138,11 @@ public class RSAKey
         return new RSAKey(kpr);
     }
 
+    /**
+     * Convenience method to obtain the private portion of the key.
+     *
+     * @return an AsymmetricKeyParameter that can be used for signing.
+     */
     public AsymmetricKeyParameter getPrivate() throws IOException{
         if (this.kpr == null)
             return null;
@@ -116,12 +151,22 @@ public class RSAKey
         return PrivateKeyFactory.createKey(this.kpr.getPrivateKeyInfo());
     }
 
+    /**
+     * Convenience method to obtain the public portion of the key.
+     *
+     * @return an AsymmetricKeyParameter that can be used for verification.
+     */
     public AsymmetricKeyParameter getPublic() throws IOException {
         if (this.kpr == null)
             return null;
         return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
     }
 
+    /**
+     * Convenience method to serialize this key as a PEM
+     *
+     * @param filename the filename to where the key will be written to.
+     */
     public void write(String filename) {
         try {
             FileWriter out = new FileWriter(filename);
@@ -133,6 +178,11 @@ public class RSAKey
         }
     }
 
+    /**
+     * Convenience method to obtain the keyid for this key
+     *
+     * @return the keyid for this key (Sha256 is baked in, for the time being)
+     */
     public String computeKeyId() {
         if (this.kpr == null)
             return null;
@@ -200,9 +250,13 @@ public class RSAKey
         return result;
     }
 
+    /**
+     * Returns the signer associated with the signing method for this key
+     *
+     * @return a Signer instance that can be used to sign or verify using
+     * RSASSA-PSS
+     */
     public Signer getSigner() {
-        // XXX theoretically we should be able to use any digest that's listed
-        // on the method, but we are using sha256 as it is the default now.
         RSAEngine engine = new RSAEngine();
         try {
             engine.init(false, getPrivate());

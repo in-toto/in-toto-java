@@ -13,18 +13,33 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Hex;
 
 /**
- * Artifact object.
+ * A class representing an Artifact (that is, a material or a product).
  *
- *
- * @param uri The uri of the artifact itself
- * @param hashobj The hash of the artifact.
+ * Used by the Link metdata type on the .add method. Can be also used to
+ * pre-populate the Link's artifact fields before instantiating a link.
  */
 public class Artifact {
 
+    /**
+     * A URI representing the location of the Artifact
+     */
     private String URI;
+
+    /**
+     * An ArtifactHash containing the hash of the contents of the file following
+     * the hash object definition in the in-toto specification.
+     */
     private ArtifactHash hash;
 
-    // FIXME: for now we will only support implicit file:// uri's
+    /**
+     * Default constructor, uses a filename to collect and automatically
+     * hash the contents of the file.
+     *
+     * This constructor does *not* perform file locking, so use with care.
+     *
+     * @param filename The filename (relative or absolute) of the Artifact to
+     * record (i.e., hash).
+     */
     public Artifact(String filename) {
 
         this.URI = filename;
@@ -41,6 +56,15 @@ public class Artifact {
         return this.hash;
     }
 
+    /**
+     * Nested subclass representing a hash object compliant with the in-toto specification.
+     *
+     * <code>
+     *  {"sha256": "...",
+     *   "sha512": "..."
+     *  }
+     * </code>
+     */
     public class ArtifactHash
         extends HashMap<String, String>
     {

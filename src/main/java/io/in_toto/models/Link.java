@@ -8,8 +8,6 @@ import java.util.HashMap;
 /**
  * Implementation of the in-toto Link metadata type.
  *
- * @param signed The signable portion, in this case, a LinkSignable is used.
- * @param signatures a list of signatures over the signable portion
  */
 public class Link extends Metablock
 {
@@ -17,6 +15,19 @@ public class Link extends Metablock
     /**
      * Constuctor method used to populate the signable payload
      *
+     * @param materials a HashMap keyed by artifact URI's and with hash
+     * objects as values represeting the artifacts used as materials in this
+     * step
+     * @param products a HashMap keyed by artifact URI's and with hash objects
+     * as values representing the artifacts created as products in this step.
+     * @param name The name of this step
+     * @param environment a HashMap containing any additional, relevant
+     * environment information.
+     * @param command the Argv array of the command executed.
+     * @param byproducts A HashMap containing the byproduct triplet
+     * stdin/stdout/retval.
+     *
+     * @see io.in_toto.models.Artifact
      */
     public Link(HashMap<String, ArtifactHash> materials,
             HashMap<String, ArtifactHash> products, String name,
@@ -29,20 +40,9 @@ public class Link extends Metablock
     }
 
     /**
-     * Inner class that represent the signable portion of the in-toto Link metadata
-     *
-     *
-     * @param materials a list of material artifact objects
-     * @param products a list of product artifact objects
-     * @param name the name of the link used for lookup
-     * @param environment an abstract dictionary object containing any other useful
-     * information
-     * @param command the command executed
-     * @param byproducts an abstract dictionary object containing information regarding
-     * stdin/stdout/stderr
+     * Inner class that represent the signable portion of the in-toto Link metadata.
      *
      */
-
 	private class LinkSignable
         extends Signable {
 

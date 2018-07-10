@@ -18,12 +18,10 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.CryptoException;
 
 /**
- * A metablock class contains two elements:
+ * A metablock class that contains two elements
  *
- * @param signed An in-toto compliant link or layout metadata object
- * @param signature: an array of signature objects over the canonical-json encoded
- *                       representation of the signed field.
- *
+ * - A signed field, with the signable portion of a piece of metadata.
+ * - A signatures field, a list of the signatures on this metadata.
  */
 class Metablock
 {
@@ -31,7 +29,9 @@ class Metablock
     ArrayList<Signature> signatures;
 
     /**
-     * Dummy constructor
+     * Base constructor.
+     *
+     * Ensures that, at the least, there is an empty list of signatures.
      */
     public Metablock(Signable signed, ArrayList<Signature> signatures) {
         this.signed = signed;
@@ -43,6 +43,8 @@ class Metablock
 
     /**
      * Serialize the current metadata into a JSON file
+     *
+     * @param filename The filename to which the metadata will be dumped.
      */
     public void dump(String filename) {
         FileWriter writer = null;
@@ -59,18 +61,9 @@ class Metablock
     }
 
     /**
-     * Loads a JSON file and populates the right object
-     *
-     * @param filepath the location in the FS of the file to load.
-     */
-    public static Metablock read(String filepath) {
-        return new Metablock(null, null);
-    }
-
-    /**
      * Signs the current signed payload using the key provided
      *
-     * @param privatekey the key used to sign the payload.
+     * @param privateKey the key used to sign the payload.
      */
     public void sign(Key privateKey) {
 
@@ -82,9 +75,7 @@ class Metablock
         try {
             keyParameters = privateKey.getPrivate();
             if (keyParameters == null || keyParameters.isPrivate() == false) {
-                System.out.println("Can't sign with a public key!");
-                return;
-            }
+                System.out.println("Can't sign with a public key!"); return; }
         } catch (IOException e) {
             System.out.println("Can't sign with this key!");
             return;
