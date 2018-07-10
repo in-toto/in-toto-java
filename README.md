@@ -70,13 +70,13 @@ import io.in_toto.keys.RSAKey;
 
     ...
     Link link = new Link(null, null, "test", null, null, null);
-    link.addArtifact("alice");
+    link.addMaterialt("alice");
 
-    link.signe(thiskey);
+    link.sign(thiskey);
     link.dump(somelink);
 ```
 
-You can see a complete example on `src/java/io/in\_toto/lib/App.java`.
+You can see a complete example on `src/java/io/in_toto/lib/App.java`.
 
 ## Limitations
 
