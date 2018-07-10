@@ -137,6 +137,19 @@ public class RSAKey
         if (this.kpr == null)
             return null;
 
+
+        byte[] JSONrepr = getJSONEncodeableFields();
+
+        // initialize digest
+        SHA256Digest digest =  new SHA256Digest();
+        byte[] result = new byte[digest.getDigestSize()];
+        digest.update(JSONrepr, 0, JSONrepr.length);
+        digest.doFinal(result, 0);
+        return Hex.toHexString(result);
+    }
+
+    public byte[] getJSONEncodeableFields() {
+
         // if we have a private portion, exclude it from the keyid computation
         String privateBackup = null;
         if (this.keyval.containsKey("private")) {
@@ -152,19 +165,13 @@ public class RSAKey
 
         byte[] JSONrepr = this.JSONEncode().getBytes();
 
-        // initialize digest
-        SHA256Digest digest =  new SHA256Digest();
-        byte[] result = new byte[digest.getDigestSize()];
-        digest.update(JSONrepr, 0, JSONrepr.length);
-        digest.doFinal(result, 0);
-
         if (privateBackup != null)
             this.keyval.put("private", privateBackup);
 
         if (keyPairBackup != null)
             this.kpr = keyPairBackup;
 
-        return Hex.toHexString(result);
+        return JSONrepr;
     }
 
     private void encodePem(Writer out, boolean privateKey) {
@@ -189,6 +196,7 @@ public class RSAKey
         // may or may not add it as a consequence keyids.
         if (result.charAt(result.length() -1) == '\n')
             result = result.substring(0, result.length() - 1);
+
         return result;
     }
 
