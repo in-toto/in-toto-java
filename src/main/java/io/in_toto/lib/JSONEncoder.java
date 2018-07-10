@@ -56,6 +56,7 @@ public interface JSONEncoder
 
     default public String JSONEncode() {
         Gson gson = new GsonBuilder()
+            .disableHtmlEscaping()
             .create();
 
         // Note the replace call: we need to unescape characters that are disallowed in the regular
