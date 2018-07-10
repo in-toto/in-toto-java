@@ -26,6 +26,13 @@ to your mvn project edit the pom.xml file to add:
 
 With it you should be able to use the library inside of your project.
 
+### Note on usage
+
+Although we intend to host this on the MVN repositories, it may take a little
+while until that happens. For now, you can clone this repository and execute
+`mvn compile` to install it into the local repository.
+
+
 ## Using the library
 
 The library exposes a series of objects and convenience methods to create,
