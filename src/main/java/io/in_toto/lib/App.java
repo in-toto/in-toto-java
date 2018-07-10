@@ -23,7 +23,7 @@ public class App
         System.out.println("Loaded key: " + thiskey.computeKeyId());
 
         Link link = new Link(null, null, "test", null, null, null);
-        link.addArtifact("alice");
+        link.addMaterial("alice");
         System.out.println("dumping file...");
         link.sign(thiskey);
         link.dump("somelink.link");

@@ -142,9 +142,27 @@ public class Link extends Metablock
         return ((LinkSignable)this.signed).byproducts;
     }
 
-	public void addArtifact(String filepath) {
-        Artifact a = new Artifact("alice");
+    /**
+     * Convenience method to indicate this link to track an artifact as
+     * material
+     *
+     * @param filepath the path of the material to track
+     */
+	public void addMaterial(String filepath) {
+        Artifact a = new Artifact(filepath);
         ((LinkSignable)this.signed).materials.put(a.getURI(),
+            a.getArtifactHashes());
+	}
+
+    /**
+     * Convenience method to indicate this link to track an artifact as
+     * product
+     *
+     * @param filepath the path of the product to track
+     */
+	public void addProduct(String filepath) {
+        Artifact a = new Artifact(filepath);
+        ((LinkSignable)this.signed).products.put(a.getURI(),
             a.getArtifactHashes());
 	}
 }
