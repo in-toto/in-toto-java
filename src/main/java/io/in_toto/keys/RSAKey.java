@@ -148,7 +148,7 @@ public class RSAKey
         return Hex.toHexString(result);
     }
 
-    public byte[] getJSONEncodeableFields() {
+    private byte[] getJSONEncodeableFields() {
 
         // if we have a private portion, exclude it from the keyid computation
         String privateBackup = null;
@@ -211,7 +211,5 @@ public class RSAKey
         }
         SHA256Digest digest = new SHA256Digest();
         return new PSSSigner(engine, digest, digest.getDigestSize());
-
-        //return new RSADigestSigner(new SHA256Digest());
     }
 }
