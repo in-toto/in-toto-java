@@ -23,7 +23,7 @@ import org.bouncycastle.crypto.CryptoException;
  * - A signed field, with the signable portion of a piece of metadata.
  * - A signatures field, a list of the signatures on this metadata.
  */
-class Metablock
+abstract class Metablock
 {
     Signable signed;
     ArrayList<Signature> signatures;
