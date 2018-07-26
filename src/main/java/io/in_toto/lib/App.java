@@ -3,7 +3,7 @@ package io.in_toto.lib;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.io.File;
 
 import io.in_toto.keys.RSAKey;
 import io.in_toto.keys.Key;
@@ -24,6 +24,8 @@ public class App
 
         Link link = new Link(null, null, "test", null, null, null);
         System.out.println("Working Directory = " + System.getProperty("user.dir"));
+        File fl = new File("alice");
+        fl.createNewFile(); // if file already exists will do nothing 
         link.addMaterial("alice");
         System.out.println("dumping file...");
         link.sign(thiskey);
