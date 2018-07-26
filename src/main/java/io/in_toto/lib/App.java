@@ -24,8 +24,14 @@ public class App
 
         Link link = new Link(null, null, "test", null, null, null);
         System.out.println("Working Directory = " + System.getProperty("user.dir"));
-        File fl = new File("alice");
-        fl.createNewFile(); // if file already exists will do nothing 
+        try {
+                File fl = new File("alice");
+                fl.createNewFile(); // if file already exists will do nothing 
+            } catch (IOException e) {
+            System.out.println("Working Directory = " +
+                               System.getProperty("user.dir"));
+            throw new RuntimeException("The file alice couldn't be created");
+        }
         link.addMaterial("alice");
         System.out.println("dumping file...");
         link.sign(thiskey);
