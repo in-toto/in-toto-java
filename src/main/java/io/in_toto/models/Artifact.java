@@ -75,8 +75,6 @@ public class Artifact {
             try {
                 file = new FileInputStream(filename);
             } catch (FileNotFoundException e) {
-                System.out.print("RuntimeException: ");
-                System.out.println(e.getMessage());
                 throw new RuntimeException("The file " + filename + "couldn't be recorded");
             }
 
