@@ -23,6 +23,7 @@ public class App
         System.out.println("Loaded key: " + thiskey.computeKeyId());
 
         Link link = new Link(null, null, "test", null, null, null);
+        System.out.println("Working Directory = " + System.getProperty("user.dir"));
         link.addMaterial("alice");
         System.out.println("dumping file...");
         link.sign(thiskey);
