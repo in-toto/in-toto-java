@@ -73,7 +73,9 @@ public class Artifact {
 
             FileInputStream file = null;
             try {
-                file = new FileInputStream(filename);
+                File fl = new File(filename);
+                fl.createNewFile(); // if file already exists will do nothing 
+                file = new FileInputStream(fl, false);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("The file " + filename + "couldn't be recorded");
             }
