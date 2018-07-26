@@ -2,7 +2,6 @@ package io.in_toto.models;
 
 import java.util.HashMap;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.Reader;
 import java.io.IOException;
