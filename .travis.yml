@@ -1,5 +1,4 @@
 language: java
-jdk:
-  - oraclejdk7
+jdk: oraclejdk7
 sudo: true
 script: mvn exec:java -Dexec.mainClass="io.in_toto.lib.App"
