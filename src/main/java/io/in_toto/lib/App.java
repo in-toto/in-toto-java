@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.File;
+import java.io.IOException;
 
 import io.in_toto.keys.RSAKey;
 import io.in_toto.keys.Key;
