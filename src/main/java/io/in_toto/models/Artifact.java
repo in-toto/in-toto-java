@@ -75,7 +75,7 @@ public class Artifact {
             try {
                 file = new FileInputStream(filename);
             } catch (FileNotFoundException e) {
-                throw new RuntimeException("The file " + filename + "couldn't be recorded");
+                throw new RuntimeException("The file " + filename + " couldn't be recorded 1");
             }
 
 
@@ -87,7 +87,7 @@ public class Artifact {
                     digest.update(result, 0, length);
                 }
             } catch (IOException e) {
-                throw new RuntimeException("The file " + filename + "couldn't be recorded");
+                throw new RuntimeException("The file " + filename + " couldn't be recorded 2");
             }
             digest.doFinal(result, 0);
 

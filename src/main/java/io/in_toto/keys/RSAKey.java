@@ -2,25 +2,39 @@ package io.in_toto.keys;
 
 import java.lang.System;
 
+import java.io.File;
+
 import io.in_toto.lib.JSONEncoder;
 
 import java.io.IOException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Base64;
+import java.security.*;
 
-import java.util.ArrayList;
+import java.security.KeyPair;
+
+import java.security.KeyFactory;
+
+import java.security.PublicKey;
+
 import java.util.HashMap;
 
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.MiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.util.io.pem.PemWriter;
+import org.bouncycastle.util.io.pem.PemObject;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Hex;
@@ -28,7 +42,9 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
 
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.crypto.signers.PSSSigner;
 import org.bouncycastle.crypto.engines.RSAEngine;
@@ -96,7 +112,7 @@ public class RSAKey
     public static RSAKey read(String filename) {
         return RSAKey.readPem(filename);
     }
-
+    
     private static RSAKey readPem(String filename)
     {
         FileReader pemfile = null;
@@ -137,6 +153,7 @@ public class RSAKey
         } catch (IOException e) {}
         return new RSAKey(kpr);
     }
+    
 
     /**
      * Convenience method to obtain the private portion of the key.
@@ -162,6 +179,8 @@ public class RSAKey
         return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
     }
 
+	private static final JcaPEMKeyConverter PEM_KEY_CONVERTER = new JcaPEMKeyConverter();
+	
     /**
      * Convenience method to serialize this key as a PEM
      *
@@ -169,10 +188,28 @@ public class RSAKey
      */
     public void write(String filename) {
         try {
-            FileWriter out = new FileWriter(filename);
-            // XXX: right now we are *not* serializing public keys, although
-            // that should be trivial
-            encodePem(out, false);
+			PublicKey pubKey = PEM_KEY_CONVERTER.getPublicKey((SubjectPublicKeyInfo) this.kpr.getPublicKeyInfo());
+			byte [] encodedPublicKey = pubKey.getEncoded();
+			
+			SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(encodedPublicKey);
+			ASN1Primitive primitive = spkInfo.parsePublicKey();
+			byte[] publicKeyPKCS1 = primitive.getEncoded();
+			
+			
+			PemObject pemObject = new PemObject("RSA PUBLIC KEY", publicKeyPKCS1);
+			StringWriter stringWriter = new StringWriter();
+			PemWriter pemWriter = new PemWriter(stringWriter);
+			pemWriter.writeObject(pemObject);
+			pemWriter.close();
+			String pemString = stringWriter.toString();
+			
+
+			File file= new File(filename);
+			FileWriter fileWriter = new FileWriter(file);
+			fileWriter.write(pemString);
+			fileWriter.flush();
+			fileWriter.close();
+			
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }
@@ -225,18 +262,21 @@ public class RSAKey
     }
 
     private void encodePem(Writer out, boolean privateKey) {
+
         JcaPEMWriter pemWriter = new JcaPEMWriter(out);
+        
         try {
+			
             if (privateKey && getPrivate() != null)
-                pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
+				pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
             else
-                pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
+				pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
             pemWriter.flush();
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }
     }
-
+    
     private String getKeyval(boolean privateKey) {
         StringWriter out = new StringWriter();
         encodePem(out, privateKey);

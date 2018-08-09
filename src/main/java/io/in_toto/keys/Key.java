@@ -1,6 +1,7 @@
 package io.in_toto.keys;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
 
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.Signer;
@@ -24,6 +25,6 @@ public abstract class Key
     public abstract AsymmetricKeyParameter getPrivate() throws IOException;
     public abstract AsymmetricKeyParameter getPublic() throws IOException;
     public abstract String computeKeyId();
-    public abstract void write(String filename);
+    public abstract void write(String filename) throws FileNotFoundException, IOException;
     public abstract Signer getSigner();
 }
