@@ -1,0 +1,16 @@
+{
+  "signed": {
+    "materials": {
+      "alice": {
+        "sha256": "d719a7fea2f51c1427f1579735b0c2118ef3174ccc0fd1cb475da75f3d0b7046"
+      }
+    },
+    "products": {},
+    "byproducts": {},
+    "environment": {},
+    "command": [],
+    "name": "test",
+    "_type": "link"
+  },
+  "signatures": []
+}
