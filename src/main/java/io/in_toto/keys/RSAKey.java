@@ -1,9 +1,5 @@
 package io.in_toto.keys;
 
-import java.lang.System;
-
-import java.io.File;
-
 import io.in_toto.lib.JSONEncoder;
 
 import java.io.IOException;
@@ -12,45 +8,26 @@ import java.io.FileWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.Base64;
-import java.security.*;
-
-import java.security.KeyPair;
-
-import java.security.KeyFactory;
-
-import java.security.PublicKey;
 
 import java.util.HashMap;
+
+import org.bouncycastle.util.encoders.Hex;
 
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.MiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.util.io.pem.PemWriter;
-import org.bouncycastle.util.io.pem.PemObject;
-
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.util.encoders.Hex;
-
+import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
-
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.crypto.signers.RSADigestSigner;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.signers.PSSSigner;
 import org.bouncycastle.crypto.engines.RSAEngine;
 
 
-import org.bouncycastle.crypto.Signer;
 
 /**
  * RSA implementation of an in-toto RSA key.
@@ -178,9 +155,11 @@ public class RSAKey
             return null;
         return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
     }
-
 	private static final JcaPEMKeyConverter PEM_KEY_CONVERTER = new JcaPEMKeyConverter();
 	
+	
+
+
     /**
      * Convenience method to serialize this key as a PEM
      *
@@ -188,28 +167,9 @@ public class RSAKey
      */
     public void write(String filename) {
         try {
-			PublicKey pubKey = PEM_KEY_CONVERTER.getPublicKey((SubjectPublicKeyInfo) this.kpr.getPublicKeyInfo());
-			byte [] encodedPublicKey = pubKey.getEncoded();
 			
-			SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(encodedPublicKey);
-			ASN1Primitive primitive = spkInfo.parsePublicKey();
-			byte[] publicKeyPKCS1 = primitive.getEncoded();
-			
-			
-			PemObject pemObject = new PemObject("RSA PUBLIC KEY", publicKeyPKCS1);
-			StringWriter stringWriter = new StringWriter();
-			PemWriter pemWriter = new PemWriter(stringWriter);
-			pemWriter.writeObject(pemObject);
-			pemWriter.close();
-			String pemString = stringWriter.toString();
-			
-
-			File file= new File(filename);
-			FileWriter fileWriter = new FileWriter(file);
-			fileWriter.write(pemString);
-			fileWriter.flush();
-			fileWriter.close();
-			
+			FileWriter out = new FileWriter(filename);
+            encodePem(out, false);
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }

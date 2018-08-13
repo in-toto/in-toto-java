@@ -1,58 +1,32 @@
 package io.in_toto.models;
 
+import io.in_toto.models.Artifact.ArtifactHash;
+import io.in_toto.models.Link;
+import io.in_toto.keys.RSAKey;
+import io.in_toto.keys.Key;
+
+
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
 
 import java.io.File;
-
-import java.util.ArrayList;
-
-import java.util.Map;
-
 import java.io.IOException;
 
-import java.lang.System;
-
-import org.junit.jupiter.api.AfterAll;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
-
-import org.junit.jupiter.api.Nested;
-
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.TestInstance;
-
 import org.junit.jupiter.api.TestInstance.Lifecycle;
-
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-
 import org.junit.rules.TemporaryFolder;
-
 import org.junit.rules.ExpectedException;
-
 import org.junit.Rule;
-
-import io.in_toto.models.Artifact;
-
-import io.in_toto.models.Artifact.ArtifactHash;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-
-import io.in_toto.models.Link;
-
-import io.in_toto.keys.RSAKey;
-
-import io.in_toto.keys.Key;
-
-import io.in_toto.keys.Signature;
 
 /**
  * Link-specific tests
@@ -168,6 +142,5 @@ class LinkTest
 		File fl = new File("dump.link");
 		assertTrue(fl.exists());
 		fl.delete();
-	
 	}	
 }

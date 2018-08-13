@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.Signer;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 
 /**
  * Public class representing an in-toto key. 

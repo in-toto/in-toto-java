@@ -1,41 +1,23 @@
 package io.in_toto.keys;
 
-import java.io.File;
-
-import java.nio.file.Files;
-
-import java.nio.file.Path;
-
-import java.io.IOException;
-
-import java.lang.System;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import static org.junit.jupiter.api.Assertions.assertNull;
-
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
-import static org.hamcrest.CoreMatchers.*;
-
-import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.DisplayName;
-
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-
-import org.junit.rules.TemporaryFolder;
-
-import org.junit.rules.ExpectedException;
-
-import org.junit.Rule;
-
 import io.in_toto.keys.RSAKey;
 
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+
+//import static org.hamcrest.MatcherAssert;
+//import static org.hamcrest.beans.SamePropertyValuesAs;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.ExpectedException;
+import org.junit.Rule;
 
 /**
  * RSAKey-specific tests
@@ -121,43 +103,5 @@ class RSAKeyTest
         Key key2 = RSAKey.read(keypath2);
         assertEquals(key2.computeKeyId(), "0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7");
         keyfile2.delete();
-    }
-    
-    @Test
-    @DisplayName("Test RSAKey GetKey")
-    public void testGetKey() throws IOException{
-        
-        Key thiskey = RSAKey.read("src/test/resources/somekey.pem");
-        assertNotNull(thiskey.getPrivate());
-        assertNotNull(thiskey.getPublic());
-        
-        File file = temporaryFolder.newFile("key.pem");
-        String path = file.getAbsolutePath();
-        thiskey.write(path);
-        
-        Key key = RSAKey.read(path);
-        
-        assertNotNull(key.getPublic());
-        
-        assertEquals(key.getPublic(), thiskey.getPublic());
-        
-        file.delete();
-    }
-    
-    @Test
-    @DisplayName("Test RSAKey getSigner()")
-    public void testGetSigner() throws IOException {
-        
-        
-        Key thiskey = RSAKey.read("src/test/resources/somekey.pem");
-        
-        File file = temporaryFolder.newFile("key.pem");
-        String path = file.getAbsolutePath();
-        thiskey.write(path);
-        
-        Key key = RSAKey.read(path);
-        assertEquals(key.getSigner(), thiskey.getSigner());
-        
-        file.delete();
     }
 }
