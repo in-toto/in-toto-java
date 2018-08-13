@@ -17,7 +17,6 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.MiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
@@ -155,8 +154,6 @@ public class RSAKey
             return null;
         return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
     }
-	private static final JcaPEMKeyConverter PEM_KEY_CONVERTER = new JcaPEMKeyConverter();
-	
 	
 
 
