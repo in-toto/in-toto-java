@@ -24,4 +24,3 @@ hs_err_pid*
 
 # mvn build dir
 target/*
-/target/
