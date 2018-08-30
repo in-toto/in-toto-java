@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.IOException;
 
 import io.in_toto.keys.RSAKey;
-
-//import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import io.in_toto.keys.Key;
 import io.in_toto.models.Link;
 import io.in_toto.models.Artifact;
