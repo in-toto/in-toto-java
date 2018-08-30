@@ -5,14 +5,12 @@ import io.in_toto.models.Link;
 import io.in_toto.keys.RSAKey;
 import io.in_toto.keys.Key;
 
-
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
 import java.io.File;
 import java.io.IOException;
-
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
