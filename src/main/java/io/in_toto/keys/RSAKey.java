@@ -130,7 +130,6 @@ public class RSAKey
         return new RSAKey(kpr);
     }
     
-
     /**
      * Convenience method to obtain the private portion of the key.
      *
@@ -155,8 +154,6 @@ public class RSAKey
         return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
     }
 	
-
-
     /**
      * Convenience method to serialize this key as a PEM
      *
@@ -225,9 +222,9 @@ public class RSAKey
         try {
 			
             if (privateKey && getPrivate() != null)
-				pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
+	        pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
             else
-				pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
+	        pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
             pemWriter.flush();
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
