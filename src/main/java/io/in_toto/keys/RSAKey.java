@@ -31,7 +31,6 @@ import org.bouncycastle.crypto.engines.RSAEngine;
 /**
  * RSA implementation of an in-toto RSA key.
  *
-
  */
 public class RSAKey
     extends Key
@@ -88,7 +87,7 @@ public class RSAKey
     public static RSAKey read(String filename) {
         return RSAKey.readPem(filename);
     }
-    
+
     private static RSAKey readPem(String filename)
     {
         FileReader pemfile = null;
@@ -129,7 +128,7 @@ public class RSAKey
         } catch (IOException e) {}
         return new RSAKey(kpr);
     }
-    
+
     /**
      * Convenience method to obtain the private portion of the key.
      *
@@ -161,12 +160,11 @@ public class RSAKey
      */
     public void write(String filename) {
         try {
-			
-			FileWriter out = new FileWriter(filename);
-            encodePem(out, false);
-        } catch (IOException e) {
-            throw new RuntimeException(e.toString());
-        }
+                FileWriter out = new FileWriter(filename);
+                encodePem(out, false);
+            } catch (IOException e) {
+                throw new RuntimeException(e.toString());
+            }
     }
 
     /**
@@ -177,7 +175,6 @@ public class RSAKey
     public String computeKeyId() {
         if (this.kpr == null)
             return null;
-
 
         byte[] JSONrepr = getJSONEncodeableFields();
 
