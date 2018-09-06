@@ -152,7 +152,7 @@ public class RSAKey
             return null;
         return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
     }
-	
+    
     /**
      * Convenience method to serialize this key as a PEM
      *
@@ -217,11 +217,11 @@ public class RSAKey
         JcaPEMWriter pemWriter = new JcaPEMWriter(out);
         
         try {
-			
+            
             if (privateKey && getPrivate() != null)
-	        pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
+            pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
             else
-	        pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
+            pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
             pemWriter.flush();
         } catch (IOException e) {
             throw new RuntimeException(e.toString());

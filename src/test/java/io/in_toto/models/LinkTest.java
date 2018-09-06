@@ -49,7 +49,7 @@ class LinkTest
     public void testLinkContructorEqual()
     {
         // test a link object
-	
+    
         assertEquals("test",link.getName());
         assertNotEquals(null,link.getName());
     }
@@ -76,11 +76,11 @@ class LinkTest
         File file = temporaryFolder.newFile("alice");
         String path = file.getAbsolutePath();
         link.addMaterial(path);
-	
+    
         Map<String, ArtifactHash> material = link.getMaterials();
         Map.Entry<String, ArtifactHash> entry = material.entrySet().iterator().next();
         assertEquals(entry.getKey(), path);
-	
+    
         file.delete();
     }
 
@@ -90,13 +90,13 @@ class LinkTest
     {
         File file = temporaryFolder.newFile("bob");
         String path = file.getAbsolutePath();
-	
+    
         link.addProduct(path);
-	
+    
         Map<String, ArtifactHash> product = link.getProducts();
         Map.Entry<String, ArtifactHash> entry = product.entrySet().iterator().next();
         assertEquals(entry.getKey(), path);
-	
+    
         file.delete();
     }
 
@@ -140,5 +140,5 @@ class LinkTest
         File fl = new File("dump.link");
         assertTrue(fl.exists());
         fl.delete();
-    }	
+    }    
 }

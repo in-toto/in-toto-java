@@ -25,7 +25,7 @@ public class App
 
         Link link = new Link(null, null, "test", null, null, null);
         try {
-			
+            
         System.out.println("Loaded key ID: " + thiskey.computeKeyId());
         
         File fl = new File("alice");

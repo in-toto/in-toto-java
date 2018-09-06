@@ -28,7 +28,7 @@ class RSAKeyTest
     /**
      * test pem loading methods;
      */
-	@Test
+    @Test
     public void testPemLoading()
     {
         // load a private key and make sure the key is private
@@ -71,13 +71,13 @@ class RSAKeyTest
      * test public key serialization
      *
      * Test methods to serialize a public key
-	 * FIXME: will wait for junit-pioneer to add TempDirectory for this test
-	 */
-	 
-	 
-	@Rule public ExpectedException thrown = ExpectedException.none();
-	 
-	@Rule
+     * FIXME: will wait for junit-pioneer to add TempDirectory for this test
+     */
+     
+     
+    @Rule public ExpectedException thrown = ExpectedException.none();
+     
+    @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test

@@ -21,13 +21,13 @@
       <artifactId>bcpkix-jdk15on</artifactId>
       <version>1.59</version>
     </dependency>
-	<!-- bcprov: bouncycastle crypto provider -->
+    <!-- bcprov: bouncycastle crypto provider -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
       <version>1.59</version>
     </dependency>
-	<!-- gson: object to json converter -->
+    <!-- gson: object to json converter -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -42,8 +42,8 @@
     </dependency>
     <dependency>
       <groupId>org.junit.vintage</groupId>
-	  <artifactId>junit-vintage-engine</artifactId>
-	  <version>5.2.0</version>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>5.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.junit.platform</groupId>
