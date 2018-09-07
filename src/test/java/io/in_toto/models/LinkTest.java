@@ -140,5 +140,21 @@ class LinkTest
         File fl = new File("dump.link");
         assertTrue(fl.exists());
         fl.delete();
-    }    
+    }
+
+    @Test
+    @DisplayName("Validate link serialization and de-serialization")
+    public void testLinkDeSerialization()
+    {
+
+        Link testLink = new Link(null, null, "sometestname",
+                null, null, null);
+
+        String jsonString = testLink.dumpString();
+        Link newLink = Link.read(jsonString);
+
+        assertTrue(newLink.getName() != null);
+        assertEquals(testLink.getName(), newLink.getName());
+    }
+
 }
