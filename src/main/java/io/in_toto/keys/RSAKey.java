@@ -1,45 +1,36 @@
 package io.in_toto.keys;
 
-import java.lang.System;
-
 import io.in_toto.lib.JSONEncoder;
 
 import java.io.IOException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.bouncycastle.util.encoders.Hex;
 
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.MiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.util.encoders.Hex;
-
+import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-
-import org.bouncycastle.crypto.signers.RSADigestSigner;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.signers.PSSSigner;
 import org.bouncycastle.crypto.engines.RSAEngine;
 
 
-import org.bouncycastle.crypto.Signer;
 
 /**
  * RSA implementation of an in-toto RSA key.
  *
-
  */
 public class RSAKey
     extends Key
@@ -161,7 +152,7 @@ public class RSAKey
             return null;
         return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
     }
-
+    
     /**
      * Convenience method to serialize this key as a PEM
      *
@@ -169,13 +160,11 @@ public class RSAKey
      */
     public void write(String filename) {
         try {
-            FileWriter out = new FileWriter(filename);
-            // XXX: right now we are *not* serializing public keys, although
-            // that should be trivial
-            encodePem(out, false);
-        } catch (IOException e) {
-            throw new RuntimeException(e.toString());
-        }
+                FileWriter out = new FileWriter(filename);
+                encodePem(out, false);
+            } catch (IOException e) {
+                throw new RuntimeException(e.toString());
+            }
     }
 
     /**
@@ -186,7 +175,6 @@ public class RSAKey
     public String computeKeyId() {
         if (this.kpr == null)
             return null;
-
 
         byte[] JSONrepr = getJSONEncodeableFields();
 
@@ -225,18 +213,21 @@ public class RSAKey
     }
 
     private void encodePem(Writer out, boolean privateKey) {
+
         JcaPEMWriter pemWriter = new JcaPEMWriter(out);
+        
         try {
+            
             if (privateKey && getPrivate() != null)
-                pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
+            pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
             else
-                pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
+            pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
             pemWriter.flush();
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }
     }
-
+    
     private String getKeyval(boolean privateKey) {
         StringWriter out = new StringWriter();
         encodePem(out, privateKey);

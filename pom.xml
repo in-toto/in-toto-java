@@ -21,13 +21,13 @@
       <artifactId>bcpkix-jdk15on</artifactId>
       <version>1.59</version>
     </dependency>
-	<!-- bcprov: bouncycastle crypto provider -->
+    <!-- bcprov: bouncycastle crypto provider -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
       <version>1.59</version>
     </dependency>
-	<!-- gson: object to json converter -->
+    <!-- gson: object to json converter -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -40,11 +40,31 @@
       <version>5.2.0</version>
      <scope>test</scope>
     </dependency>
-	<!--<dependency>
-	  <groupId>org.junit-pioneer</groupId>
-	  <artifactId>junit-pioneer</artifactId>
-	  <version>0.1-SNAPSHOT</version>
-	</dependency> -->
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>5.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-runner</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-migrationsupport</artifactId>
+      <version>5.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit-pioneer</groupId>
+      <artifactId>junit-pioneer</artifactId>
+      <version>0.1.2</version>
+    </dependency>
   </dependencies>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -61,6 +81,11 @@
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-surefire-provider</artifactId>
             <version>1.2.0</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.2.0</version>
           </dependency>
         </dependencies>
       </plugin>

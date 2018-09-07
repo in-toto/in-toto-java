@@ -43,7 +43,7 @@ public class Link extends Metablock
      * Inner class that represent the signable portion of the in-toto Link metadata.
      *
      */
-	private class LinkSignable
+    private class LinkSignable
         extends Signable {
 
         private HashMap<String, ArtifactHash> materials;
@@ -148,11 +148,11 @@ public class Link extends Metablock
      *
      * @param filepath the path of the material to track
      */
-	public void addMaterial(String filepath) {
+    public void addMaterial(String filepath) {
         Artifact a = new Artifact(filepath);
         ((LinkSignable)this.signed).materials.put(a.getURI(),
             a.getArtifactHashes());
-	}
+    }
 
     /**
      * Convenience method to indicate this link to track an artifact as
@@ -160,11 +160,11 @@ public class Link extends Metablock
      *
      * @param filepath the path of the product to track
      */
-	public void addProduct(String filepath) {
+    public void addProduct(String filepath) {
         Artifact a = new Artifact(filepath);
         ((LinkSignable)this.signed).products.put(a.getURI(),
             a.getArtifactHashes());
-	}
+    }
 }
 
 
