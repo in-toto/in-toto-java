@@ -1,13 +1,13 @@
-package io.github.in_toto.models;
+package io.in_toto.models;
 
 import java.util.ArrayList;
 
 import java.io.FileWriter;
 import java.io.IOException;
 
-import io.github.in_toto.keys.Key;
-import io.github.in_toto.keys.Signature;
-import io.github.in_toto.models.Signable;
+import io.in_toto.keys.Key;
+import io.in_toto.keys.Signature;
+import io.in_toto.models.Signable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

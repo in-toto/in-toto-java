@@ -1,9 +1,9 @@
-package io.github.in_toto.models;
+package io.in_toto.models;
 
-import io.github.in_toto.models.Artifact.ArtifactHash;
-import io.github.in_toto.models.Link;
-import io.github.in_toto.keys.RSAKey;
-import io.github.in_toto.keys.Key;
+import io.in_toto.models.Artifact.ArtifactHash;
+import io.in_toto.models.Link;
+import io.in_toto.keys.RSAKey;
+import io.in_toto.keys.Key;
 
 import java.util.ArrayList;
 import java.util.Map;

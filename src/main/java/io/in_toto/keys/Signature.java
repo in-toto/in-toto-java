@@ -1,4 +1,4 @@
-package io.github.in_toto.keys;
+package io.in_toto.keys;
 
 import java.io.IOException;
 

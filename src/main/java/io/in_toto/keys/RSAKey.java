@@ -1,6 +1,6 @@
-package io.github.in_toto.keys;
+package io.in_toto.keys;
 
-import io.github.in_toto.lib.JSONEncoder;
+import io.in_toto.lib.JSONEncoder;
 
 import java.io.IOException;
 import java.io.FileReader;

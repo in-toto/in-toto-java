@@ -1,6 +1,6 @@
-package io.github.in_toto.models;
+package io.in_toto.models;
 
-import io.github.in_toto.lib.JSONEncoder;
+import io.in_toto.lib.JSONEncoder;
 
 
 /**
