@@ -2,12 +2,12 @@
  * package-private class representing the signable payload of the in-toto link
  * metadata.
  */
-package io.in_toto.models;
+package io.github.in_toto.models;
 
-import io.in_toto.models.Artifact;
-import io.in_toto.models.Artifact.ArtifactHash;
-import io.in_toto.keys.Signature;
-import io.in_toto.models.LinkSignable;
+import io.github.in_toto.models.Artifact;
+import io.github.in_toto.models.Artifact.ArtifactHash;
+import io.github.in_toto.keys.Signature;
+import io.github.in_toto.models.LinkSignable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
