@@ -1,4 +1,4 @@
-package io.in_toto.models;
+package io.github.in_toto.models;
 
 import java.util.HashMap;
 
