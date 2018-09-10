@@ -1,7 +1,7 @@
-package io.in_toto.models;
+package io.github.in_toto.models;
 
-import io.in_toto.models.Artifact;
-import io.in_toto.models.Artifact.ArtifactHash;
+import io.github.in_toto.models.Artifact;
+import io.github.in_toto.models.Artifact.ArtifactHash;
 import java.util.ArrayList;
 import java.util.HashMap;
 

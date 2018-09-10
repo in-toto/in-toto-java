@@ -1,6 +1,6 @@
-package io.in_toto.keys;
+package io.github.in_toto.keys;
 
-import io.in_toto.keys.RSAKey;
+import io.github.in_toto.keys.RSAKey;
 
 import java.io.File;
 import java.io.IOException;
