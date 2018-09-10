@@ -3,6 +3,7 @@ package io.in_toto.models;
 import java.util.ArrayList;
 
 import java.io.FileWriter;
+import java.io.Writer;
 import java.io.IOException;
 
 import io.in_toto.keys.Key;
@@ -23,9 +24,9 @@ import org.bouncycastle.crypto.CryptoException;
  * - A signed field, with the signable portion of a piece of metadata.
  * - A signatures field, a list of the signatures on this metadata.
  */
-abstract class Metablock
+abstract class Metablock<S extends Signable>
 {
-    Signable signed;
+    S signed;
     ArrayList<Signature> signatures;
 
     /**
@@ -33,7 +34,7 @@ abstract class Metablock
      *
      * Ensures that, at the least, there is an empty list of signatures.
      */
-    public Metablock(Signable signed, ArrayList<Signature> signatures) {
+    public Metablock(S signed, ArrayList<Signature> signatures) {
         this.signed = signed;
 
         if (signatures == null)
@@ -48,16 +49,37 @@ abstract class Metablock
      */
     public void dump(String filename) {
         FileWriter writer = null;
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         try{
             writer = new FileWriter(filename);
-            writer.write(gson.toJson(this));
-            writer.flush();
+            dump(writer);
             writer.close();
         } catch (IOException e) {
-            System.out.println("Couldn't serialize object: " + e.toString());
+            throw new RuntimeException("Couldn't serialize object: " + e.toString());
         }
+    }
+
+    /**
+     * Serialize the current metadata into a writer
+     *
+     * @param writer the target writer
+     */
+    public void dump(Writer writer)
+        throws IOException {
+
+        writer.write(dumpString());
+        writer.flush();
+    }
+
+    /**
+     * Serialize the current metadata to a string
+     *
+     *
+     * @return a JSON string representation of the metadata instance
+     */
+    public String dumpString() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(this);
     }
 
     /**
