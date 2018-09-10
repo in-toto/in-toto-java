@@ -1,4 +1,4 @@
-package io.github.in_toto.lib;
+package io.in_toto.lib;
 
 import java.lang.System;
 
