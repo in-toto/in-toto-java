@@ -2,14 +2,18 @@ package io.in_toto.models;
 
 import io.in_toto.models.Artifact;
 import io.in_toto.models.Artifact.ArtifactHash;
+import io.in_toto.keys.Signature;
+import io.in_toto.models.LinkSignable;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.google.gson.Gson;
 
 /**
  * Implementation of the in-toto Link metadata type.
  *
  */
-public class Link extends Metablock
+public class Link extends Metablock<LinkSignable>
 {
 
     /**
@@ -40,58 +44,31 @@ public class Link extends Metablock
     }
 
     /**
-     * Inner class that represent the signable portion of the in-toto Link metadata.
+     * convenience method to save the Link metdata file using the name defined by
+     * the specification
      *
      */
-    private class LinkSignable
-        extends Signable {
+    public void dump() {
+        dump(getFullName());
+    }
 
-        private HashMap<String, ArtifactHash> materials;
-        private HashMap<String, ArtifactHash> products;
-        private HashMap<String, String>  byproducts;
-        private HashMap<String, String>  environment;
-        private ArrayList<String> command;
-        private String name;
+    /**
+     * get full link name, including keyid bytes in the form of
+     *
+     *  <stepname>.<keyid_bytes>.link
+     *
+     *  This method will always use the keyid of the first signature in the
+     *  metadata.
+     *
+     *  @return a string containing this name or null if no signatures are
+     *  present
+     */
+    public String getFullName() {
+        if (this.signatures == null || this.signatures.isEmpty())
+            return getName() + ".UNSIGNED.link";
 
-        private LinkSignable(HashMap<String, ArtifactHash> materials,
-                HashMap<String, ArtifactHash> products, String name,
-                HashMap<String, String> environment, ArrayList<String> command,
-                HashMap<String, String> byproducts) {
-
-            super();
-
-            if (materials == null)
-                materials = new HashMap<String, ArtifactHash>();
-
-            if (products == null)
-                products = new HashMap<String, ArtifactHash>();
-
-            //FIXME: probably warn about this would be a good idea
-            if (name == null)
-               name = "step";
-
-            if (environment == null)
-                environment = new HashMap<String, String>();
-
-            if (command == null)
-                command = new ArrayList<String>();
-
-            if (byproducts == null)
-                byproducts = new HashMap<String, String>();
-
-            this.materials = materials;
-            this.products = products;
-            this.name = name;
-            this.environment = environment;
-            this.command = command;
-            this.byproducts = byproducts;
-
-        }
-
-        @Override
-        public String getType() {
-            return "link";
-        }
+        String keyId = ((Signature)this.signatures.get(0)).getKeyId();
+        return getName() + "." + keyId.substring(0, 8) + ".link";
     }
 
     public void setMaterials(HashMap<String, ArtifactHash> materials) {
@@ -164,6 +141,11 @@ public class Link extends Metablock
         Artifact a = new Artifact(filepath);
         ((LinkSignable)this.signed).products.put(a.getURI(),
             a.getArtifactHashes());
+	}
+
+    public static Link read(String jsonString) {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonString, Link.class);
     }
 }
 

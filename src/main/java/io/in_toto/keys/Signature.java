@@ -20,4 +20,8 @@ public class Signature
         this.keyid = keyid;
         this.sig = sig;
     }
+
+    public String getKeyId() {
+        return this.keyid;
+    }
 }
