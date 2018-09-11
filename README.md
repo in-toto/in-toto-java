@@ -16,7 +16,7 @@ to your mvn project edit the pom.xml file to add:
 ```xml
     ...
     <dependency>
-      <groupId>io.in-toto</groupId>
+      <groupId>io.github.in-toto</groupId>
       <artifactId>in-toto</artifactId>
       <version>0.1</version>
       <scope>compile</scope>
@@ -31,7 +31,6 @@ With it you should be able to use the library inside of your project.
 Although we intend to host this on the MVN repositories, it may take a little
 while until that happens. For now, you can clone this repository and execute
 `mvn compile` to install it into the local repository.
-
 
 ## Using the library
 
@@ -62,8 +61,8 @@ supported hashes.
 Finally, you can sign and dump a link by calling sign and dump respectively.
 
 ```java
-import io.in_toto.keys.Key;
-import io.in_toto.keys.RSAKey;
+import io.github.in_toto.keys.Key;
+import io.github.in_toto.keys.RSAKey;
 ...
     Key thiskey = RSAKey.read("src/test/resources/somekey.pem");
     System.out.println("Loaded key: " + thiskey.computeKeyId());
@@ -76,7 +75,7 @@ import io.in_toto.keys.RSAKey;
     link.dump(somelink);
 ```
 
-You can see a complete example on `src/java/io/in_toto/lib/App.java`.
+You can see a complete example on `src/java/io/github/in_toto/lib/App.java`.
 
 ## Limitations
 
