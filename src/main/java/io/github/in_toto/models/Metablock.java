@@ -63,6 +63,8 @@ abstract class Metablock<S extends Signable>
      * Serialize the current metadata into a writer
      *
      * @param writer the target writer
+     *
+     * @throws java.io.IOException if unable to write to the passed writer.
      */
     public void dump(Writer writer)
         throws IOException {

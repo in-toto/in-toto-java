@@ -31,7 +31,7 @@ public class Link extends Metablock<LinkSignable>
      * @param byproducts A HashMap containing the byproduct triplet
      * stdin/stdout/retval.
      *
-     * @see io.in_toto.models.Artifact
+     * @see io.github.in_toto.models.Artifact
      */
     public Link(HashMap<String, ArtifactHash> materials,
             HashMap<String, ArtifactHash> products, String name,
@@ -55,7 +55,7 @@ public class Link extends Metablock<LinkSignable>
     /**
      * get full link name, including keyid bytes in the form of
      *
-     *  <stepname>.<keyid_bytes>.link
+     *  {@literal <stepname>.<keyid_bytes>.link }
      *
      *  This method will always use the keyid of the first signature in the
      *  metadata.
