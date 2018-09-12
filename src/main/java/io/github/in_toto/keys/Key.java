@@ -1,4 +1,4 @@
-package io.in_toto.keys;
+package io.github.in_toto.keys;
 
 import java.io.IOException;
 import java.io.FileNotFoundException;
