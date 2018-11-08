@@ -104,7 +104,7 @@ class LinkTest
     @DisplayName("Validate Link setByproducts")
     public void testValidByproduct()
     {
-        HashMap<String, String> byproduct = new HashMap<>();
+        HashMap<String, Object> byproduct = new HashMap<>();
         byproduct.put("stdin","");
         link.setByproducts(byproduct);
         assertEquals(byproduct, link.getByproducts());
@@ -114,7 +114,7 @@ class LinkTest
     @DisplayName("Validate Link setEnvironments")
     public void testValidEnvironment()
     {
-        HashMap<String, String> environment = new HashMap<>();
+        HashMap<String, Object> environment = new HashMap<>();
         environment.put("variables", "<ENV>");
         link.setEnvironment(environment);
         assertEquals(environment, link.getEnvironment());
