@@ -29,29 +29,29 @@ public interface JSONEncoder
     // FIXME canonicalization we need to unescape the escaped strings because someone at Google decided
     // to not use their own serializer architecture to perform the escaping :/
     static JsonElement canonicalize(JsonElement src) {
-      if (src instanceof JsonArray) {
-        // Canonicalize each element of the array
-        JsonArray srcArray = (JsonArray)src;
-        JsonArray result = new JsonArray();
-        for (int i = 0; i < srcArray.size(); i++) {
-          result.add(canonicalize(srcArray.get(i)));
+        if (src instanceof JsonArray) {
+            // Canonicalize each element of the array
+            JsonArray srcArray = (JsonArray)src;
+            JsonArray result = new JsonArray();
+            for (int i = 0; i < srcArray.size(); i++) {
+                result.add(canonicalize(srcArray.get(i)));
+            }
+            return result;
+        } else if (src instanceof JsonObject) {
+            // Sort the attributes by name, and the canonicalize each element of the object
+            JsonObject srcObject = (JsonObject)src;
+            JsonObject result = new JsonObject();
+            TreeSet<String> attributes = new TreeSet<>();
+            for (Map.Entry<String, JsonElement> entry : srcObject.entrySet()) {
+                attributes.add(entry.getKey());
+            }
+            for (String attribute : attributes) {
+                result.add(attribute, canonicalize(srcObject.get(attribute)));
+            }
+            return result;
+        } else {
+            return src;
         }
-        return result;
-      } else if (src instanceof JsonObject) {
-        // Sort the attributes by name, and the canonicalize each element of the object
-        JsonObject srcObject = (JsonObject)src;
-        JsonObject result = new JsonObject();
-        TreeSet<String> attributes = new TreeSet<>();
-        for (Map.Entry<String, JsonElement> entry : srcObject.entrySet()) {
-          attributes.add(entry.getKey());
-        }
-        for (String attribute : attributes) {
-          result.add(attribute, canonicalize(srcObject.get(attribute)));
-        }
-        return result;
-      } else {
-        return src;
-      }
     }
 
     default public String JSONEncode() {
