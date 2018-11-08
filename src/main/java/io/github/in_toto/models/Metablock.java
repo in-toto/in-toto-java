@@ -131,7 +131,7 @@ abstract class Metablock<S extends Signable>
         }
 
         keyid = privateKey.computeKeyId();
-        payload = this.signed.JSONEncode().getBytes();
+        payload = this.signed.JSONEncodeCanonical().getBytes();
 
         Signer signer = privateKey.getSigner();
         signer.init(true, keyParameters);
