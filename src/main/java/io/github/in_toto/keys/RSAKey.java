@@ -201,7 +201,7 @@ public class RSAKey
             this.kpr = null;
         }
 
-        byte[] JSONrepr = this.JSONEncode().getBytes();
+        byte[] JSONrepr = this.JSONEncodeCanonical(false).getBytes();
 
         if (privateBackup != null)
             this.keyval.put("private", privateBackup);
