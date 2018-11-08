@@ -17,15 +17,15 @@ class LinkSignable
 
     HashMap<String, ArtifactHash> materials;
     HashMap<String, ArtifactHash> products;
-    HashMap<String, String>  byproducts;
-    HashMap<String, String>  environment;
+    HashMap<String, Object>  byproducts;
+    HashMap<String, Object>  environment;
     ArrayList<String> command;
     String name;
 
     LinkSignable(HashMap<String, ArtifactHash> materials,
             HashMap<String, ArtifactHash> products, String name,
-            HashMap<String, String> environment, ArrayList<String> command,
-            HashMap<String, String> byproducts) {
+            HashMap<String, Object> environment, ArrayList<String> command,
+            HashMap<String, Object> byproducts) {
 
         super();
 
@@ -40,13 +40,13 @@ class LinkSignable
            name = "step";
 
         if (environment == null)
-            environment = new HashMap<String, String>();
+            environment = new HashMap<String, Object>();
 
         if (command == null)
             command = new ArrayList<String>();
 
         if (byproducts == null)
-            byproducts = new HashMap<String, String>();
+            byproducts = new HashMap<String, Object>();
 
         this.materials = materials;
         this.products = products;

@@ -35,8 +35,8 @@ public class Link extends Metablock<LinkSignable>
      */
     public Link(HashMap<String, ArtifactHash> materials,
             HashMap<String, ArtifactHash> products, String name,
-            HashMap<String, String> environment, ArrayList<String> command,
-            HashMap<String, String> byproducts) {
+            HashMap<String, Object> environment, ArrayList<String> command,
+            HashMap<String, Object> byproducts) {
         super(null, null);
         LinkSignable signable = new LinkSignable(
                 materials, products, name, environment, command, byproducts);
@@ -95,11 +95,11 @@ public class Link extends Metablock<LinkSignable>
         return ((LinkSignable)this.signed).name;
     }
 
-    public void setEnvironment(HashMap<String, String> environment) {
+    public void setEnvironment(HashMap<String, Object> environment) {
         ((LinkSignable)this.signed).environment = environment;
     }
 
-    public HashMap<String, String> getEnvironment() {
+    public HashMap<String, Object> getEnvironment() {
         return ((LinkSignable)this.signed).environment;
     }
 
@@ -111,11 +111,11 @@ public class Link extends Metablock<LinkSignable>
         return ((LinkSignable)this.signed).command;
     }
 
-    public void setByproducts(HashMap<String, String> byproducts) {
+    public void setByproducts(HashMap<String, Object> byproducts) {
         ((LinkSignable)this.signed).byproducts = byproducts;
     }
 
-    public HashMap<String, String> getByproducts() {
+    public HashMap<String, Object> getByproducts() {
         return ((LinkSignable)this.signed).byproducts;
     }
 
