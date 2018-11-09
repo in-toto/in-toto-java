@@ -12,12 +12,17 @@ import io.github.in_toto.models.Signable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.CryptoException;
 
+import java.lang.reflect.Type;
 /**
  * A metablock class that contains two elements
  *
@@ -80,7 +85,27 @@ abstract class Metablock<S extends Signable>
      * @return a JSON string representation of the metadata instance
      */
     public String dumpString() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder()
+                // Override gson serializer to convert all numbers to
+                // non-floating point numbers, as we don't allow floating point
+                // numbers in the reference implementation.
+                // This is required to handle generic data, such as
+                // `byproducts` or `environment`, where we don't declare the
+                // type of the contained values. Gson treats any numeric value
+                // where the type is not specified in the target data structure
+                // as double.
+                .registerTypeAdapter(Double.class, new JsonSerializer<Double>() {
+                        @Override
+                        public JsonElement serialize(
+                                Double src, Type typeOfSrc,
+                                JsonSerializationContext context) {
+                            if(src == src.longValue())
+                                return new JsonPrimitive(src.longValue());
+                            return new JsonPrimitive(src);
+                            }
+                        })
+                .setPrettyPrinting()
+                .create();
         return gson.toJson(this);
     }
 
