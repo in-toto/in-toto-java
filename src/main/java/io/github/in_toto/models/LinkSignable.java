@@ -17,8 +17,14 @@ class LinkSignable
 
     HashMap<String, ArtifactHash> materials;
     HashMap<String, ArtifactHash> products;
-    HashMap<String, Object>  byproducts;
-    HashMap<String, Object>  environment;
+    // NOTE: Caution when dealing with numeric values!
+    // Since gson does not know the type of the target, it will
+    // store any numeric value as `Double`, e.g.:
+    // {"byproducts": {"return-value": 1}}
+    // is parsed as
+    // {"byproducts": {"return-value": 1.0}}
+    HashMap<String, Object> byproducts;
+    HashMap<String, Object> environment;
     ArrayList<String> command;
     String name;
 
