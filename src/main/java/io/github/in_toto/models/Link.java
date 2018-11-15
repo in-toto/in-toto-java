@@ -22,6 +22,11 @@ import com.google.gson.Gson;
 public class Link extends Metablock<LinkSignable>
 {
     /**
+     * default exclude pattern used to filter out redundant artifacts
+     */
+    transient String defaultExcludePattern = "**.{git,link}**";
+
+    /**
      * Constuctor method used to populate the signable payload
      *
      * @param materials a HashMap keyed by artifact URI's and with hash
@@ -81,57 +86,42 @@ public class Link extends Metablock<LinkSignable>
      * @param materials the HashMap of artifacts
      * @param pattern the exclude pattern
      */
-    public HashMap<String, ArtifactHash>excludeArtifactByPattern(HashMap<String, ArtifactHash> materials, String pattern)
+    public HashMap<String, ArtifactHash>excludeArtifactsByPattern
+        (HashMap<String, ArtifactHash> materials, String pattern)
     {
         String patternString;
+        HashMap<String, ArtifactHash> filtered_artifacts;
 
         if ( pattern != null && pattern.length() != 0) {
             patternString = pattern;
         } else {
-            patternString = "**.{git,link}**";
+            patternString = defaultExcludePattern;
         }
 
         FileSystem fileSystem = FileSystems.getDefault();
 
-        PathMatcher pathMatcher = fileSystem.getPathMatcher("glob:" + patternString);
+        PathMatcher pathMatcher =
+            fileSystem.getPathMatcher("glob:" + patternString);
 
-        for(Iterator<HashMap.Entry<String, ArtifactHash>>it=materials.entrySet().iterator();it.hasNext();){
+        filtered_artifacts = materials;
 
-            HashMap.Entry<String, ArtifactHash> entry = it.next();
+        Iterator<HashMap.Entry<String, ArtifactHash>> iterator = filtered_artifacts.entrySet().iterator();
+
+        while(iterator.hasNext()){
+
+            HashMap.Entry<String, ArtifactHash> entry = iterator.next();
 
             if (pathMatcher.matches(Paths.get(entry.getKey()))) {
-                it.remove();
+                iterator.remove();
             }
         }
 
-        return materials;
-    }
-
-    /**
-     * check if artifact matches the pattern
-     * @param filepath the path of the artifact
-     * @param pattern the exclude pattern
-     */
-    public boolean isPatternInFilePath(String filepath, String pattern)
-    {
-
-        String patternString;
-
-        if ( pattern != null && pattern.length() != 0) {
-            patternString = pattern;
-        } else {
-            patternString = "**.{git,link}**";
-        }
-
-        FileSystem fileSystem = FileSystems.getDefault();
-
-        PathMatcher pathMatcher = fileSystem.getPathMatcher("glob:" + patternString);
-
-        return pathMatcher.matches(Paths.get(filepath));
+        return filtered_artifacts;
     }
 
     public void setMaterials(HashMap<String, ArtifactHash> materials, String pattern) {
-        ((LinkSignable)this.signed).materials = excludeArtifactByPattern(materials, pattern);
+        ((LinkSignable)this.signed).materials =
+            excludeArtifactsByPattern(materials, pattern);
     }
 
     public void setMaterials(HashMap<String, ArtifactHash> materials) {
@@ -143,7 +133,8 @@ public class Link extends Metablock<LinkSignable>
     }
 
     public void setProducts(HashMap<String, ArtifactHash> products, String pattern) {
-        ((LinkSignable)this.signed).products = excludeArtifactByPattern(products, pattern);
+        ((LinkSignable)this.signed).products =
+            excludeArtifactsByPattern(products, pattern);
     }
 
     public void setProducts(HashMap<String, ArtifactHash> products) {
@@ -194,11 +185,14 @@ public class Link extends Metablock<LinkSignable>
      */
     public void addMaterial(String filePath, String pattern) {
 
-        if(!isPatternInFilePath(filePath, pattern)) {
-            Artifact a = new Artifact(filePath);
-            ((LinkSignable)this.signed).materials.put(a.getURI(),
-                a.getArtifactHashes());
-        }
+        Artifact a = new Artifact(filePath);
+
+        HashMap<String, ArtifactHash> material = new HashMap<String, ArtifactHash>();
+
+        material.put(a.getURI(), a.getArtifactHashes());
+
+        excludeArtifactsByPattern(material, pattern)
+            .forEach(((LinkSignable)this.signed).materials::putIfAbsent);
     }
 
     public void addMaterial(String filePath) {
@@ -213,18 +207,21 @@ public class Link extends Metablock<LinkSignable>
      *
      * @param filepath the path of the product to track
      */
-    public void addProduct(String filepath, String pattern) {
+    public void addProduct(String filePath, String pattern) {
 
-        if(!isPatternInFilePath(filepath, pattern)) {
-            Artifact a = new Artifact(filepath);
-            ((LinkSignable)this.signed).products.put(a.getURI(),
-                a.getArtifactHashes());
-        }
+        Artifact a = new Artifact(filePath);
+
+        HashMap<String, ArtifactHash> product = new HashMap<String, ArtifactHash>();
+
+        product.put(a.getURI(), a.getArtifactHashes());
+
+        excludeArtifactsByPattern(product, pattern)
+            .forEach(((LinkSignable)this.signed).products::putIfAbsent);
     }
 
-    public void addProduct(String filepath) {
+    public void addProduct(String filePath) {
 
-        addProduct(filepath, null);
+        addProduct(filePath, null);
 
 	}
 
