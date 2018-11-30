@@ -82,6 +82,7 @@ abstract class Metablock<S extends Signable>
      */
     public String dumpString() {
         Gson gson = new GsonBuilder()
+                .serializeNulls()
                 // Use custom serializer to enforce non-floating point numbers
                 .registerTypeAdapter(Double.class, new NumericJSONSerializer())
                 .setPrettyPrinting()

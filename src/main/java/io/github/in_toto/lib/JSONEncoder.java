@@ -140,13 +140,11 @@ public interface JSONEncoder
      * @return A canonical json encoded string of the calling object.
      */
     default public String JSONEncodeCanonical(boolean serializeNulls) {
-        Gson gson = new GsonBuilder()
-            .disableHtmlEscaping()
-            .create();
-
+        GsonBuilder gsonBuilder = new GsonBuilder();
         if (serializeNulls) {
-            gson.serializeNulls();
+            gsonBuilder.serializeNulls();
         }
+        Gson gson = gsonBuilder.disableHtmlEscaping().create();
 
         return canonicalize(gson.toJsonTree(this));
     }
