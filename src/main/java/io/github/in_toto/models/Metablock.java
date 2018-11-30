@@ -127,4 +127,14 @@ abstract class Metablock<S extends Signable>
         this.signatures.add(new Signature(keyid, sig));
 
     }
+
+    /**
+     * Public shortcut to call JSONEncodeCanonical on the signed field of
+     * this metablock.
+     *
+     * @param serializeNulls
+     */
+    public String getCanonicalJSON(boolean serializeNulls) {
+        return this.signed.JSONEncodeCanonical(serializeNulls);
+    }
 }
