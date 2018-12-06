@@ -122,7 +122,7 @@ public interface JSONEncoder
      * Method to create a canonical json encoded string of the calling object
      * using the specification at http://wiki.laptop.org/go/Canonical_JSON.
      *
-     * Attributes with `null` values are encoded as `"<name>": null`.
+     * Attributes with `null` values are encoded as {@code "<name>": null}.
      *
      * @return A canonical json encoded string of the calling object.
      */
@@ -135,7 +135,7 @@ public interface JSONEncoder
      * using the specification at http://wiki.laptop.org/go/Canonical_JSON
      *
      * @param serializeNulls if true attributes with null values are
-     * are encoded as `"<name>": null` and omitted otherwise.
+     * are encoded as {@code "<name>": null} and omitted otherwise.
      *
      * @return A canonical json encoded string of the calling object.
      */
