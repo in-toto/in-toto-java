@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.2
+
+- Fix canonicalization routine to improve interoperability with reference impl.
+
 ## Version 0.1.1
 
 - Fix dependency handle to improve compatbility with travis plugin
