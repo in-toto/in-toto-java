@@ -132,7 +132,9 @@ abstract class Metablock<S extends Signable>
      * Public shortcut to call JSONEncodeCanonical on the signed field of
      * this metablock.
      *
-     * @param serializeNulls
+     * @param serializeNulls if nulls should be included or not when encoding
+     *
+     * @return a JSON string representation of this obj
      */
     public String getCanonicalJSON(boolean serializeNulls) {
         return this.signed.JSONEncodeCanonical(serializeNulls);
