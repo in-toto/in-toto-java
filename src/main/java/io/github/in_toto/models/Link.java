@@ -105,7 +105,8 @@ public class Link extends Metablock<LinkSignable>
 
         filtered_artifacts = materials;
 
-        Iterator<HashMap.Entry<String, ArtifactHash>> iterator = filtered_artifacts.entrySet().iterator();
+        Iterator<HashMap.Entry<String, ArtifactHash>> iterator =
+            filtered_artifacts.entrySet().iterator();
 
         while(iterator.hasNext()){
 
