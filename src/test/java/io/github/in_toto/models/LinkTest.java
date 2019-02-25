@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -76,11 +77,11 @@ class LinkTest
         File file = temporaryFolder.newFile("alice");
         String path = file.getAbsolutePath();
         link.addMaterial(path);
-    
+
         Map<String, ArtifactHash> material = link.getMaterials();
         Map.Entry<String, ArtifactHash> entry = material.entrySet().iterator().next();
         assertEquals(entry.getKey(), path);
-    
+
         file.delete();
     }
 
@@ -90,9 +91,9 @@ class LinkTest
     {
         File file = temporaryFolder.newFile("bob");
         String path = file.getAbsolutePath();
-    
+
         link.addProduct(path);
-    
+
         Map<String, ArtifactHash> product = link.getProducts();
         Map.Entry<String, ArtifactHash> entry = product.entrySet().iterator().next();
         assertEquals(entry.getKey(), path);
@@ -155,6 +156,296 @@ class LinkTest
 
         assertTrue(newLink.getName() != null);
         assertEquals(testLink.getName(), newLink.getName());
+    }
+
+    @Test
+    @DisplayName("Test Apply Exclude Patterns")
+    public void testApplyExcludePatterns() throws IOException
+    {
+        Link testLink = new Link(null, null, "sometestname",
+                null, null, null);
+
+        File file1 = temporaryFolder.newFile("foo");
+        File file2 = temporaryFolder.newFile("bar");
+        File file3 = temporaryFolder.newFile("baz");
+
+        String path1 = file1.getAbsolutePath();
+        String path2 = file2.getAbsolutePath();
+        String path3 = file3.getAbsolutePath();
+
+        String pattern = "**{foo,bar}";
+
+        testLink.addProduct(path1, pattern);
+        testLink.addProduct(path2, pattern);
+        testLink.addProduct(path3, pattern);
+
+        testLink.addMaterial(path1, pattern);
+        testLink.addMaterial(path2, pattern);
+        testLink.addMaterial(path3, pattern);
+
+        Map<String, ArtifactHash> product = testLink.getProducts();
+        assertEquals(product.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
+        assertEquals(entry1.getKey(), path3);
+
+        Map<String, ArtifactHash> material = testLink.getMaterials();
+        assertEquals(material.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
+        assertEquals(entry2.getKey(), path3);
+
+        file1.delete();
+        file2.delete();
+        file3.delete();
+    }
+
+    @Test
+    @DisplayName("Test Apply Exclude Default Patterns")
+    public void testApplyExcludeDefaultPatterns() throws IOException
+    {
+        Link testLink = new Link(null, null, "sometestname",
+                null, null, null);
+
+        File file1 = temporaryFolder.newFile("foo.link");
+        File file2 = temporaryFolder.newFile("bar");
+        File file3 = temporaryFolder.newFolder(".git");
+        File file4 = temporaryFolder.newFile(file3.getName() + "/baz");
+
+        String path1 = file1.getAbsolutePath();
+        String path2 = file2.getAbsolutePath();
+        String path4 = file4.getAbsolutePath();
+
+        testLink.addProduct(path1);
+        testLink.addProduct(path2);
+        testLink.addProduct(path4);
+
+        testLink.addMaterial(path1);
+        testLink.addMaterial(path2);
+        testLink.addMaterial(path4);
+
+        Map<String, ArtifactHash> product = testLink.getProducts();
+        assertEquals(product.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
+        assertEquals(entry1.getKey(), path2);
+
+        Map<String, ArtifactHash> material = testLink.getMaterials();
+        assertEquals(material.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
+        assertEquals(entry2.getKey(), path2);
+
+        file1.delete();
+        file2.delete();
+        file3.delete();
+    }
+
+    @Test
+    @DisplayName("Test Apply Exclude All")
+    public void testApplyExcludeAll() throws IOException
+    {
+        Link testLink = new Link(null, null, "sometestname",
+                null, null, null);
+
+        File file1 = temporaryFolder.newFile("foo");
+        File file2 = temporaryFolder.newFile("bar");
+        File file3 = temporaryFolder.newFile("baz");
+
+        String path1 = file1.getAbsolutePath();
+        String path2 = file2.getAbsolutePath();
+        String path3 = file3.getAbsolutePath();
+
+        String pattern = "**";
+
+        testLink.addProduct(path1, pattern);
+        testLink.addProduct(path2, pattern);
+        testLink.addProduct(path3, pattern);
+
+        testLink.addMaterial(path1, pattern);
+        testLink.addMaterial(path2, pattern);
+        testLink.addMaterial(path3, pattern);
+
+        Map<String, ArtifactHash> product = testLink.getProducts();
+        assertEquals(product.size(), 0);
+        assertFalse(product.entrySet().iterator().hasNext());
+
+        Map<String, ArtifactHash> material = testLink.getMaterials();
+        assertEquals(material.size(), 0);
+        assertFalse(material.entrySet().iterator().hasNext());
+
+        file1.delete();
+        file2.delete();
+        file3.delete();
+    }
+
+    @Test
+    @DisplayName("Test Apply Exclude Multiple Star")
+    public void testApplyExcludeMultipleStar() throws IOException
+    {
+        Link testLink = new Link(null, null, "sometestname",
+                null, null, null);
+
+        File file1 = temporaryFolder.newFile("foo");
+        File file2 = temporaryFolder.newFile("bar");
+        File file3 = temporaryFolder.newFile("baz");
+
+        String path1 = file1.getAbsolutePath();
+        String path2 = file2.getAbsolutePath();
+        String path3 = file3.getAbsolutePath();
+
+        String pattern = "**a**";
+
+        testLink.addProduct(path1, pattern);
+        testLink.addProduct(path2, pattern);
+        testLink.addProduct(path3, pattern);
+
+        testLink.addMaterial(path1, pattern);
+        testLink.addMaterial(path2, pattern);
+        testLink.addMaterial(path3, pattern);
+
+        Map<String, ArtifactHash> product = testLink.getProducts();
+        assertEquals(product.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
+        assertEquals(entry1.getKey(), path1);
+
+        Map<String, ArtifactHash> material = testLink.getMaterials();
+        assertEquals(material.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
+        assertEquals(entry2.getKey(), path1);
+
+        file1.delete();
+        file2.delete();
+        file3.delete();
+    }
+
+    @Test
+    @DisplayName("Test Apply Exclude Question Mark")
+    public void testApplyExcludeQuestionMark() throws IOException
+    {
+        Link testLink = new Link(null, null, "sometestname",
+                null, null, null);
+
+        File file1 = temporaryFolder.newFile("foo");
+        File file2 = temporaryFolder.newFile("bazfoo");
+        File file3 = temporaryFolder.newFile("barfoo");
+
+        String path1 = file1.getAbsolutePath();
+        String path2 = file2.getAbsolutePath();
+        String path3 = file3.getAbsolutePath();
+
+        String pattern = "**ba?foo";
+
+        testLink.addProduct(path1, pattern);
+        testLink.addProduct(path2, pattern);
+        testLink.addProduct(path3, pattern);
+
+        testLink.addMaterial(path1, pattern);
+        testLink.addMaterial(path2, pattern);
+        testLink.addMaterial(path3, pattern);
+
+        Map<String, ArtifactHash> product = testLink.getProducts();
+        assertEquals(product.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
+        assertEquals(entry1.getKey(), path1);
+
+        Map<String, ArtifactHash> material = testLink.getProducts();
+        assertEquals(product.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
+        assertEquals(entry2.getKey(), path1);
+
+        file1.delete();
+        file2.delete();
+        file3.delete();
+    }
+
+    @Test
+    @DisplayName("Test Apply Exclude Sequence")
+    public void testApplyExcludeSeq() throws IOException
+    {
+        Link testLink = new Link(null, null, "sometestname",
+                null, null, null);
+
+        File file1 = temporaryFolder.newFile("baxfoo");
+        File file2 = temporaryFolder.newFile("bazfoo");
+        File file3 = temporaryFolder.newFile("barfoo");
+
+        String path1 = file1.getAbsolutePath();
+        String path2 = file2.getAbsolutePath();
+        String path3 = file3.getAbsolutePath();
+
+        String pattern = "**ba[xz]foo";
+
+        testLink.addProduct(path1, pattern);
+        testLink.addProduct(path2, pattern);
+        testLink.addProduct(path3, pattern);
+
+        testLink.addMaterial(path1, pattern);
+        testLink.addMaterial(path2, pattern);
+        testLink.addMaterial(path3, pattern);
+
+        Map<String, ArtifactHash> product = testLink.getProducts();
+        assertEquals(product.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
+        assertEquals(entry1.getKey(), path3);
+
+        Map<String, ArtifactHash> material = testLink.getMaterials();
+        assertEquals(material.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
+        assertEquals(entry2.getKey(), path3);
+
+        file1.delete();
+        file2.delete();
+        file3.delete();
+    }
+
+
+    @Test
+    @DisplayName("Test Apply Exclude Negate Sequence")
+    public void testApplyExcludeNegSeq() throws IOException
+    {
+        Link testLink = new Link(null, null, "sometestname",
+                null, null, null);
+
+        File file1 = temporaryFolder.newFile("baxfoo");
+        File file2 = temporaryFolder.newFile("bazfoo");
+        File file3 = temporaryFolder.newFile("barfoo");
+
+        String path1 = file1.getAbsolutePath();
+        String path2 = file2.getAbsolutePath();
+        String path3 = file3.getAbsolutePath();
+
+        String pattern = "**ba[!r]foo";
+
+        testLink.addProduct(path1, pattern);
+        testLink.addProduct(path2, pattern);
+        testLink.addProduct(path3, pattern);
+
+        testLink.addMaterial(path1, pattern);
+        testLink.addMaterial(path2, pattern);
+        testLink.addMaterial(path3, pattern);
+
+        Map<String, ArtifactHash> product = testLink.getProducts();
+        assertEquals(product.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
+        assertEquals(entry1.getKey(), path3);
+
+        Map<String, ArtifactHash> material = testLink.getMaterials();
+        assertEquals(product.size(), 1);
+
+        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
+        assertEquals(entry2.getKey(), path3);
+
+        file1.delete();
+        file2.delete();
+        file3.delete();
     }
 
 }
