@@ -4,8 +4,14 @@ import io.github.in_toto.models.Artifact;
 import io.github.in_toto.models.Artifact.ArtifactHash;
 import io.github.in_toto.keys.Signature;
 import io.github.in_toto.models.LinkSignable;
+
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import com.google.gson.Gson;
 
@@ -15,6 +21,10 @@ import com.google.gson.Gson;
  */
 public class Link extends Metablock<LinkSignable>
 {
+    /**
+     * default exclude pattern used to filter out redundant artifacts
+     */
+    transient String defaultExcludePattern = "**.{git,link}**";
 
     /**
      * Constuctor method used to populate the signable payload
@@ -71,16 +81,65 @@ public class Link extends Metablock<LinkSignable>
         return getName() + "." + keyId.substring(0, 8) + ".link";
     }
 
+    /**
+     * exclude artifacts matching the pattern
+     * @param materials the HashMap of artifacts
+     * @param pattern the exclude pattern
+     */
+    public HashMap<String, ArtifactHash>excludeArtifactsByPattern
+        (HashMap<String, ArtifactHash> materials, String pattern)
+    {
+        String patternString;
+        HashMap<String, ArtifactHash> filtered_artifacts;
+
+        if ( pattern != null && pattern.length() != 0) {
+            patternString = pattern;
+        } else {
+            patternString = defaultExcludePattern;
+        }
+
+        FileSystem fileSystem = FileSystems.getDefault();
+
+        PathMatcher pathMatcher =
+            fileSystem.getPathMatcher("glob:" + patternString);
+
+        filtered_artifacts = materials;
+
+        Iterator<HashMap.Entry<String, ArtifactHash>> iterator =
+            filtered_artifacts.entrySet().iterator();
+
+        while(iterator.hasNext()){
+
+            HashMap.Entry<String, ArtifactHash> entry = iterator.next();
+
+            if (pathMatcher.matches(Paths.get(entry.getKey()))) {
+                iterator.remove();
+            }
+        }
+
+        return filtered_artifacts;
+    }
+
+    public void setMaterials(HashMap<String, ArtifactHash> materials, String pattern) {
+        ((LinkSignable)this.signed).materials =
+            excludeArtifactsByPattern(materials, pattern);
+    }
+
     public void setMaterials(HashMap<String, ArtifactHash> materials) {
-        ((LinkSignable)this.signed).materials = materials;
+        setMaterials(materials, null);
     }
 
     public HashMap<String, ArtifactHash>getMaterials() {
         return ((LinkSignable)this.signed).materials;
     }
 
+    public void setProducts(HashMap<String, ArtifactHash> products, String pattern) {
+        ((LinkSignable)this.signed).products =
+            excludeArtifactsByPattern(products, pattern);
+    }
+
     public void setProducts(HashMap<String, ArtifactHash> products) {
-        ((LinkSignable)this.signed).products = products;
+        setProducts(products, null);
     }
 
     public HashMap<String, ArtifactHash>getProducts() {
@@ -125,10 +184,22 @@ public class Link extends Metablock<LinkSignable>
      *
      * @param filepath the path of the material to track
      */
-    public void addMaterial(String filepath) {
-        Artifact a = new Artifact(filepath);
-        ((LinkSignable)this.signed).materials.put(a.getURI(),
-            a.getArtifactHashes());
+    public void addMaterial(String filePath, String pattern) {
+
+        Artifact a = new Artifact(filePath);
+
+        HashMap<String, ArtifactHash> material = new HashMap<String, ArtifactHash>();
+
+        material.put(a.getURI(), a.getArtifactHashes());
+
+        excludeArtifactsByPattern(material, pattern)
+            .forEach(((LinkSignable)this.signed).materials::putIfAbsent);
+    }
+
+    public void addMaterial(String filePath) {
+
+        addMaterial(filePath, null);
+
     }
 
     /**
@@ -137,10 +208,22 @@ public class Link extends Metablock<LinkSignable>
      *
      * @param filepath the path of the product to track
      */
-    public void addProduct(String filepath) {
-        Artifact a = new Artifact(filepath);
-        ((LinkSignable)this.signed).products.put(a.getURI(),
-            a.getArtifactHashes());
+    public void addProduct(String filePath, String pattern) {
+
+        Artifact a = new Artifact(filePath);
+
+        HashMap<String, ArtifactHash> product = new HashMap<String, ArtifactHash>();
+
+        product.put(a.getURI(), a.getArtifactHashes());
+
+        excludeArtifactsByPattern(product, pattern)
+            .forEach(((LinkSignable)this.signed).products::putIfAbsent);
+    }
+
+    public void addProduct(String filePath) {
+
+        addProduct(filePath, null);
+
 	}
 
     public static Link read(String jsonString) {
