@@ -26,12 +26,6 @@ to your mvn project edit the pom.xml file to add:
 
 With it you should be able to use the library inside of your project.
 
-### Note on usage
-
-Although we intend to host this on the MVN repositories, it may take a little
-while until that happens. For now, you can clone this repository and execute
-`mvn compile` to install it into the local repository.
-
 ## Using the library
 
 The library exposes a series of objects and convenience methods to create,
@@ -77,22 +71,21 @@ import io.github.in_toto.keys.RSAKey;
 
 You can see a complete example on `src/java/io/github/in_toto/lib/App.java`.
 
-## Limitations
+## Note on reduced feature-set
 
-Right now the library is in very early stages. Although the functionality
-provided is proven to work, some aspects are still yet to be polished. Namely,
-I intend to add the following in the forseeable future:
+in-toto java is not yet a fully compliant in-toto implementation. This
+implementation is focused on providing a stable, usable core feature set for
+its main goal. The features that we will adding in the near future include:
 
 - A more user-friendly API to create and interact with metadata.
 - Layout metadata support, including full supply chain verification.
 - DSA (and possibly GPG) key support.
 - A more thorough test suite that includes integration tests.
 
-So far the only guarantee of this library is that dumped link metadata passes
-in-toto verification on the [python](https://github.com/in-toto/in-toto)
-reference implementation when providing the right key. This was a crucial
-aspect given that, without interoperability, having a separate implementation
-would be rather useless.
+We can guarantee that the dumped link metadata passes in-toto verification on
+the [python](https://github.com/in-toto/in-toto) reference implementation when
+providing the right key. This was a crucial aspect given that, without
+interoperability, having a separate implementation would be rather useless.
 
 As of now, the near-future goals of this library are to be used in a Jenkins
 plugin and to support Android buildsystems. However, for any other step in the
