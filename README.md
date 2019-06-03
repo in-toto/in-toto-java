@@ -75,7 +75,7 @@ You can see a complete example on `src/java/io/github/in_toto/lib/App.java`.
 
 in-toto java is not yet a fully compliant in-toto implementation. This
 implementation is focused on providing a stable, usable core feature set for
-its main goal. The features that we will adding in the near future include:
+its main goal. The features that we will add in the near future include:
 
 - A more user-friendly API to create and interact with metadata.
 - Layout metadata support, including full supply chain verification.
@@ -84,8 +84,7 @@ its main goal. The features that we will adding in the near future include:
 
 We can guarantee that the dumped link metadata passes in-toto verification on
 the [python](https://github.com/in-toto/in-toto) reference implementation when
-providing the right key. This was a crucial aspect given that, without
-interoperability, having a separate implementation would be rather useless.
+providing the right key.
 
 As of now, the near-future goals of this library are to be used in a Jenkins
 plugin and to support Android buildsystems. However, for any other step in the
