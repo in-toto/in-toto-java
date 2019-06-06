@@ -1,3 +1,5 @@
+package io.github.in_toto;
+
 import io.github.in_toto.models.Link;
 import java.io.*;
 import java.nio.file.*;
