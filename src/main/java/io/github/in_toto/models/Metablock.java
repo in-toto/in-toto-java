@@ -4,15 +4,19 @@ import java.util.ArrayList;
 
 import java.io.FileWriter;
 import java.io.Writer;
+import java.lang.reflect.Type;
 import java.io.IOException;
 
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.Signature;
 import io.github.in_toto.models.Signable;
-import io.github.in_toto.lib.NumericJSONSerializer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.util.encoders.Hex;
@@ -138,5 +142,27 @@ abstract class Metablock<S extends Signable>
      */
     public String getCanonicalJSON(boolean serializeNulls) {
         return this.signed.JSONEncodeCanonical(serializeNulls);
+    }
+    
+    /**
+     * A custom implementation of the gson JsonSerializer to convert numeric values
+     * to non-floating point numbers when serializing JSON.
+     *
+     * This is required to handle generic data, such as `byproducts` or
+     * `environment`, where the type of the contained values is not declared. Gson
+     * treats any numeric value, with generic type in the target data structure as
+     * double. However, the in-toto reference implementation does not allow
+     * floating point numbers in JSON-formatted metadata.
+     *
+     */
+    private static class NumericJSONSerializer implements JsonSerializer<Double> {
+        public JsonElement serialize(Double src, Type typeOfSrc,
+                JsonSerializationContext context) {
+            if(src == src.longValue()) {
+                return new JsonPrimitive(src.longValue());
+            }
+
+            return new JsonPrimitive(src);
+        }
     }
 }
