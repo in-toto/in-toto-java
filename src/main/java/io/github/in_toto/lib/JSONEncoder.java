@@ -1,7 +1,5 @@
 package io.github.in_toto.lib;
 
-import java.lang.System;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -9,14 +7,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializer;
-import com.google.gson.JsonSerializationContext;
 
-
-import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.Map;
-import java.lang.reflect.Type;
 
 /**
  * JSONEncoder interface

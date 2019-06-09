@@ -1,9 +1,5 @@
 package io.github.in_toto.keys;
 
-import java.io.IOException;
-
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-
 /**
  * Public class representing an in-toto Signature. 
  *

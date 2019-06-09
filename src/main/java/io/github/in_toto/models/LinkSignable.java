@@ -4,9 +4,7 @@
  */
 package io.github.in_toto.models;
 
-import io.github.in_toto.models.Artifact;
 import io.github.in_toto.models.Artifact.ArtifactHash;
-import io.github.in_toto.keys.Signature;
 import io.github.in_toto.models.LinkSignable;
 import java.util.ArrayList;
 import java.util.HashMap;

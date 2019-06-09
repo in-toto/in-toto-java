@@ -3,10 +3,8 @@ package io.github.in_toto.models;
 import java.util.HashMap;
 
 import java.io.FileInputStream;
-import java.io.Reader;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.io.StringWriter;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
@@ -88,6 +86,12 @@ public class Artifact {
                 }
             } catch (IOException e) {
                 throw new RuntimeException("The file " + filename + " couldn't be recorded");
+            } finally {
+            	try {
+					file.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
             }
             digest.doFinal(result, 0);
 

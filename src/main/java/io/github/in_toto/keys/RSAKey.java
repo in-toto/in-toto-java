@@ -125,7 +125,17 @@ public class RSAKey
                         pem.toString());
             }
 
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        	
+        } finally {
+        	try {
+				pemReader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }
+        
+        
         return new RSAKey(kpr);
     }
 
@@ -225,6 +235,12 @@ public class RSAKey
             pemWriter.flush();
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
+        } finally {
+        	try {
+				pemWriter.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         }
     }
     
