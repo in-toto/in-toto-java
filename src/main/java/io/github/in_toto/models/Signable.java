@@ -8,18 +8,21 @@ import io.github.in_toto.lib.JSONEncoder;
  * to prepare for signing
  *
  */
-abstract class Signable
-    implements JSONEncoder
-{
+public interface Signable extends JSONEncoder {
+    public String getType();    
+
+	
     /**
-     * Subclasses must define the _type field appropriately for serialization
+     * get full link name, including keyid bytes in the form of
+     *
+     *  {@literal <stepname>.<keyid_bytes>.link }
+     *
+     *  This method will always use the keyid of the first signature in the
+     *  metadata.
+     *
+     *  @return a string containing this name or null if no signatures are
+     *  present
      */
-    protected String _type;
-
-    public Signable() {
-        this._type = getType();
-    }
-
-    public abstract String getType();
+    public String getFullName(String keyId);
 
 }

@@ -2,8 +2,6 @@ package io.github.in_toto.models;
 
 import java.util.ArrayList;
 
-import java.io.FileWriter;
-import java.io.Writer;
 import java.lang.reflect.Type;
 import java.io.IOException;
 
@@ -29,9 +27,9 @@ import org.bouncycastle.crypto.CryptoException;
  * - A signed field, with the signable portion of a piece of metadata.
  * - A signatures field, a list of the signatures on this metadata.
  */
-abstract class Metablock<S extends Signable>
-{
-    S signed;
+public final class Metablock<S extends Signable> {
+	transient Transporter transporter = new FileTransporter();
+    final S signed;
     ArrayList<Signature> signatures;
 
     /**
@@ -46,36 +44,14 @@ abstract class Metablock<S extends Signable>
             signatures = new ArrayList<Signature>();
         this.signatures = signatures;
     }
-
+    
     /**
-     * Serialize the current metadata into a JSON file
+     * Dump the this serialized object to the tranporter.
      *
-     * @param filename The filename to which the metadata will be dumped.
      */
-    public void dump(String filename) {
-        FileWriter writer = null;
-
-        try{
-            writer = new FileWriter(filename);
-            dump(writer);
-            writer.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Couldn't serialize object: " + e.toString());
-        }
-    }
-
-    /**
-     * Serialize the current metadata into a writer
-     *
-     * @param writer the target writer
-     *
-     * @throws java.io.IOException if unable to write to the passed writer.
-     */
-    public void dump(Writer writer)
-        throws IOException {
-
-        writer.write(dumpString());
-        writer.flush();
+    public void dump() {
+    	transporter.setId(this.signed.getFullName(this.getShortKeyId()));
+        transporter.dump(this.toJson());
     }
 
     /**
@@ -84,7 +60,7 @@ abstract class Metablock<S extends Signable>
      *
      * @return a JSON string representation of the metadata instance
      */
-    public String dumpString() {
+    public String toJson() {
         Gson gson = new GsonBuilder()
                 .serializeNulls()
                 // Use custom serializer to enforce non-floating point numbers
@@ -165,4 +141,27 @@ abstract class Metablock<S extends Signable>
             return new JsonPrimitive(src);
         }
     }
+    
+    /**
+     * Get short key id.
+     * 
+     * The short key are the first 8 characters of the key
+     *  
+     * @return String  
+     */
+    public String getShortKeyId() {
+    	if (this.signatures == null || this.signatures.isEmpty())
+            return "UNSIGNED";
+        String keyId = this.signatures.get(0).getKeyId();
+        return keyId.substring(0, 8);
+    }
+
+	public Transporter getTransporter() {
+		return transporter;
+	}
+
+	public void setTransporter(Transporter transporter) {
+		this.transporter = transporter;
+	}
+    
 }

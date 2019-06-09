@@ -37,22 +37,24 @@ Metadata classes are located in the `io.in_toto.models.*` namespace. You can,
 for example create a link as follows:
 
 ```java
-    Link link = new Link(null, null, "test", null, null);
+    Link link = new LinkBuilder("test").build();
 ```
 
 This will create a link object that you can operate with. 
 
 You can populate a link and track artifacts using the Artifact class and the
-ArtifactHash subclass. You can also use the link's convenience method:
+ArtifactHash subclass. Because a link is immutable you should use the LinkBuilder helper class:
 
 ```java
-    link.addArtifact("alice");
+    LinkBuilder linkBuilder = new LinkBuilder("test");
+    linkBuilder.addMaterial("alice");
+    Link link = linkBuilder.build();
 ```
 
 Once the artfifact is populated, it hashes the target artifact with any of the
 supported hashes.
 
-Finally, you can sign and dump a link by calling sign and dump respectively.
+Finally, you can create a Metablock and sign and dump this as a JSON string.
 
 ```java
 import io.github.in_toto.keys.Key;
@@ -62,14 +64,17 @@ import io.github.in_toto.keys.RSAKey;
     System.out.println("Loaded key: " + thiskey.computeKeyId());
 
     ...
-    Link link = new Link(null, null, "test", null, null, null);
-    link.addMaterialt("alice");
+    LinkBuilder linkBuilder = new LinkBuilder("test");
+    linkBuilder.addMaterial("alice");
+    Link link = linkBuilder.build();
+    
+    Metablock metablock = new Metablock<Link>(link, null);
 
-    link.sign(thiskey);
-    link.dump(somelink);
+    metablock.sign(thiskey);
+    metablock.dump();
 ```
 
-You can see a complete example on `src/java/io/github/in_toto/lib/App.java`.
+You can see a complete example on `src/test/java/io/github/in_toto/lib/HelloWorldTest.java`.
 
 ## Note on reduced feature-set
 

@@ -1,32 +1,48 @@
 package io.github.in_toto.models;
 
-import io.github.in_toto.models.Artifact;
 import io.github.in_toto.models.Artifact.ArtifactHash;
-import io.github.in_toto.keys.Signature;
-import io.github.in_toto.models.LinkSignable;
 
+import java.lang.reflect.Type;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Implementation of the in-toto Link metadata type.
  *
  */
-public class Link extends Metablock<LinkSignable>
-{
+public final class Link implements Signable {
     /**
      * default exclude pattern used to filter out redundant artifacts
      */
-    transient String defaultExcludePattern = "**.{git,link}**";
+    final static transient String defaultExcludePattern = "**.{git,link}**";
 
-    /**
+    private final String _type = getType();
+    private final String name;
+    private final Map<String, ArtifactHash> materials;
+    private final Map<String, ArtifactHash> products;
+    // NOTE: Caution when dealing with numeric values!
+    // Since gson does not know the type of the target, it will
+    // store any numeric value as `Double`, e.g.:
+    // {"byproducts": {"return-value": 1}}
+    // is parsed as
+    // {"byproducts": {"return-value": 1.0}}
+    private final Map<String, Object> byproducts;
+    private final Map<String, Object> environment;
+    private final List<String> command;
+
+
+	/**
      * Constuctor method used to populate the signable payload
      *
      * @param materials a HashMap keyed by artifact URI's and with hash
@@ -43,50 +59,75 @@ public class Link extends Metablock<LinkSignable>
      *
      * @see io.github.in_toto.models.Artifact
      */
-    public Link(HashMap<String, ArtifactHash> materials,
-            HashMap<String, ArtifactHash> products, String name,
-            HashMap<String, Object> environment, ArrayList<String> command,
-            HashMap<String, Object> byproducts) {
-        super(null, null);
-        LinkSignable signable = new LinkSignable(
-                materials, products, name, environment, command, byproducts);
-        this.signed = signable;
-    }
+    public Link( String name, Map<String, ArtifactHash> materials,
+            Map<String, ArtifactHash> products,
+            Map<String, Object> environment, List<String> command,
+            Map<String, Object> byproducts) {
+    	super();
 
+    	//FIXME: probably warn about this would be a good idea
+        if (name == null)
+           this.name = "step";
+        else
+        	this.name = name;
+
+        if (materials == null)
+            this.materials = Collections.unmodifiableMap(new HashMap<String, ArtifactHash>());
+        else
+        	this.materials = Collections.unmodifiableMap(materials);
+
+        if (products == null)
+            this.products = Collections.unmodifiableMap(new HashMap<String, ArtifactHash>());
+        else
+        	this.products = Collections.unmodifiableMap(products);
+
+        if (environment == null)
+            this.environment = Collections.unmodifiableMap(new HashMap<String, Object>());
+        else
+        	this.environment = Collections.unmodifiableMap(environment);
+
+        if (command == null)
+            this.command = Collections.unmodifiableList(new ArrayList<String>());
+        else
+            this.command = Collections.unmodifiableList(command);
+        	
+
+        if (byproducts == null)
+            this.byproducts = Collections.unmodifiableMap(new HashMap<String, Object>());
+        else
+        	this.byproducts = Collections.unmodifiableMap(byproducts);
+    }
+    
+    public Link(LinkBuilder builder) {   	
+    	this(builder.getName(), 
+    			builder.getMaterials(), 
+    			builder.getProducts(), 
+    			builder.getEnvironment(), 
+    			builder.getCommand(), 
+    			builder.getByproducts());
+    	
+    }
+    
     /**
-     * convenience method to save the Link metdata file using the name defined by
-     * the specification
-     *
+     * This method deserializes the specified Json into a {code Metablock<Link>}.
+     * 
+     * @param jsonString
+     * @return {code Metablock<Link>}
      */
-    public void dump() {
-        dump(getFullName());
+    public static Metablock<Link> fromJson(String jsonString) {
+        Gson gson = new Gson();
+        Type metablockType = new TypeToken<Metablock<Link>>() {}.getType();
+        Metablock<Link> metablock = gson.fromJson(jsonString, metablockType);
+        return metablock;
     }
 
-    /**
-     * get full link name, including keyid bytes in the form of
-     *
-     *  {@literal <stepname>.<keyid_bytes>.link }
-     *
-     *  This method will always use the keyid of the first signature in the
-     *  metadata.
-     *
-     *  @return a string containing this name or null if no signatures are
-     *  present
-     */
-    public String getFullName() {
-        if (this.signatures == null || this.signatures.isEmpty())
-            return getName() + ".UNSIGNED.link";
-
-        String keyId = ((Signature)this.signatures.get(0)).getKeyId();
-        return getName() + "." + keyId.substring(0, 8) + ".link";
-    }
 
     /**
      * exclude artifacts matching the pattern
      * @param materials the HashMap of artifacts
      * @param pattern the exclude pattern
      */
-    public HashMap<String, ArtifactHash>excludeArtifactsByPattern
+    public static HashMap<String, ArtifactHash>excludeArtifactsByPattern
         (HashMap<String, ArtifactHash> materials, String pattern)
     {
         String patternString;
@@ -120,116 +161,42 @@ public class Link extends Metablock<LinkSignable>
         return filtered_artifacts;
     }
 
-    public void setMaterials(HashMap<String, ArtifactHash> materials, String pattern) {
-        ((LinkSignable)this.signed).materials =
-            excludeArtifactsByPattern(materials, pattern);
+	public String getType() {
+		return "link";
+	}
+	
+    public String getFullName(String keyId) {
+        return this.getName() + "." + keyId + ".link";
     }
 
-    public void setMaterials(HashMap<String, ArtifactHash> materials) {
-        setMaterials(materials, null);
-    }
-
-    public HashMap<String, ArtifactHash>getMaterials() {
-        return ((LinkSignable)this.signed).materials;
-    }
-
-    public void setProducts(HashMap<String, ArtifactHash> products, String pattern) {
-        ((LinkSignable)this.signed).products =
-            excludeArtifactsByPattern(products, pattern);
-    }
-
-    public void setProducts(HashMap<String, ArtifactHash> products) {
-        setProducts(products, null);
-    }
-
-    public HashMap<String, ArtifactHash>getProducts() {
-        return ((LinkSignable)this.signed).products;
-    }
-
-    public void setName(String name) {
-        ((LinkSignable)this.signed).name = name;
-    }
-
-    public String getName() {
-        return ((LinkSignable)this.signed).name;
-    }
-
-    public void setEnvironment(HashMap<String, Object> environment) {
-        ((LinkSignable)this.signed).environment = environment;
-    }
-
-    public HashMap<String, Object> getEnvironment() {
-        return ((LinkSignable)this.signed).environment;
-    }
-
-    public void setCommand(ArrayList<String> command) {
-        ((LinkSignable)this.signed).command = command;
-    }
-
-    public ArrayList<String> getCommand() {
-        return ((LinkSignable)this.signed).command;
-    }
-
-    public void setByproducts(HashMap<String, Object> byproducts) {
-        ((LinkSignable)this.signed).byproducts = byproducts;
-    }
-
-    public HashMap<String, Object> getByproducts() {
-        return ((LinkSignable)this.signed).byproducts;
-    }
-
-    /**
-     * Convenience method to indicate this link to track an artifact as
-     * material
-     *
-     * @param filepath the path of the material to track
-     */
-    public void addMaterial(String filePath, String pattern) {
-
-        Artifact a = new Artifact(filePath);
-
-        HashMap<String, ArtifactHash> material = new HashMap<String, ArtifactHash>();
-
-        material.put(a.getURI(), a.getArtifactHashes());
-
-        excludeArtifactsByPattern(material, pattern)
-            .forEach(((LinkSignable)this.signed).materials::putIfAbsent);
-    }
-
-    public void addMaterial(String filePath) {
-
-        addMaterial(filePath, null);
-
-    }
-
-    /**
-     * Convenience method to indicate this link to track an artifact as
-     * product
-     *
-     * @param filepath the path of the product to track
-     */
-    public void addProduct(String filePath, String pattern) {
-
-        Artifact a = new Artifact(filePath);
-
-        HashMap<String, ArtifactHash> product = new HashMap<String, ArtifactHash>();
-
-        product.put(a.getURI(), a.getArtifactHashes());
-
-        excludeArtifactsByPattern(product, pattern)
-            .forEach(((LinkSignable)this.signed).products::putIfAbsent);
-    }
-
-    public void addProduct(String filePath) {
-
-        addProduct(filePath, null);
-
+	public String getDefaultExcludePattern() {
+		return defaultExcludePattern;
 	}
 
-    public static Link read(String jsonString) {
-        Gson gson = new Gson();
-        return gson.fromJson(jsonString, Link.class);
-    }
+	public Map<String, ArtifactHash> getMaterials() {
+		return materials;
+	}
+
+	public Map<String, ArtifactHash> getProducts() {
+		return products;
+	}
+
+	public Map<String, Object> getByproducts() {
+		return byproducts;
+	}
+
+	public Map<String, Object> getEnvironment() {
+		return environment;
+	}
+
+	public List<String> getCommand() {
+		return command;
+	}
+
+	public String getName() {
+		return name;
+	}    
+    
 }
 
 

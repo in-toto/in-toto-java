@@ -8,7 +8,7 @@ import io.github.in_toto.keys.Key;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-
+import java.util.List;
 import java.io.File;
 import java.io.IOException;
 
@@ -36,7 +36,8 @@ import org.junit.Rule;
 @TestInstance(Lifecycle.PER_CLASS)
 class LinkTest
 {
-    private Link link = new Link(null, null, "test", null, null, null);
+    private LinkBuilder linkBuilder =  new LinkBuilder("test");
+	private Link link = linkBuilder.build();
     private Key key = RSAKey.read("src/test/resources/somekey.pem");
 
     @Rule
@@ -62,12 +63,12 @@ class LinkTest
         // test link data types
 
         assertTrue(link instanceof Link);
-        assertTrue(link.getByproducts() instanceof HashMap);
-        assertTrue(link.getEnvironment() instanceof HashMap);
+        assertTrue(link.getByproducts() instanceof Map);
+        assertTrue(link.getEnvironment() instanceof Map);
         assertTrue(link.getName() instanceof String);
-        assertTrue(link.getProducts() instanceof HashMap);
-        assertTrue(link.getMaterials() instanceof HashMap);
-        assertTrue(link.getCommand() instanceof ArrayList);
+        assertTrue(link.getProducts() instanceof Map);
+        assertTrue(link.getMaterials() instanceof Map);
+        assertTrue(link.getCommand() instanceof List);
     }
 
     @Test
@@ -76,7 +77,9 @@ class LinkTest
     {
         File file = temporaryFolder.newFile("alice");
         String path = file.getAbsolutePath();
-        link.addMaterial(path);
+        linkBuilder.addMaterial(path);
+        
+        Link link = linkBuilder.build();
 
         Map<String, ArtifactHash> material = link.getMaterials();
         Map.Entry<String, ArtifactHash> entry = material.entrySet().iterator().next();
@@ -91,9 +94,11 @@ class LinkTest
     {
         File file = temporaryFolder.newFile("bob");
         String path = file.getAbsolutePath();
-
-        link.addProduct(path);
-
+        
+        linkBuilder.addProduct(path);
+        
+        Link link = linkBuilder.build();
+        
         Map<String, ArtifactHash> product = link.getProducts();
         Map.Entry<String, ArtifactHash> entry = product.entrySet().iterator().next();
         assertEquals(entry.getKey(), path);
@@ -107,7 +112,10 @@ class LinkTest
     {
         HashMap<String, Object> byproduct = new HashMap<>();
         byproduct.put("stdin","");
-        link.setByproducts(byproduct);
+        
+        linkBuilder.setByproducts(byproduct);
+        
+        Link link = linkBuilder.build();
         assertEquals(byproduct, link.getByproducts());
     }
 
@@ -117,7 +125,9 @@ class LinkTest
     {
         HashMap<String, Object> environment = new HashMap<>();
         environment.put("variables", "<ENV>");
-        link.setEnvironment(environment);
+        
+        linkBuilder.setEnvironment(environment);
+        Link link = linkBuilder.build();
         assertEquals(environment, link.getEnvironment());
     }
 
@@ -127,7 +137,9 @@ class LinkTest
     {
         ArrayList<String> command = new ArrayList<String>();
         command.add("<COMMAND>");
-        link.setCommand(command);
+        linkBuilder.setCommand(command);
+        
+        Link link = linkBuilder.build();
         assertEquals(command.get(0), link.getCommand().get(0));
     }
 
@@ -136,9 +148,10 @@ class LinkTest
     @DisplayName("Validate Link sign & dump")
     public void testLinkSignDump()
     {
-        link.sign(key);
-        link.dump("dump.link");
-        File fl = new File("dump.link");
+        Metablock<Link> metablock = new Metablock<Link>(link, null);
+    	metablock.sign(key);
+        metablock.dump();
+        File fl = new File("test.0b70eafb.link");
         assertTrue(fl.exists());
         fl.delete();
     }
@@ -148,22 +161,21 @@ class LinkTest
     public void testLinkDeSerialization()
     {
 
-        Link testLink = new Link(null, null, "sometestname",
-                null, null, null);
+        Link testLink = new LinkBuilder("sometestname").build();
+        Metablock<Link> metablock = new Metablock<Link>(testLink, null);
 
-        String jsonString = testLink.dumpString();
-        Link newLink = Link.read(jsonString);
+        String jsonString = metablock.toJson();
+        Metablock<Link> newMetablock = Link.fromJson(jsonString);
 
-        assertTrue(newLink.getName() != null);
-        assertEquals(testLink.getName(), newLink.getName());
+        assertTrue(((Link)newMetablock.signed).getName() != null);
+        assertEquals(((Link)metablock.signed).getName(), ((Link)newMetablock.signed).getName());
     }
 
     @Test
     @DisplayName("Test Apply Exclude Patterns")
     public void testApplyExcludePatterns() throws IOException
     {
-        Link testLink = new Link(null, null, "sometestname",
-                null, null, null);
+    	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
         File file1 = temporaryFolder.newFile("foo");
         File file2 = temporaryFolder.newFile("bar");
@@ -175,13 +187,15 @@ class LinkTest
 
         String pattern = "**{foo,bar}";
 
-        testLink.addProduct(path1, pattern);
-        testLink.addProduct(path2, pattern);
-        testLink.addProduct(path3, pattern);
+        testLinkBuilder.addProduct(path1, pattern);
+        testLinkBuilder.addProduct(path2, pattern);
+        testLinkBuilder.addProduct(path3, pattern);
 
-        testLink.addMaterial(path1, pattern);
-        testLink.addMaterial(path2, pattern);
-        testLink.addMaterial(path3, pattern);
+        testLinkBuilder.addMaterial(path1, pattern);
+        testLinkBuilder.addMaterial(path2, pattern);
+        testLinkBuilder.addMaterial(path3, pattern);
+        
+        Link testLink = testLinkBuilder.build();
 
         Map<String, ArtifactHash> product = testLink.getProducts();
         assertEquals(product.size(), 1);
@@ -204,8 +218,7 @@ class LinkTest
     @DisplayName("Test Apply Exclude Default Patterns")
     public void testApplyExcludeDefaultPatterns() throws IOException
     {
-        Link testLink = new Link(null, null, "sometestname",
-                null, null, null);
+    	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
         File file1 = temporaryFolder.newFile("foo.link");
         File file2 = temporaryFolder.newFile("bar");
@@ -216,13 +229,15 @@ class LinkTest
         String path2 = file2.getAbsolutePath();
         String path4 = file4.getAbsolutePath();
 
-        testLink.addProduct(path1);
-        testLink.addProduct(path2);
-        testLink.addProduct(path4);
+        testLinkBuilder.addProduct(path1);
+        testLinkBuilder.addProduct(path2);
+        testLinkBuilder.addProduct(path4);
 
-        testLink.addMaterial(path1);
-        testLink.addMaterial(path2);
-        testLink.addMaterial(path4);
+        testLinkBuilder.addMaterial(path1);
+        testLinkBuilder.addMaterial(path2);
+        testLinkBuilder.addMaterial(path4);
+        
+        Link testLink = testLinkBuilder.build();
 
         Map<String, ArtifactHash> product = testLink.getProducts();
         assertEquals(product.size(), 1);
@@ -245,8 +260,7 @@ class LinkTest
     @DisplayName("Test Apply Exclude All")
     public void testApplyExcludeAll() throws IOException
     {
-        Link testLink = new Link(null, null, "sometestname",
-                null, null, null);
+    	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
         File file1 = temporaryFolder.newFile("foo");
         File file2 = temporaryFolder.newFile("bar");
@@ -258,13 +272,15 @@ class LinkTest
 
         String pattern = "**";
 
-        testLink.addProduct(path1, pattern);
-        testLink.addProduct(path2, pattern);
-        testLink.addProduct(path3, pattern);
+        testLinkBuilder.addProduct(path1, pattern);
+        testLinkBuilder.addProduct(path2, pattern);
+        testLinkBuilder.addProduct(path3, pattern);
 
-        testLink.addMaterial(path1, pattern);
-        testLink.addMaterial(path2, pattern);
-        testLink.addMaterial(path3, pattern);
+        testLinkBuilder.addMaterial(path1, pattern);
+        testLinkBuilder.addMaterial(path2, pattern);
+        testLinkBuilder.addMaterial(path3, pattern);
+        
+        Link testLink = testLinkBuilder.build();
 
         Map<String, ArtifactHash> product = testLink.getProducts();
         assertEquals(product.size(), 0);
@@ -283,8 +299,7 @@ class LinkTest
     @DisplayName("Test Apply Exclude Multiple Star")
     public void testApplyExcludeMultipleStar() throws IOException
     {
-        Link testLink = new Link(null, null, "sometestname",
-                null, null, null);
+    	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
         File file1 = temporaryFolder.newFile("foo");
         File file2 = temporaryFolder.newFile("bar");
@@ -296,13 +311,15 @@ class LinkTest
 
         String pattern = "**a**";
 
-        testLink.addProduct(path1, pattern);
-        testLink.addProduct(path2, pattern);
-        testLink.addProduct(path3, pattern);
+        testLinkBuilder.addProduct(path1, pattern);
+        testLinkBuilder.addProduct(path2, pattern);
+        testLinkBuilder.addProduct(path3, pattern);
 
-        testLink.addMaterial(path1, pattern);
-        testLink.addMaterial(path2, pattern);
-        testLink.addMaterial(path3, pattern);
+        testLinkBuilder.addMaterial(path1, pattern);
+        testLinkBuilder.addMaterial(path2, pattern);
+        testLinkBuilder.addMaterial(path3, pattern);
+        
+        Link testLink = testLinkBuilder.build();
 
         Map<String, ArtifactHash> product = testLink.getProducts();
         assertEquals(product.size(), 1);
@@ -325,8 +342,7 @@ class LinkTest
     @DisplayName("Test Apply Exclude Question Mark")
     public void testApplyExcludeQuestionMark() throws IOException
     {
-        Link testLink = new Link(null, null, "sometestname",
-                null, null, null);
+    	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
         File file1 = temporaryFolder.newFile("foo");
         File file2 = temporaryFolder.newFile("bazfoo");
@@ -338,13 +354,15 @@ class LinkTest
 
         String pattern = "**ba?foo";
 
-        testLink.addProduct(path1, pattern);
-        testLink.addProduct(path2, pattern);
-        testLink.addProduct(path3, pattern);
+        testLinkBuilder.addProduct(path1, pattern);
+        testLinkBuilder.addProduct(path2, pattern);
+        testLinkBuilder.addProduct(path3, pattern);
 
-        testLink.addMaterial(path1, pattern);
-        testLink.addMaterial(path2, pattern);
-        testLink.addMaterial(path3, pattern);
+        testLinkBuilder.addMaterial(path1, pattern);
+        testLinkBuilder.addMaterial(path2, pattern);
+        testLinkBuilder.addMaterial(path3, pattern);
+        
+        Link testLink = testLinkBuilder.build();
 
         Map<String, ArtifactHash> product = testLink.getProducts();
         assertEquals(product.size(), 1);
@@ -367,8 +385,7 @@ class LinkTest
     @DisplayName("Test Apply Exclude Sequence")
     public void testApplyExcludeSeq() throws IOException
     {
-        Link testLink = new Link(null, null, "sometestname",
-                null, null, null);
+    	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
         File file1 = temporaryFolder.newFile("baxfoo");
         File file2 = temporaryFolder.newFile("bazfoo");
@@ -380,13 +397,15 @@ class LinkTest
 
         String pattern = "**ba[xz]foo";
 
-        testLink.addProduct(path1, pattern);
-        testLink.addProduct(path2, pattern);
-        testLink.addProduct(path3, pattern);
+        testLinkBuilder.addProduct(path1, pattern);
+        testLinkBuilder.addProduct(path2, pattern);
+        testLinkBuilder.addProduct(path3, pattern);
 
-        testLink.addMaterial(path1, pattern);
-        testLink.addMaterial(path2, pattern);
-        testLink.addMaterial(path3, pattern);
+        testLinkBuilder.addMaterial(path1, pattern);
+        testLinkBuilder.addMaterial(path2, pattern);
+        testLinkBuilder.addMaterial(path3, pattern);
+        
+        Link testLink = testLinkBuilder.build();
 
         Map<String, ArtifactHash> product = testLink.getProducts();
         assertEquals(product.size(), 1);
@@ -410,8 +429,7 @@ class LinkTest
     @DisplayName("Test Apply Exclude Negate Sequence")
     public void testApplyExcludeNegSeq() throws IOException
     {
-        Link testLink = new Link(null, null, "sometestname",
-                null, null, null);
+    	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
         File file1 = temporaryFolder.newFile("baxfoo");
         File file2 = temporaryFolder.newFile("bazfoo");
@@ -423,13 +441,15 @@ class LinkTest
 
         String pattern = "**ba[!r]foo";
 
-        testLink.addProduct(path1, pattern);
-        testLink.addProduct(path2, pattern);
-        testLink.addProduct(path3, pattern);
+        testLinkBuilder.addProduct(path1, pattern);
+        testLinkBuilder.addProduct(path2, pattern);
+        testLinkBuilder.addProduct(path3, pattern);
 
-        testLink.addMaterial(path1, pattern);
-        testLink.addMaterial(path2, pattern);
-        testLink.addMaterial(path3, pattern);
+        testLinkBuilder.addMaterial(path1, pattern);
+        testLinkBuilder.addMaterial(path2, pattern);
+        testLinkBuilder.addMaterial(path3, pattern);
+        
+        Link testLink = testLinkBuilder.build();
 
         Map<String, ArtifactHash> product = testLink.getProducts();
         assertEquals(product.size(), 1);

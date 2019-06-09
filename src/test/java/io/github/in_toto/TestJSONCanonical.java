@@ -1,6 +1,7 @@
 package io.github.in_toto;
 
 import io.github.in_toto.models.Link;
+import io.github.in_toto.models.Metablock;
 import java.io.*;
 import java.nio.file.*;
 import org.bouncycastle.util.encoders.Hex;
@@ -27,11 +28,11 @@ class TestJSONCanonical {
         // environment field
         String linkString = new String(Files.readAllBytes(
                 Paths.get("src/test/resources/testvalues.link")));
-        Link link = Link.read(linkString);
+        Metablock<Link> metablock = Link.fromJson(linkString);
 
         // Assert that Java's canonical json representation of the link is
         // equal to reference implementation's canonical json representation
-        assertEquals(Hex.toHexString(link.getCanonicalJSON(true).getBytes()),
+        assertEquals(Hex.toHexString(metablock.getCanonicalJSON(true).getBytes()),
                 referenceCanonicalLinkHex);
     }
 }
