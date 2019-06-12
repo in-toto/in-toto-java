@@ -2,6 +2,8 @@ package io.github.in_toto.models;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public final class FileTransporter implements Transporter {
 	private String id;
@@ -19,21 +21,27 @@ public final class FileTransporter implements Transporter {
 
         FileWriter writer = null;
 
-        try{
+        try {
             writer = new FileWriter(id);
             writer.write(jsonString);
             writer.flush();
             writer.close();
         } catch (IOException e) {
-            throw new RuntimeException("Couldn't serialize object: " + e.toString());
+            throw new RuntimeException("Couldn't write file: " + e.toString());
         }
 		
 	}
 
 	@Override
 	public String load() {
-		// TODO Auto-generated method stub
-		return null;
+		String jsonString = null;
+		try {
+			jsonString = new String ( Files.readAllBytes( Paths.get(id) ) );
+	    }
+	    catch (IOException e) {
+	    	throw new RuntimeException("Couldn't read file: " + e.toString());
+	    }
+		return jsonString; 
 	}
 
 	public String getId() {

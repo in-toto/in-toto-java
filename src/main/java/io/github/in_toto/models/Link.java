@@ -100,7 +100,7 @@ public final class Link implements Signable {
     
     public Link(LinkBuilder builder) {   	
     	this(builder.getName(), 
-    			builder.getMaterials(), 
+    			builder.getMaterials(),
     			builder.getProducts(), 
     			builder.getEnvironment(), 
     			builder.getCommand(), 
@@ -267,6 +267,11 @@ public final class Link implements Signable {
         }
 
         return filtered_artifacts;
+    }
+    
+    public static Metablock<Link> load(String filename) {
+    	Transporter transporter = new FileTransporter(filename);
+    	return Link.fromJson(transporter.load());
     }
 
 	public String getType() {

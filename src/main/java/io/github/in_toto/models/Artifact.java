@@ -1,7 +1,5 @@
 package io.github.in_toto.models;
 
-import java.util.HashMap;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
@@ -9,6 +7,14 @@ import java.io.FileNotFoundException;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
 import org.bouncycastle.util.encoders.Hex;
+
+import com.google.gson.TypeAdapter;
+import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
+import io.github.in_toto.models.Artifact.ArtifactHash.ArtifactHashJsonAdapter;
+import io.github.in_toto.models.Artifact.ArtifactHash.HashAlgorithm;
 
 /**
  * A class representing an Artifact (that is, a material or a product).
@@ -41,8 +47,13 @@ public final class Artifact {
     public Artifact(String filename) {
 
         this.URI = filename;
-        this.hash = new ArtifactHash();
-        this.hash.collect(filename);
+        this.hash = ArtifactHash.collect(filename);
+
+    }
+    
+    public Artifact(String filename, HashAlgorithm algorithm, String hash) {
+        this.URI = filename;
+        this.hash = new ArtifactHash(algorithm, hash);
 
     }
 
@@ -63,11 +74,17 @@ public final class Artifact {
      *  }
      * </code>
      */
-    public final class ArtifactHash
-        extends HashMap<String, String>
-    {
+    @JsonAdapter(ArtifactHashJsonAdapter.class)
+    static final class ArtifactHash {
+    	private final HashAlgorithm algorithm;
+    	private final String hash;
+    	
+    	ArtifactHash(HashAlgorithm algorithm, String hash) {
+    		this.algorithm = algorithm;
+    		this.hash = hash;
+    	}
 
-        private void collect(String filename) {
+        private static ArtifactHash collect(String filename) {
 
             FileInputStream file = null;
             try {
@@ -97,7 +114,68 @@ public final class Artifact {
 
             // We should be able to submit more hashes, but we will do sha256
             // only for the time being
-            this.put("sha256", Hex.toHexString(result));
+            return new ArtifactHash(HashAlgorithm.sha256, Hex.toHexString(result));
         }
+
+		private HashAlgorithm getAlgorithm() {
+			return algorithm;
+		}
+
+		private String getHash() {
+			return hash;
+		}
+		
+		class ArtifactHashJsonAdapter extends TypeAdapter<ArtifactHash> {
+
+			@Override
+			public void write(JsonWriter out, ArtifactHash hash) throws IOException {
+				out.beginObject();
+			    out.name(hash.getAlgorithm().name()).value(hash.getHash());
+			    out.endObject();
+			}
+
+			@Override
+			public ArtifactHash read(JsonReader in) throws IOException {
+				in.beginObject();
+				HashAlgorithm algo = HashAlgorithm.valueOf(in.nextName());
+				String hash = in.nextString();
+				in.endObject();
+				return new ArtifactHash(algo, hash);
+			}
+
+		}
+	    
+	    public static enum HashAlgorithm {
+	    	sha256, sha512
+	    }
+
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((algorithm == null) ? 0 : algorithm.hashCode());
+			result = prime * result + ((hash == null) ? 0 : hash.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ArtifactHash other = (ArtifactHash) obj;
+			if (algorithm != other.algorithm)
+				return false;
+			if (hash == null) {
+				if (other.hash != null)
+					return false;
+			} else if (!hash.equals(other.hash))
+				return false;
+			return true;
+		}        
     }
 }

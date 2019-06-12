@@ -1,6 +1,7 @@
 package io.github.in_toto.models;
 
 import io.github.in_toto.models.Artifact.ArtifactHash;
+import io.github.in_toto.models.Artifact.ArtifactHash.HashAlgorithm;
 import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Link.LinkBuilder;
 import io.github.in_toto.keys.RSAKey;
@@ -170,6 +171,24 @@ class LinkTest
 
         assertTrue(((Link)newMetablock.signed).getName() != null);
         assertEquals(((Link)metablock.signed).getName(), ((Link)newMetablock.signed).getName());
+    }
+    
+    @Test
+    @DisplayName("Validate link serialization and de-serialization with artifacts")
+    public void testLinkDeSerializationWithArtifacts()
+    {
+
+        Metablock<Link> testMetablockLink = Link.load("src/test/resources/clone.776a00e2.link");
+        assertTrue(testMetablockLink.signed.getName() != null);
+        assertEquals(testMetablockLink.signed.getName(), "clone");
+        assertEquals(testMetablockLink.signed.getProducts().get("demo-project/foo.py"),
+        		new ArtifactHash(HashAlgorithm.sha256, "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235"));
+
+        String jsonString = testMetablockLink.toJson();
+        Metablock<Link> newLinkMetablock = Link.fromJson(jsonString);
+
+        assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
+        assertEquals(newLinkMetablock.signed.getProducts().get("demo-project/foo.py"), testMetablockLink.signed.getProducts().get("demo-project/foo.py"));
     }
 
     @Test
