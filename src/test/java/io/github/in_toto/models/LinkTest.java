@@ -2,6 +2,7 @@ package io.github.in_toto.models;
 
 import io.github.in_toto.models.Artifact.ArtifactHash;
 import io.github.in_toto.models.Link;
+import io.github.in_toto.models.Link.LinkBuilder;
 import io.github.in_toto.keys.RSAKey;
 import io.github.in_toto.keys.Key;
 

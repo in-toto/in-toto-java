@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.RSAKey;
 import io.github.in_toto.models.Link;
-import io.github.in_toto.models.LinkBuilder;
+import io.github.in_toto.models.Link.LinkBuilder;
 import io.github.in_toto.models.Metablock;
 
 class HelloWorldTest {
