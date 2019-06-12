@@ -114,7 +114,7 @@ public final class Link implements Signable {
      * @author Gerard Borst
      * 
      */
-    public static class LinkBuilder {
+    public static final class LinkBuilder {
         private final String name;
         private Map<String, ArtifactHash> materials = new HashMap<String, ArtifactHash>();
         private Map<String, ArtifactHash> products = new HashMap<String, ArtifactHash>();

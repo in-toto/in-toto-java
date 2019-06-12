@@ -16,7 +16,7 @@ import org.bouncycastle.util.encoders.Hex;
  * Used by the Link metdata type on the .add method. Can be also used to
  * pre-populate the Link's artifact fields before instantiating a link.
  */
-public class Artifact {
+public final class Artifact {
 
     /**
      * A URI representing the location of the Artifact
@@ -63,7 +63,7 @@ public class Artifact {
      *  }
      * </code>
      */
-    public class ArtifactHash
+    public final class ArtifactHash
         extends HashMap<String, String>
     {
 

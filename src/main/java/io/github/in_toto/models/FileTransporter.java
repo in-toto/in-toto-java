@@ -3,7 +3,7 @@ package io.github.in_toto.models;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class FileTransporter implements Transporter {
+public final class FileTransporter implements Transporter {
 	private String id;
 	
 	public FileTransporter() {
