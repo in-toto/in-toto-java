@@ -1,0 +1,49 @@
+{
+ "signatures": [],
+ "signed": {
+  "_type": "link",
+  "byproducts": {
+   "return-value": 0,
+   "stderr": "",
+   "stdout": ""
+  },
+  "command": [
+   "tar",
+   "xzf",
+   "demo-project.tar.gz"
+  ],
+  "environment": {},
+  "materials": {
+   ".keep": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "alice.pub": {
+    "sha256": "54d66a3cda423bb31027f388ffb6753a37e7bd5d9d883140fb818dac73456695"
+   },
+   "demo-project.tar.gz": {
+    "sha256": "254e073dea811ec6312027e5cdaa9d0d337ad935d239a75631256730a101f8a8"
+   },
+   "root.layout": {
+    "sha256": "6c28284582d98d0ee722d7b22dacc23b541145daed4e724bdf433822f2713eea"
+   }
+  },
+  "name": "untar",
+  "products": {
+   ".keep": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "alice.pub": {
+    "sha256": "54d66a3cda423bb31027f388ffb6753a37e7bd5d9d883140fb818dac73456695"
+   },
+   "demo-project.tar.gz": {
+    "sha256": "254e073dea811ec6312027e5cdaa9d0d337ad935d239a75631256730a101f8a8"
+   },
+   "demo-project/foo.py": {
+    "sha256": "c2c0ea54fa94fac3a4e1575d6ed3bbd1b01a6d0b8deb39196bdc31c457ef731b"
+   },
+   "root.layout": {
+    "sha256": "6c28284582d98d0ee722d7b22dacc23b541145daed4e724bdf433822f2713eea"
+   }
+  }
+ }
+}

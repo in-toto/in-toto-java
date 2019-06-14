@@ -9,10 +9,14 @@ import io.github.in_toto.keys.Key;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -26,6 +30,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
+
+import com.google.gson.reflect.TypeToken;
+
 import org.junit.rules.ExpectedException;
 import org.junit.Rule;
 
@@ -41,6 +48,8 @@ class LinkTest
     private LinkBuilder linkBuilder =  new LinkBuilder("test");
 	private Link link = linkBuilder.build();
     private Key key = RSAKey.read("src/test/resources/somekey.pem");
+    private FileTransporter transporter = new FileTransporter();
+    private Type metablockType = new TypeToken<Metablock<Link>>() {}.getType();
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -68,8 +77,8 @@ class LinkTest
         assertTrue(link.getByproducts() instanceof Map);
         assertTrue(link.getEnvironment() instanceof Map);
         assertTrue(link.getName() instanceof String);
-        assertTrue(link.getProducts() instanceof Map);
-        assertTrue(link.getMaterials() instanceof Map);
+        assertTrue(link.getProducts() instanceof Set);
+        assertTrue(link.getMaterials() instanceof Set);
         assertTrue(link.getCommand() instanceof List);
     }
 
@@ -79,13 +88,14 @@ class LinkTest
     {
         File file = temporaryFolder.newFile("alice");
         String path = file.getAbsolutePath();
+        
+        Artifact pathArtifact = new Artifact(path);
+        
         linkBuilder.addMaterial(path);
         
         Link link = linkBuilder.build();
 
-        Map<String, ArtifactHash> material = link.getMaterials();
-        Map.Entry<String, ArtifactHash> entry = material.entrySet().iterator().next();
-        assertEquals(entry.getKey(), path);
+        assertTrue(link.getMaterials().contains(pathArtifact));
 
         file.delete();
     }
@@ -97,13 +107,15 @@ class LinkTest
         File file = temporaryFolder.newFile("bob");
         String path = file.getAbsolutePath();
         
+        Artifact pathArtifact = new Artifact(path); 
+        
         linkBuilder.addProduct(path);
         
         Link link = linkBuilder.build();
         
-        Map<String, ArtifactHash> product = link.getProducts();
-        Map.Entry<String, ArtifactHash> entry = product.entrySet().iterator().next();
-        assertEquals(entry.getKey(), path);
+        Set<Artifact> product = link.getProducts();
+        Artifact entry = product.iterator().next();
+        assertEquals(entry, pathArtifact);
     
         file.delete();
     }
@@ -148,47 +160,97 @@ class LinkTest
     @AfterAll
     @Test
     @DisplayName("Validate Link sign & dump")
-    public void testLinkSignDump()
+    public void testLinkSignDump() throws URISyntaxException
     {
         Metablock<Link> metablock = new Metablock<Link>(link, null);
-    	metablock.sign(key);
-        metablock.dump();
+        metablock.sign(key);
+    	URI uri = new URI("test.0b70eafb.link");
+        transporter.dump(uri, metablock);
         File fl = new File("test.0b70eafb.link");
         assertTrue(fl.exists());
         fl.delete();
     }
 
     @Test
-    @DisplayName("Validate link serialization and de-serialization")
-    public void testLinkDeSerialization()
+    @DisplayName("Validate link serialization and deserialization with artifacts from object")
+    public void testLinkSerializationWithArtifactsFromObject() throws IOException, URISyntaxException
     {
+    	LinkBuilder testLinkBuilder = new LinkBuilder("serialize");
 
-        Link testLink = new LinkBuilder("sometestname").build();
-        Metablock<Link> metablock = new Metablock<Link>(testLink, null);
+        String path1 = "src/test/resources/serialize/foo";
+        String path2 = "src/test/resources/serialize/baz";
+        String path3 = "src/test/resources/serialize/bar";
+        
+        Artifact pathArtifact1 = new Artifact(path1);
+        Artifact pathArtifact2 = new Artifact(path2);
+        Artifact pathArtifact3 = new Artifact(path3);
+        
+        testLinkBuilder.addProduct(path1);
+        testLinkBuilder.addProduct(path2);
+        testLinkBuilder.addProduct(path3);
 
-        String jsonString = metablock.toJson();
-        Metablock<Link> newMetablock = Link.fromJson(jsonString);
+        testLinkBuilder.addMaterial(path1);
+        testLinkBuilder.addMaterial(path2);
+        testLinkBuilder.addMaterial(path3);
+        
+        Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
+        testMetablockLink.sign(key);
+        
+        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).getKeyId());
+        
+        transporter.dump(linkFile, testMetablockLink);
 
-        assertTrue(((Link)newMetablock.signed).getName() != null);
-        assertEquals(((Link)metablock.signed).getName(), ((Link)newMetablock.signed).getName());
-    }
-    
-    @Test
-    @DisplayName("Validate link serialization and de-serialization with artifacts")
-    public void testLinkDeSerializationWithArtifacts()
-    {
-
-        Metablock<Link> testMetablockLink = Link.load("src/test/resources/clone.776a00e2.link");
-        assertTrue(testMetablockLink.signed.getName() != null);
-        assertEquals(testMetablockLink.signed.getName(), "clone");
-        assertEquals(testMetablockLink.signed.getProducts().get("demo-project/foo.py"),
-        		new ArtifactHash(HashAlgorithm.sha256, "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235"));
-
-        String jsonString = testMetablockLink.toJson();
-        Metablock<Link> newLinkMetablock = Link.fromJson(jsonString);
+        Metablock<Link> newLinkMetablock = transporter.load(linkFile, metablockType);
+        File tempFile = new File(linkFile.getPath());
+        tempFile.delete();
+        
+        newLinkMetablock.sign(key);
+        
+        assertEquals(newLinkMetablock.signatures.get(0).getSig(), testMetablockLink.signatures.get(0).getSig());
 
         assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
-        assertEquals(newLinkMetablock.signed.getProducts().get("demo-project/foo.py"), testMetablockLink.signed.getProducts().get("demo-project/foo.py"));
+        assertTrue(newLinkMetablock.signed.getProducts().contains(pathArtifact1));
+        assertTrue(newLinkMetablock.signed.getProducts().contains(pathArtifact2));
+        assertTrue(newLinkMetablock.signed.getProducts().contains(pathArtifact3));
+        assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact1));
+        assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact2));
+        assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact3));
+        
+        Metablock<Link> metablockFromFile = transporter.load(new URI("src/test/resources/serialize/serialize.link"), metablockType);
+        metablockFromFile.sign(key);
+        
+        assertEquals(metablockFromFile.signed.getName(), testMetablockLink.signed.getName());
+        assertTrue(metablockFromFile.signed.getProducts().contains(pathArtifact1));
+        assertTrue(metablockFromFile.signed.getProducts().contains(pathArtifact2));
+        assertTrue(metablockFromFile.signed.getProducts().contains(pathArtifact3));
+        assertTrue(metablockFromFile.signed.getMaterials().contains(pathArtifact1));
+        assertTrue(metablockFromFile.signed.getMaterials().contains(pathArtifact2));
+        assertTrue(metablockFromFile.signed.getMaterials().contains(pathArtifact3));        
+        //assertEquals(metablockFromFile.signatures.get(0).getSig(), testMetablockLink.signatures.get(0).getSig());
+    }
+
+    
+    @Test
+    @DisplayName("Validate link serialization and de-serialization with artifacts from file")
+    public void testLinkDeSerializationWithArtifactsFromFile() throws URISyntaxException
+    {
+    	Artifact testproduct = new Artifact("demo-project/foo.py", new ArtifactHash(HashAlgorithm.sha256, "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235"));
+
+        Metablock<Link> testMetablockLink = transporter.load(new URI("src/test/resources/clone.776a00e2.link"), metablockType);
+        assertTrue(testMetablockLink.signed.getName() != null);
+        assertEquals(testMetablockLink.signed.getName(), "clone");
+        assertTrue(testMetablockLink.signed.getProducts().contains(testproduct));
+
+        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).getKeyId());
+        
+        transporter.dump(linkFile, testMetablockLink);
+
+        Metablock<Link> newLinkMetablock = transporter.load(linkFile, metablockType);
+        File tempFile = new File(linkFile.getPath());
+        tempFile.delete();
+
+        assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
+        assertTrue(newLinkMetablock.signed.getProducts().contains(testproduct));
     }
 
     @Test
@@ -204,30 +266,32 @@ class LinkTest
         String path1 = file1.getAbsolutePath();
         String path2 = file2.getAbsolutePath();
         String path3 = file3.getAbsolutePath();
+        
+        Artifact pathArtifact3 = new Artifact(path3);
 
         String pattern = "**{foo,bar}";
 
-        testLinkBuilder.addProduct(path1, pattern);
-        testLinkBuilder.addProduct(path2, pattern);
-        testLinkBuilder.addProduct(path3, pattern);
+        testLinkBuilder.setExcludePattern(pattern);
 
-        testLinkBuilder.addMaterial(path1, pattern);
-        testLinkBuilder.addMaterial(path2, pattern);
-        testLinkBuilder.addMaterial(path3, pattern);
+        testLinkBuilder.addProduct(path1);
+        testLinkBuilder.addProduct(path2);
+        testLinkBuilder.addProduct(path3);
+
+        testLinkBuilder.addMaterial(path1);
+        testLinkBuilder.addMaterial(path2);
+        testLinkBuilder.addMaterial(path3);
         
         Link testLink = testLinkBuilder.build();
 
-        Map<String, ArtifactHash> product = testLink.getProducts();
+        Set<Artifact> product = testLink.getProducts();
         assertEquals(product.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
-        assertEquals(entry1.getKey(), path3);
+        assertTrue(product.contains(pathArtifact3));
 
-        Map<String, ArtifactHash> material = testLink.getMaterials();
+        Set<Artifact> material = testLink.getMaterials();
         assertEquals(material.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
-        assertEquals(entry2.getKey(), path3);
+        assertTrue(material.contains(pathArtifact3));
 
         file1.delete();
         file2.delete();
@@ -248,6 +312,8 @@ class LinkTest
         String path1 = file1.getAbsolutePath();
         String path2 = file2.getAbsolutePath();
         String path4 = file4.getAbsolutePath();
+        
+        Artifact pathArtifact2 = new Artifact(path2);
 
         testLinkBuilder.addProduct(path1);
         testLinkBuilder.addProduct(path2);
@@ -259,17 +325,15 @@ class LinkTest
         
         Link testLink = testLinkBuilder.build();
 
-        Map<String, ArtifactHash> product = testLink.getProducts();
+        Set<Artifact> product = testLink.getProducts();
         assertEquals(product.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
-        assertEquals(entry1.getKey(), path2);
+        assertTrue(product.contains(pathArtifact2));
 
-        Map<String, ArtifactHash> material = testLink.getMaterials();
+        Set<Artifact> material = testLink.getMaterials();
         assertEquals(material.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
-        assertEquals(entry2.getKey(), path2);
+        assertTrue(material.contains(pathArtifact2));
 
         file1.delete();
         file2.delete();
@@ -292,23 +356,25 @@ class LinkTest
 
         String pattern = "**";
 
-        testLinkBuilder.addProduct(path1, pattern);
-        testLinkBuilder.addProduct(path2, pattern);
-        testLinkBuilder.addProduct(path3, pattern);
+        testLinkBuilder.setExcludePattern(pattern);
 
-        testLinkBuilder.addMaterial(path1, pattern);
-        testLinkBuilder.addMaterial(path2, pattern);
-        testLinkBuilder.addMaterial(path3, pattern);
+        testLinkBuilder.addProduct(path1);
+        testLinkBuilder.addProduct(path2);
+        testLinkBuilder.addProduct(path3);
+
+        testLinkBuilder.addMaterial(path1);
+        testLinkBuilder.addMaterial(path2);
+        testLinkBuilder.addMaterial(path3);
         
         Link testLink = testLinkBuilder.build();
 
-        Map<String, ArtifactHash> product = testLink.getProducts();
+        Set<Artifact> product = testLink.getProducts();
         assertEquals(product.size(), 0);
-        assertFalse(product.entrySet().iterator().hasNext());
+        assertFalse(product.iterator().hasNext());
 
-        Map<String, ArtifactHash> material = testLink.getMaterials();
+        Set<Artifact> material = testLink.getMaterials();
         assertEquals(material.size(), 0);
-        assertFalse(material.entrySet().iterator().hasNext());
+        assertFalse(material.iterator().hasNext());
 
         file1.delete();
         file2.delete();
@@ -328,30 +394,32 @@ class LinkTest
         String path1 = file1.getAbsolutePath();
         String path2 = file2.getAbsolutePath();
         String path3 = file3.getAbsolutePath();
+        
+        Artifact pathArtifact1 = new Artifact(path1);
 
         String pattern = "**a**";
 
-        testLinkBuilder.addProduct(path1, pattern);
-        testLinkBuilder.addProduct(path2, pattern);
-        testLinkBuilder.addProduct(path3, pattern);
+        testLinkBuilder.setExcludePattern(pattern);
 
-        testLinkBuilder.addMaterial(path1, pattern);
-        testLinkBuilder.addMaterial(path2, pattern);
-        testLinkBuilder.addMaterial(path3, pattern);
+        testLinkBuilder.addProduct(path1);
+        testLinkBuilder.addProduct(path2);
+        testLinkBuilder.addProduct(path3);
+
+        testLinkBuilder.addMaterial(path1);
+        testLinkBuilder.addMaterial(path2);
+        testLinkBuilder.addMaterial(path3);
         
         Link testLink = testLinkBuilder.build();
 
-        Map<String, ArtifactHash> product = testLink.getProducts();
+        Set<Artifact> product = testLink.getProducts();
         assertEquals(product.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
-        assertEquals(entry1.getKey(), path1);
+        assertTrue(product.contains(pathArtifact1));
 
-        Map<String, ArtifactHash> material = testLink.getMaterials();
+        Set<Artifact> material = testLink.getMaterials();
         assertEquals(material.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
-        assertEquals(entry2.getKey(), path1);
+        assertTrue(material.contains(pathArtifact1));
 
         file1.delete();
         file2.delete();
@@ -371,30 +439,32 @@ class LinkTest
         String path1 = file1.getAbsolutePath();
         String path2 = file2.getAbsolutePath();
         String path3 = file3.getAbsolutePath();
+        
+        Artifact pathArtifact1 = new Artifact(path1);
 
         String pattern = "**ba?foo";
 
-        testLinkBuilder.addProduct(path1, pattern);
-        testLinkBuilder.addProduct(path2, pattern);
-        testLinkBuilder.addProduct(path3, pattern);
+        testLinkBuilder.setExcludePattern(pattern);
 
-        testLinkBuilder.addMaterial(path1, pattern);
-        testLinkBuilder.addMaterial(path2, pattern);
-        testLinkBuilder.addMaterial(path3, pattern);
+        testLinkBuilder.addProduct(path1);
+        testLinkBuilder.addProduct(path2);
+        testLinkBuilder.addProduct(path3);
+
+        testLinkBuilder.addMaterial(path1);
+        testLinkBuilder.addMaterial(path2);
+        testLinkBuilder.addMaterial(path3);
         
         Link testLink = testLinkBuilder.build();
 
-        Map<String, ArtifactHash> product = testLink.getProducts();
+        Set<Artifact> product = testLink.getProducts();
         assertEquals(product.size(), 1);
+        
+        assertTrue(product.contains(pathArtifact1));
 
-        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
-        assertEquals(entry1.getKey(), path1);
+        Set<Artifact> material = testLink.getProducts();
+        assertEquals(material.size(), 1);
 
-        Map<String, ArtifactHash> material = testLink.getProducts();
-        assertEquals(product.size(), 1);
-
-        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
-        assertEquals(entry2.getKey(), path1);
+        assertTrue(material.contains(pathArtifact1));
 
         file1.delete();
         file2.delete();
@@ -414,30 +484,32 @@ class LinkTest
         String path1 = file1.getAbsolutePath();
         String path2 = file2.getAbsolutePath();
         String path3 = file3.getAbsolutePath();
+        
+        Artifact pathArtifact3 = new Artifact(path3);
 
         String pattern = "**ba[xz]foo";
 
-        testLinkBuilder.addProduct(path1, pattern);
-        testLinkBuilder.addProduct(path2, pattern);
-        testLinkBuilder.addProduct(path3, pattern);
+        testLinkBuilder.setExcludePattern(pattern);
 
-        testLinkBuilder.addMaterial(path1, pattern);
-        testLinkBuilder.addMaterial(path2, pattern);
-        testLinkBuilder.addMaterial(path3, pattern);
+        testLinkBuilder.addProduct(path1);
+        testLinkBuilder.addProduct(path2);
+        testLinkBuilder.addProduct(path3);
+
+        testLinkBuilder.addMaterial(path1);
+        testLinkBuilder.addMaterial(path2);
+        testLinkBuilder.addMaterial(path3);
         
         Link testLink = testLinkBuilder.build();
 
-        Map<String, ArtifactHash> product = testLink.getProducts();
+        Set<Artifact> product = testLink.getProducts();
         assertEquals(product.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
-        assertEquals(entry1.getKey(), path3);
+        assertTrue(product.contains(pathArtifact3));
 
-        Map<String, ArtifactHash> material = testLink.getMaterials();
+        Set<Artifact> material = testLink.getMaterials();
         assertEquals(material.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
-        assertEquals(entry2.getKey(), path3);
+        assertTrue(material.contains(pathArtifact3));
 
         file1.delete();
         file2.delete();
@@ -458,30 +530,32 @@ class LinkTest
         String path1 = file1.getAbsolutePath();
         String path2 = file2.getAbsolutePath();
         String path3 = file3.getAbsolutePath();
+        
+        Artifact pathArtifact3 = new Artifact(path3);
 
         String pattern = "**ba[!r]foo";
 
-        testLinkBuilder.addProduct(path1, pattern);
-        testLinkBuilder.addProduct(path2, pattern);
-        testLinkBuilder.addProduct(path3, pattern);
+        testLinkBuilder.setExcludePattern(pattern);
 
-        testLinkBuilder.addMaterial(path1, pattern);
-        testLinkBuilder.addMaterial(path2, pattern);
-        testLinkBuilder.addMaterial(path3, pattern);
+        testLinkBuilder.addProduct(path1);
+        testLinkBuilder.addProduct(path2);
+        testLinkBuilder.addProduct(path3);
+
+        testLinkBuilder.addMaterial(path1);
+        testLinkBuilder.addMaterial(path2);
+        testLinkBuilder.addMaterial(path3);
         
         Link testLink = testLinkBuilder.build();
 
-        Map<String, ArtifactHash> product = testLink.getProducts();
+        Set<Artifact> product = testLink.getProducts();
         assertEquals(product.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry1 = product.entrySet().iterator().next();
-        assertEquals(entry1.getKey(), path3);
+        assertTrue(product.contains(pathArtifact3));
 
-        Map<String, ArtifactHash> material = testLink.getMaterials();
-        assertEquals(product.size(), 1);
+        Set<Artifact> material = testLink.getMaterials();
+        assertEquals(material.size(), 1);
 
-        Map.Entry<String, ArtifactHash> entry2 = material.entrySet().iterator().next();
-        assertEquals(entry2.getKey(), path3);
+        assertTrue(material.contains(pathArtifact3));
 
         file1.delete();
         file2.delete();

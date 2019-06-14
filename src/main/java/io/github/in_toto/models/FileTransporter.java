@@ -2,55 +2,45 @@ package io.github.in_toto.models;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public final class FileTransporter implements Transporter {
-	private String id;
-	
-	public FileTransporter() {
-		
-	}
-	
-	public FileTransporter(String path) {
-		this.setId(path);
-	}
+import com.google.gson.Gson;
 
+public final class FileTransporter implements Transporter {
+	
+	public FileTransporter() {	
+	}
+	
 	@Override
-	public void dump(String jsonString) {
+	public <S extends Signable> void dump(URI uri, Metablock<S> metablock) {
 
         FileWriter writer = null;
+        String jsonString = metablock.toJson();
 
         try {
-            writer = new FileWriter(id);
+            writer = new FileWriter(uri.getPath());
             writer.write(jsonString);
             writer.flush();
             writer.close();
         } catch (IOException e) {
             throw new RuntimeException("Couldn't write file: " + e.toString());
         }
-		
 	}
 
 	@Override
-	public String load() {
+	public <S extends Signable> Metablock<S> load(URI uri, Type type) {
 		String jsonString = null;
 		try {
-			jsonString = new String ( Files.readAllBytes( Paths.get(id) ) );
+			jsonString = new String ( Files.readAllBytes( Paths.get(uri.getPath()) ) );
 	    }
 	    catch (IOException e) {
 	    	throw new RuntimeException("Couldn't read file: " + e.toString());
 	    }
-		return jsonString; 
+		Gson gson = new Gson();
+	    Metablock<S> metablock = gson.fromJson(jsonString, type);
+	    return metablock;
 	}
-
-	public String getId() {
-		return this.id;
-	}
-
-	@Override
-	public void setId(String id) {
-		this.id = id;
-	}
-
 }

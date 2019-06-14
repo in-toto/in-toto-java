@@ -1,7 +1,5 @@
 package io.github.in_toto.keys;
 
-import io.github.in_toto.lib.JSONEncoder;
-
 import java.io.IOException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -12,6 +10,8 @@ import java.io.Writer;
 import java.util.HashMap;
 
 import org.bouncycastle.util.encoders.Hex;
+
+import io.github.in_toto.lib.JSONEncoder;
 
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -68,7 +68,7 @@ public class RSAKey
      *
      * You most likely want to use the static method {@link #read read} to instantiate this class.
      *
-     * @param kpr: A PEMKeypair conatining the private and public key information
+     * @param kpr A PEMKeypair containing the private and public key information
      */
     public RSAKey(PEMKeyPair kpr) {
         this.kpr = kpr;

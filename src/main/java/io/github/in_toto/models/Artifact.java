@@ -2,6 +2,9 @@ package io.github.in_toto.models;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.io.FileNotFoundException;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -19,8 +22,7 @@ import io.github.in_toto.models.Artifact.ArtifactHash.HashAlgorithm;
 /**
  * A class representing an Artifact (that is, a material or a product).
  *
- * Used by the Link metdata type on the .add method. Can be also used to
- * pre-populate the Link's artifact fields before instantiating a link.
+ * Used by the Link metadata type on the .add method.
  */
 public final class Artifact {
 
@@ -51,9 +53,9 @@ public final class Artifact {
 
     }
     
-    public Artifact(String filename, HashAlgorithm algorithm, String hash) {
+    public Artifact(String filename, ArtifactHash hash) {
         this.URI = filename;
-        this.hash = new ArtifactHash(algorithm, hash);
+        this.hash = hash;
 
     }
 
@@ -65,7 +67,44 @@ public final class Artifact {
         return this.hash;
     }
 
-    /**
+    @Override
+	public String toString() {
+		return "Artifact [URI=" + URI + ", hash=" + hash + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((URI == null) ? 0 : URI.hashCode());
+		result = prime * result + ((hash == null) ? 0 : hash.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Artifact other = (Artifact) obj;
+		if (URI == null) {
+			if (other.URI != null)
+				return false;
+		} else if (!URI.equals(other.URI))
+			return false;
+		if (hash == null) {
+			if (other.hash != null)
+				return false;
+		} else if (!hash.equals(other.hash))
+			return false;
+		return true;
+	}
+
+
+	/**
      * Nested subclass representing a hash object compliant with the in-toto specification.
      *
      * <code>
@@ -125,7 +164,7 @@ public final class Artifact {
 			return hash;
 		}
 		
-		class ArtifactHashJsonAdapter extends TypeAdapter<ArtifactHash> {
+		static class ArtifactHashJsonAdapter extends TypeAdapter<ArtifactHash> {
 
 			@Override
 			public void write(JsonWriter out, ArtifactHash hash) throws IOException {
@@ -149,6 +188,10 @@ public final class Artifact {
 	    	sha256, sha512
 	    }
 
+		@Override
+		public String toString() {
+			return "ArtifactHash [algorithm=" + algorithm + ", hash=" + hash + "]";
+		}
 
 		@Override
 		public int hashCode() {
@@ -178,4 +221,39 @@ public final class Artifact {
 			return true;
 		}        
     }
+    
+
+	
+	class ArtifactSetJsonAdapter extends TypeAdapter<Set<Artifact>> {
+
+		@Override
+		public
+		void write(JsonWriter out, Set<Artifact> value) throws IOException {
+			ArtifactHashJsonAdapter artifactHashAdapter = new ArtifactHashJsonAdapter();
+			Iterator<Artifact> artifactIt = value.iterator();
+			out.beginObject();
+			while (artifactIt.hasNext()) {
+				Artifact artifact = artifactIt.next();
+				out.name(artifact.getURI());
+				artifactHashAdapter.write(out, artifact.getArtifactHashes());
+			}
+			out.endObject();
+		}
+
+		@Override
+		public Set<Artifact> read(JsonReader in) throws IOException {
+			Set<Artifact> artifacts = new HashSet<Artifact>();
+			in.beginObject();
+			while (in.hasNext()) {
+				String filename = in.nextName();
+				in.beginObject();
+				HashAlgorithm algo = HashAlgorithm.valueOf(in.nextName());
+				String hash = in.nextString();
+				in.endObject();
+				artifacts.add(new Artifact(filename, new ArtifactHash(algo, hash)));
+			}
+			in.endObject();
+			return artifacts;
+		}		
+	}
 }

@@ -29,10 +29,18 @@ import org.bouncycastle.crypto.CryptoException;
  */
 public final class Metablock<S extends Signable> {
 	transient Transporter transporter = new FileTransporter();
-    final S signed;
+    S signed;
     ArrayList<Signature> signatures;
 
-    /**
+    public void setSigned(S signed) {
+		this.signed = signed;
+	}
+
+	public void setSignatures(ArrayList<Signature> signatures) {
+		this.signatures = signatures;
+	}
+
+	/**
      * Base constructor.
      *
      * Ensures that, at the least, there is an empty list of signatures.
@@ -43,15 +51,6 @@ public final class Metablock<S extends Signable> {
         if (signatures == null)
             signatures = new ArrayList<Signature>();
         this.signatures = signatures;
-    }
-    
-    /**
-     * Dump the this serialized object to the tranporter.
-     *
-     */
-    public void dump() {
-    	transporter.setId(this.signed.getFullName(this.getShortKeyId()));
-        transporter.dump(this.toJson());
     }
 
     /**
@@ -158,5 +157,51 @@ public final class Metablock<S extends Signable> {
 	public void setTransporter(Transporter transporter) {
 		this.transporter = transporter;
 	}
+
+	public ArrayList<Signature> getSignatures() {
+		return signatures;
+	}
+
+	public S getSigned() {
+		return signed;
+	}
+
+	@Override
+	public String toString() {
+		return "Metablock [transporter=" + transporter + ", signed=" + signed + ", signatures=" + signatures + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((signatures == null) ? 0 : signatures.hashCode());
+		result = prime * result + ((signed == null) ? 0 : signed.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		@SuppressWarnings("rawtypes")
+		Metablock other = (Metablock) obj;
+		if (signatures == null) {
+			if (other.signatures != null)
+				return false;
+		} else if (!signatures.equals(other.signatures))
+			return false;
+		if (signed == null) {
+			if (other.signed != null)
+				return false;
+		} else if (!signed.equals(other.signed))
+			return false;
+		return true;
+	}
     
+	
 }
