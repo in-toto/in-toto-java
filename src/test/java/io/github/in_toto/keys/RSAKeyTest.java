@@ -22,8 +22,8 @@ import org.junit.Rule;
 class RSAKeyTest
 {
 
-    private static final String private_key_path = "src/test/resources/somekey.pem";
-    private static final String public_key_path = "src/test/resources/someotherkey.pem";
+    private static final String private_key_path = "src/test/resources/rsakey_test/somekey.pem";
+    private static final String public_key_path = "src/test/resources/rsakey_test/someotherkey.pem";
 
     /**
      * test pem loading methods;
@@ -84,7 +84,7 @@ class RSAKeyTest
     @DisplayName("Test RSAKey ComputeKeyID()")
     public void testComputeKeyID() throws IOException {
         
-        Key thiskey = RSAKey.read("src/test/resources/someotherkey.pem");
+        Key thiskey = RSAKey.read("src/test/resources/rsakey_test/someotherkey.pem");
         File keyfile = temporaryFolder.newFile("key.pem");
         String keypath = keyfile.getAbsolutePath();
         thiskey.write(keypath);
@@ -92,7 +92,7 @@ class RSAKeyTest
         assertEquals(key.computeKeyId(), thiskey.computeKeyId());
         keyfile.delete();
         
-        Key thiskey2 = RSAKey.read("src/test/resources/somekey.pem");
+        Key thiskey2 = RSAKey.read("src/test/resources/rsakey_test/somekey.pem");
         File keyfile2 = temporaryFolder.newFile("key2.pem");
         String keypath2 = keyfile2.getAbsolutePath();
         thiskey2.write(keypath2);

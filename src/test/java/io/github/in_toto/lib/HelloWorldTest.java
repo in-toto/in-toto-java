@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,13 +40,13 @@ class HelloWorldTest {
 
 	@Test
 	void testHelloWorld() {
-		Key thiskey = RSAKey.read("src/test/resources/somekey.pem");
+		Key thiskey = RSAKey.read("src/test/resources/lib_test/somekey.pem");
 
 		System.out.println("Loaded key ID: " + thiskey.computeKeyId());		
 
 		LinkBuilder linkBuilder = new LinkBuilder("test");
 
-		linkBuilder.addMaterial("alice");
+		linkBuilder.addMaterial(Arrays.asList("alice"));
 		System.out.println("dumping file...");
 		Link link = linkBuilder.build();
 		Metablock<Link> linkMetablock = new Metablock<Link>(link, null);

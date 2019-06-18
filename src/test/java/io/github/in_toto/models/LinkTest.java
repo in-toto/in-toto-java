@@ -8,6 +8,7 @@ import io.github.in_toto.keys.RSAKey;
 import io.github.in_toto.keys.Key;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ class LinkTest
 {
     private LinkBuilder linkBuilder =  new LinkBuilder("test");
 	private Link link = linkBuilder.build();
-    private Key key = RSAKey.read("src/test/resources/somekey.pem");
+    private Key key = RSAKey.read("src/test/resources/link_test/somekey.pem");
     private FileTransporter transporter = new FileTransporter();
     private Type metablockType = new TypeToken<Metablock<Link>>() {}.getType();
 
@@ -91,7 +92,7 @@ class LinkTest
         
         Artifact pathArtifact = new Artifact(path);
         
-        linkBuilder.addMaterial(path);
+        linkBuilder.addMaterial(Arrays.asList(path));
         
         Link link = linkBuilder.build();
 
@@ -105,11 +106,11 @@ class LinkTest
     public void testValidProduct() throws IOException
     {
         File file = temporaryFolder.newFile("bob");
-        String path = file.getAbsolutePath();
+        String path = file.getPath();
         
         Artifact pathArtifact = new Artifact(path); 
         
-        linkBuilder.addProduct(path);
+        linkBuilder.addProduct(Arrays.asList(path));
         
         Link link = linkBuilder.build();
         
@@ -176,22 +177,18 @@ class LinkTest
     public void testLinkSerializationWithArtifactsFromObject() throws IOException, URISyntaxException
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("serialize");
+    	testLinkBuilder.setBasePath("src/test/resources/link_test/serialize");
 
-        String path1 = "src/test/resources/serialize/foo";
-        String path2 = "src/test/resources/serialize/baz";
-        String path3 = "src/test/resources/serialize/bar";
+        String path1 = "src/test/resources/link_test/serialize/foo";
+        String path2 = "src/test/resources/link_test/serialize/baz";
+        String path3 = "src/test/resources/link_test/serialize/bar";
         
-        Artifact pathArtifact1 = new Artifact(path1);
-        Artifact pathArtifact2 = new Artifact(path2);
-        Artifact pathArtifact3 = new Artifact(path3);
-        
-        testLinkBuilder.addProduct(path1);
-        testLinkBuilder.addProduct(path2);
-        testLinkBuilder.addProduct(path3);
+        Artifact pathArtifact1 = new Artifact("foo", new Artifact(path1).getArtifactHashes());
+        Artifact pathArtifact2 = new Artifact("baz", new Artifact(path2).getArtifactHashes());
+        Artifact pathArtifact3 = new Artifact("bar", new Artifact(path3).getArtifactHashes());
 
-        testLinkBuilder.addMaterial(path1);
-        testLinkBuilder.addMaterial(path2);
-        testLinkBuilder.addMaterial(path3);
+        testLinkBuilder.addProduct(Arrays.asList(""));
+        testLinkBuilder.addMaterial(Arrays.asList(""));
         
         Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
         testMetablockLink.sign(key);
@@ -216,7 +213,7 @@ class LinkTest
         assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact2));
         assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact3));
         
-        Metablock<Link> metablockFromFile = transporter.load(new URI("src/test/resources/serialize/serialize.link"), metablockType);
+        Metablock<Link> metablockFromFile = transporter.load(new URI("src/test/resources/link_test/serialize/serialize.link"), metablockType);
         metablockFromFile.sign(key);
         
         assertEquals(metablockFromFile.signed.getName(), testMetablockLink.signed.getName());
@@ -236,7 +233,7 @@ class LinkTest
     {
     	Artifact testproduct = new Artifact("demo-project/foo.py", new ArtifactHash(HashAlgorithm.sha256, "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235"));
 
-        Metablock<Link> testMetablockLink = transporter.load(new URI("src/test/resources/clone.776a00e2.link"), metablockType);
+        Metablock<Link> testMetablockLink = transporter.load(new URI("src/test/resources/link_test/clone.776a00e2.link"), metablockType);
         assertTrue(testMetablockLink.signed.getName() != null);
         assertEquals(testMetablockLink.signed.getName(), "clone");
         assertTrue(testMetablockLink.signed.getProducts().contains(testproduct));
@@ -271,15 +268,10 @@ class LinkTest
 
         String pattern = "**{foo,bar}";
 
-        testLinkBuilder.setExcludePattern(pattern);
+        testLinkBuilder.setExcludePatterns(pattern);
 
-        testLinkBuilder.addProduct(path1);
-        testLinkBuilder.addProduct(path2);
-        testLinkBuilder.addProduct(path3);
-
-        testLinkBuilder.addMaterial(path1);
-        testLinkBuilder.addMaterial(path2);
-        testLinkBuilder.addMaterial(path3);
+        testLinkBuilder.addProduct(Arrays.asList(path1, path2, path3));
+        testLinkBuilder.addMaterial(Arrays.asList(path1, path2, path3));
         
         Link testLink = testLinkBuilder.build();
 
@@ -315,13 +307,8 @@ class LinkTest
         
         Artifact pathArtifact2 = new Artifact(path2);
 
-        testLinkBuilder.addProduct(path1);
-        testLinkBuilder.addProduct(path2);
-        testLinkBuilder.addProduct(path4);
-
-        testLinkBuilder.addMaterial(path1);
-        testLinkBuilder.addMaterial(path2);
-        testLinkBuilder.addMaterial(path4);
+        testLinkBuilder.addProduct(Arrays.asList(path1, path2,path4));
+        testLinkBuilder.addMaterial(Arrays.asList(path1, path2,path4));
         
         Link testLink = testLinkBuilder.build();
 
@@ -356,15 +343,10 @@ class LinkTest
 
         String pattern = "**";
 
-        testLinkBuilder.setExcludePattern(pattern);
+        testLinkBuilder.setExcludePatterns(pattern);
 
-        testLinkBuilder.addProduct(path1);
-        testLinkBuilder.addProduct(path2);
-        testLinkBuilder.addProduct(path3);
-
-        testLinkBuilder.addMaterial(path1);
-        testLinkBuilder.addMaterial(path2);
-        testLinkBuilder.addMaterial(path3);
+        testLinkBuilder.addProduct(Arrays.asList(path1, path2, path3));
+        testLinkBuilder.addMaterial(Arrays.asList(path1, path2, path3));
         
         Link testLink = testLinkBuilder.build();
 
@@ -399,15 +381,10 @@ class LinkTest
 
         String pattern = "**a**";
 
-        testLinkBuilder.setExcludePattern(pattern);
+        testLinkBuilder.setExcludePatterns(pattern);
 
-        testLinkBuilder.addProduct(path1);
-        testLinkBuilder.addProduct(path2);
-        testLinkBuilder.addProduct(path3);
-
-        testLinkBuilder.addMaterial(path1);
-        testLinkBuilder.addMaterial(path2);
-        testLinkBuilder.addMaterial(path3);
+        testLinkBuilder.addProduct(Arrays.asList(path1, path2, path3));
+        testLinkBuilder.addMaterial(Arrays.asList(path1, path2, path3));
         
         Link testLink = testLinkBuilder.build();
 
@@ -444,15 +421,10 @@ class LinkTest
 
         String pattern = "**ba?foo";
 
-        testLinkBuilder.setExcludePattern(pattern);
+        testLinkBuilder.setExcludePatterns(pattern);
 
-        testLinkBuilder.addProduct(path1);
-        testLinkBuilder.addProduct(path2);
-        testLinkBuilder.addProduct(path3);
-
-        testLinkBuilder.addMaterial(path1);
-        testLinkBuilder.addMaterial(path2);
-        testLinkBuilder.addMaterial(path3);
+        testLinkBuilder.addProduct(Arrays.asList(path1, path2, path3));
+        testLinkBuilder.addMaterial(Arrays.asList(path1, path2, path3));
         
         Link testLink = testLinkBuilder.build();
 
@@ -489,15 +461,10 @@ class LinkTest
 
         String pattern = "**ba[xz]foo";
 
-        testLinkBuilder.setExcludePattern(pattern);
-
-        testLinkBuilder.addProduct(path1);
-        testLinkBuilder.addProduct(path2);
-        testLinkBuilder.addProduct(path3);
-
-        testLinkBuilder.addMaterial(path1);
-        testLinkBuilder.addMaterial(path2);
-        testLinkBuilder.addMaterial(path3);
+        testLinkBuilder.setExcludePatterns(pattern);
+        
+        testLinkBuilder.addProduct(Arrays.asList(path1, path2, path3));
+        testLinkBuilder.addMaterial(Arrays.asList(path1, path2, path3));
         
         Link testLink = testLinkBuilder.build();
 
@@ -535,15 +502,10 @@ class LinkTest
 
         String pattern = "**ba[!r]foo";
 
-        testLinkBuilder.setExcludePattern(pattern);
+        testLinkBuilder.setExcludePatterns(pattern);
 
-        testLinkBuilder.addProduct(path1);
-        testLinkBuilder.addProduct(path2);
-        testLinkBuilder.addProduct(path3);
-
-        testLinkBuilder.addMaterial(path1);
-        testLinkBuilder.addMaterial(path2);
-        testLinkBuilder.addMaterial(path3);
+        testLinkBuilder.addProduct(Arrays.asList(path1, path2, path3));
+        testLinkBuilder.addMaterial(Arrays.asList(path1, path2, path3));
         
         Link testLink = testLinkBuilder.build();
 

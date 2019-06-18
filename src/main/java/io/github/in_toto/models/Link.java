@@ -1,14 +1,9 @@
 package io.github.in_toto.models;
 
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,17 +48,13 @@ public final class Link implements Signable {
      *
      * @see io.github.in_toto.models.Artifact
      */
-    public Link( String name, Set<Artifact> materials,
+    private Link( String name, Set<Artifact> materials,
             Set<Artifact> products,
             Map<String, Object> environment, List<String> command,
             Map<String, Object> byproducts) {
     	super();
 
-    	//FIXME: probably warn about this would be a good idea
-        if (name == null)
-           this.name = "step";
-        else
-        	this.name = name;
+    	this.name = name;
 
         if (materials == null)
             this.materials = Collections.unmodifiableSet(new HashSet<Artifact>());
@@ -91,14 +82,13 @@ public final class Link implements Signable {
         	this.byproducts = Collections.unmodifiableMap(byproducts);
     }
     
-    public Link(LinkBuilder builder) {   	
+    private Link(LinkBuilder builder) {   	
     	this(builder.getName(), 
     			builder.getMaterials(),
     			builder.getProducts(), 
     			builder.getEnvironment(), 
     			builder.getCommand(), 
     			builder.getByproducts());
-    	
     }
     /**
      * 
@@ -108,30 +98,21 @@ public final class Link implements Signable {
      * 
      */
     public static final class LinkBuilder {
-
-
-        /**
-         * exclude pattern used to filter out redundant Artifacts
-         */
-        private String excludePattern = getDefaultExcludePattern();
-        /**
-         * default excludePattern used to filter out redundant Artifacts
-         */
-        public final static String defaultExcludePattern = "**.{git,link}**";
         private final String name;
         private Set<Artifact> materials = new HashSet<Artifact>();
         private Set<Artifact> products = new HashSet<Artifact>();
         private Map<String, Object> byproducts = new HashMap<String, Object>();
         private Map<String, Object> environment = new HashMap<String, Object>();
         private List<String> command = new ArrayList<String>();
-        
-        public LinkBuilder(String name) {
+        private String excludePatterns;
+        private String basePath;
+        private boolean followSymlinkDirs = false;
+
+		public LinkBuilder(String name) {
         	this.name = name;        	
         }
         
         public Link build() {
-        	this.materials = this.excludeArtifactsByPattern(excludePattern);
-            this.products = this.excludeArtifactsByPattern(excludePattern);
         	return new Link(this);
         }
         
@@ -139,118 +120,106 @@ public final class Link implements Signable {
          * Convenience method to indicate this link to track an artifact as
          * material
          *
-         * @param filePath the path of the material to track
+         * @param filePaths List<String> of file paths to track
+         * @return LinkBuilder object with added artifacts
          */
-        public void addMaterial(String filePath) {
-            Artifact a = new Artifact(filePath);
-            this.materials.add(a);
+        public LinkBuilder addMaterial(List<String> filePaths) {
+        	this.materials.addAll(Artifact.recordArtifacts(filePaths, excludePatterns, basePath,
+        			followSymlinkDirs));
+            return this;
         }
 
         /**
          * Convenience method to indicate this link to track an artifact as
          * product
-         *
-         * @param filePath the path of the product to track
+         * 
+         * @param filePaths List<String> of file paths to track
+         * @return LinkBuilder object with added artifacts
          */
-        public void addProduct(String filePath) {
-            Artifact a = new Artifact(filePath);
-            this.products.add(a);
+        public LinkBuilder addProduct(List<String> filePaths) {
+        	this.products.addAll(Artifact.recordArtifacts(filePaths, excludePatterns, basePath,
+        			followSymlinkDirs));
+            return this;
+        }
+        
+        /**
+         * 
+         * @param environment
+         * @return
+         */
+        public LinkBuilder setEnvironment(Map<String, Object> environment) {
+            this.environment = environment;
+            return this;
         }
 
         /**
-         * exclude artifacts matching the excludePattern
-         * @param excludePattern the exclude excludePattern
+         * 
+         * @param command
+         * @return
          */
-        private Set<Artifact>excludeArtifactsByPattern
-            (String pattern)
-        {
-            String patternString;
-            Set<Artifact> filtered_artifacts;
-
-            if ( pattern != null && pattern.length() != 0) {
-                patternString = pattern;
-            } else {
-                patternString = defaultExcludePattern;
-            }
-
-            FileSystem fileSystem = FileSystems.getDefault();
-
-            PathMatcher pathMatcher =
-                fileSystem.getPathMatcher("glob:" + patternString);
-
-            filtered_artifacts = this.materials;
-
-            Iterator<Artifact> iterator =
-                filtered_artifacts.iterator();
-
-            while(iterator.hasNext()){
-
-                Artifact entry = iterator.next();
-
-                if (pathMatcher.matches(Paths.get(entry.getURI()))) {
-                    iterator.remove();
-                }
-            }
-
-            return filtered_artifacts;
-        }
-        
-
-    	public String getExcludePattern() {
-			return excludePattern;
-		}
-
-		public void setExcludePattern(String pattern) {
-			this.excludePattern = pattern;
-		}
-
-		private static String getDefaultExcludePattern() {
-    		return defaultExcludePattern;
-    	}
-        
-        public void setEnvironment(Map<String, Object> environment) {
-            this.environment = environment;
-        }
-
-        public void setCommand(List<String> command) {
+        public LinkBuilder setCommand(List<String> command) {
             this.command = command;
+            return this;
         }
 
-        public void setByproducts(Map<String, Object> byproducts) {
+        /**
+         * 
+         * @param byproducts
+         * @return
+         */
+        public LinkBuilder setByproducts(Map<String, Object> byproducts) {
             this.byproducts = byproducts;
+            return this;
         }
 
-    	public String getName() {
+		/**
+		 * 
+		 * @param excludePatterns
+		 * @return
+		 */
+        public LinkBuilder setExcludePatterns(String excludePatterns) {
+			this.excludePatterns = excludePatterns;
+            return this;
+		}
+
+		/**
+		 * 
+		 * @param basePath
+		 * @return
+		 */
+        public LinkBuilder setBasePath(String basePath) {
+			this.basePath = basePath;
+            return this;
+		}        
+
+    	public LinkBuilder setFollowSymlinkDirs(boolean followSymlinkDirs) {
+			this.followSymlinkDirs = followSymlinkDirs;
+            return this;
+		}
+
+		private String getName() {
     		return name;
     	}
 
-    	public Set<Artifact> getMaterials() {
+    	private Set<Artifact> getMaterials() {
     		return materials;
     	}
 
-    	public Set<Artifact> getProducts() {
+    	private Set<Artifact> getProducts() {
     		return products;
     	}
 
-    	public Map<String, Object> getByproducts() {
+    	private Map<String, Object> getByproducts() {
     		return byproducts;
     	}
 
-    	public Map<String, Object> getEnvironment() {
+    	private Map<String, Object> getEnvironment() {
     		return environment;
     	}
 
-    	public List<String> getCommand() {
+    	private List<String> getCommand() {
     		return command;
     	}
-
-		public void setMaterials(Set<Artifact> materials) {
-			this.materials = materials;
-		}
-
-		public void setProducts(Set<Artifact> products) {
-			this.products = products;
-		}
     }
 
 	public String getType() {
