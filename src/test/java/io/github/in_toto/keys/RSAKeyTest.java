@@ -4,11 +4,14 @@ import io.github.in_toto.keys.RSAKey;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
@@ -77,27 +80,23 @@ class RSAKeyTest
      
     @Rule public ExpectedException thrown = ExpectedException.none();
      
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @TempDir
+    Path temporaryFolder;
 
     @Test
     @DisplayName("Test RSAKey ComputeKeyID()")
     public void testComputeKeyID() throws IOException {
         
         Key thiskey = RSAKey.read("src/test/resources/rsakey_test/someotherkey.pem");
-        File keyfile = temporaryFolder.newFile("key.pem");
-        String keypath = keyfile.getAbsolutePath();
-        thiskey.write(keypath);
-        Key key = RSAKey.read(keypath);
+        Path keyFile = Files.createFile(temporaryFolder.resolve("key.pem"));
+        thiskey.write(keyFile.toString());
+        Key key = RSAKey.read(keyFile.toString());
         assertEquals(key.computeKeyId(), thiskey.computeKeyId());
-        keyfile.delete();
         
         Key thiskey2 = RSAKey.read("src/test/resources/rsakey_test/somekey.pem");
-        File keyfile2 = temporaryFolder.newFile("key2.pem");
-        String keypath2 = keyfile2.getAbsolutePath();
-        thiskey2.write(keypath2);
-        Key key2 = RSAKey.read(keypath2);
+        Path keyFile2 = Files.createFile(temporaryFolder.resolve("key2.pem"));
+        thiskey2.write(keyFile2.toString());
+        Key key2 = RSAKey.read(keyFile2.toString());
         assertEquals(key2.computeKeyId(), "0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7");
-        keyfile2.delete();
     }
 }

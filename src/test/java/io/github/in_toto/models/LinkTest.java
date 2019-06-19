@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -29,6 +32,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
 
@@ -42,7 +46,6 @@ import org.junit.Rule;
  */
  
 @DisplayName("Link-specific tests")
-@EnableRuleMigrationSupport
 @TestInstance(Lifecycle.PER_CLASS)
 class LinkTest
 {
@@ -51,9 +54,9 @@ class LinkTest
     private Key key = RSAKey.read("src/test/resources/link_test/somekey.pem");
     private FileTransporter transporter = new FileTransporter();
     private Type metablockType = new TypeToken<Metablock<Link>>() {}.getType();
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    
+    @TempDir
+    Path temporaryFolder;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -87,26 +90,23 @@ class LinkTest
     @DisplayName("Validate Link addMaterials")
     public void testValidMaterial() throws IOException
     {
-        File file = temporaryFolder.newFile("alice");
-        String path = file.getAbsolutePath();
+
+        String keyFile = Files.createFile(temporaryFolder.resolve("alice")).toString();
         
-        Artifact pathArtifact = new Artifact(path);
+        Artifact pathArtifact = new Artifact(keyFile);
         
-        linkBuilder.addMaterial(Arrays.asList(path));
+        linkBuilder.addMaterial(Arrays.asList(keyFile));
         
         Link link = linkBuilder.build();
 
         assertTrue(link.getMaterials().contains(pathArtifact));
-
-        file.delete();
     }
 
     @Test
     @DisplayName("Validate Link addProducts")
     public void testValidProduct() throws IOException
     {
-        File file = temporaryFolder.newFile("bob");
-        String path = file.getPath();
+        String path = Files.createFile(temporaryFolder.resolve("bob")).toString();
         
         Artifact pathArtifact = new Artifact(path); 
         
@@ -117,8 +117,6 @@ class LinkTest
         Set<Artifact> product = link.getProducts();
         Artifact entry = product.iterator().next();
         assertEquals(entry, pathArtifact);
-    
-        file.delete();
     }
 
     @Test
@@ -256,13 +254,9 @@ class LinkTest
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
-        File file1 = temporaryFolder.newFile("foo");
-        File file2 = temporaryFolder.newFile("bar");
-        File file3 = temporaryFolder.newFile("baz");
-
-        String path1 = file1.getAbsolutePath();
-        String path2 = file2.getAbsolutePath();
-        String path3 = file3.getAbsolutePath();
+        String path1 = Files.createFile(temporaryFolder.resolve("foo")).toString();
+        String path2 = Files.createFile(temporaryFolder.resolve("bar")).toString();
+        String path3 = Files.createFile(temporaryFolder.resolve("baz")).toString();
         
         Artifact pathArtifact3 = new Artifact(path3);
 
@@ -284,10 +278,6 @@ class LinkTest
         assertEquals(material.size(), 1);
 
         assertTrue(material.contains(pathArtifact3));
-
-        file1.delete();
-        file2.delete();
-        file3.delete();
     }
 
     @Test
@@ -296,15 +286,11 @@ class LinkTest
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
-        File file1 = temporaryFolder.newFile("foo.link");
-        File file2 = temporaryFolder.newFile("bar");
-        File file3 = temporaryFolder.newFolder(".git");
-        File file4 = temporaryFolder.newFile(file3.getName() + "/baz");
-
-        String path1 = file1.getAbsolutePath();
-        String path2 = file2.getAbsolutePath();
-        String path4 = file4.getAbsolutePath();
+        String path1 = Files.createFile(temporaryFolder.resolve("foo.link")).toString();
+        String path2 = Files.createFile(temporaryFolder.resolve("bar")).toString();
+        Path path3 = Files.createDirectory(temporaryFolder.resolve(".git"));
         
+        String path4 = Files.createFile(Paths.get(path3.toString(),"baz")).toString();        
         Artifact pathArtifact2 = new Artifact(path2);
 
         testLinkBuilder.addProduct(Arrays.asList(path1, path2,path4));
@@ -321,10 +307,6 @@ class LinkTest
         assertEquals(material.size(), 1);
 
         assertTrue(material.contains(pathArtifact2));
-
-        file1.delete();
-        file2.delete();
-        file3.delete();
     }
 
     @Test
@@ -333,13 +315,9 @@ class LinkTest
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
-        File file1 = temporaryFolder.newFile("foo");
-        File file2 = temporaryFolder.newFile("bar");
-        File file3 = temporaryFolder.newFile("baz");
-
-        String path1 = file1.getAbsolutePath();
-        String path2 = file2.getAbsolutePath();
-        String path3 = file3.getAbsolutePath();
+        String path1 = Files.createFile(temporaryFolder.resolve("foo")).toString();
+        String path2 = Files.createFile(temporaryFolder.resolve("bar")).toString();
+        String path3 = Files.createFile(temporaryFolder.resolve("baz")).toString();
 
         String pattern = "**";
 
@@ -357,10 +335,6 @@ class LinkTest
         Set<Artifact> material = testLink.getMaterials();
         assertEquals(material.size(), 0);
         assertFalse(material.iterator().hasNext());
-
-        file1.delete();
-        file2.delete();
-        file3.delete();
     }
 
     @Test
@@ -369,13 +343,9 @@ class LinkTest
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
-        File file1 = temporaryFolder.newFile("foo");
-        File file2 = temporaryFolder.newFile("bar");
-        File file3 = temporaryFolder.newFile("baz");
-
-        String path1 = file1.getAbsolutePath();
-        String path2 = file2.getAbsolutePath();
-        String path3 = file3.getAbsolutePath();
+        String path1 = Files.createFile(temporaryFolder.resolve("foo")).toString();
+        String path2 = Files.createFile(temporaryFolder.resolve("bar")).toString();
+        String path3 = Files.createFile(temporaryFolder.resolve("baz")).toString();
         
         Artifact pathArtifact1 = new Artifact(path1);
 
@@ -397,10 +367,6 @@ class LinkTest
         assertEquals(material.size(), 1);
 
         assertTrue(material.contains(pathArtifact1));
-
-        file1.delete();
-        file2.delete();
-        file3.delete();
     }
 
     @Test
@@ -409,13 +375,9 @@ class LinkTest
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
-        File file1 = temporaryFolder.newFile("foo");
-        File file2 = temporaryFolder.newFile("bazfoo");
-        File file3 = temporaryFolder.newFile("barfoo");
-
-        String path1 = file1.getAbsolutePath();
-        String path2 = file2.getAbsolutePath();
-        String path3 = file3.getAbsolutePath();
+        String path1 = Files.createFile(temporaryFolder.resolve("foo")).toString();
+        String path2 = Files.createFile(temporaryFolder.resolve("barfoo")).toString();
+        String path3 = Files.createFile(temporaryFolder.resolve("bazfoo")).toString();
         
         Artifact pathArtifact1 = new Artifact(path1);
 
@@ -437,10 +399,6 @@ class LinkTest
         assertEquals(material.size(), 1);
 
         assertTrue(material.contains(pathArtifact1));
-
-        file1.delete();
-        file2.delete();
-        file3.delete();
     }
 
     @Test
@@ -449,13 +407,9 @@ class LinkTest
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
-        File file1 = temporaryFolder.newFile("baxfoo");
-        File file2 = temporaryFolder.newFile("bazfoo");
-        File file3 = temporaryFolder.newFile("barfoo");
-
-        String path1 = file1.getAbsolutePath();
-        String path2 = file2.getAbsolutePath();
-        String path3 = file3.getAbsolutePath();
+        String path1 = Files.createFile(temporaryFolder.resolve("baxfoo")).toString();
+        String path2 = Files.createFile(temporaryFolder.resolve("bazfoo")).toString();
+        String path3 = Files.createFile(temporaryFolder.resolve("barfoo")).toString();
         
         Artifact pathArtifact3 = new Artifact(path3);
 
@@ -477,10 +431,6 @@ class LinkTest
         assertEquals(material.size(), 1);
 
         assertTrue(material.contains(pathArtifact3));
-
-        file1.delete();
-        file2.delete();
-        file3.delete();
     }
 
 
@@ -490,13 +440,9 @@ class LinkTest
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
-        File file1 = temporaryFolder.newFile("baxfoo");
-        File file2 = temporaryFolder.newFile("bazfoo");
-        File file3 = temporaryFolder.newFile("barfoo");
-
-        String path1 = file1.getAbsolutePath();
-        String path2 = file2.getAbsolutePath();
-        String path3 = file3.getAbsolutePath();
+        String path1 = Files.createFile(temporaryFolder.resolve("baxfoo")).toString();
+        String path2 = Files.createFile(temporaryFolder.resolve("bazfoo")).toString();
+        String path3 = Files.createFile(temporaryFolder.resolve("barfoo")).toString();
         
         Artifact pathArtifact3 = new Artifact(path3);
 
@@ -518,10 +464,6 @@ class LinkTest
         assertEquals(material.size(), 1);
 
         assertTrue(material.contains(pathArtifact3));
-
-        file1.delete();
-        file2.delete();
-        file3.delete();
     }
 
 }

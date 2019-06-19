@@ -4,17 +4,10 @@
   <groupId>io.github.in-toto</groupId>
   <artifactId>in-toto</artifactId>
   <packaging>jar</packaging>
-  <version>0.2</version>
+  <version>1.0-SNAPSHOT</version>
   <name>in-toto</name>
   <url>http://maven.apache.org</url>
   <dependencies>
-    <!-- junit : unit test framework  -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>5.2.0</version>
-      <scope>test</scope>
-    </dependency>
     <!-- bcpkix: pem/openssl key serialization de-serialization -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
@@ -26,6 +19,11 @@
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
       <version>1.59</version>
+    </dependency>    
+    <dependency>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client</artifactId>
+      <version>1.29.1</version>
     </dependency>
     <!-- gson: object to json converter -->
     <dependency>
@@ -35,38 +33,17 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.2.0</version>
-     <scope>test</scope>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>5.4.2</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.junit.vintage</groupId>
-      <artifactId>junit-vintage-engine</artifactId>
-      <version>5.1.0-M1</version>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>5.4.2</version>
+        <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.junit.platform</groupId>
-      <artifactId>junit-platform-launcher</artifactId>
-      <version>1.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.platform</groupId>
-      <artifactId>junit-platform-runner</artifactId>
-      <version>1.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-migrationsupport</artifactId>
-      <version>5.0.0</version>
-    </dependency>
-    <!--
-    <dependency>
-      <groupId>org.junit-pioneer</groupId>
-      <artifactId>junit-pioneer</artifactId>
-      <version>0.1.2</version>
-    </dependency>
-    -->
   </dependencies>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
