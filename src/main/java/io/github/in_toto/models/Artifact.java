@@ -190,10 +190,10 @@ public final class Artifact {
 							// remove base path from path and the first char with "/"
 							String relPath = null;
 							if (this.basePath != null)
-								relPath = entry.toString().replace(this.basePath, "").substring(1);
+								relPath = Paths.get(this.basePath).relativize(entry).toString();
 							else
 								relPath = entry.toString();
-							recurseAndCollect(relPath);;
+							recurseAndCollect(relPath);
 						}
 					}
 				}
@@ -292,6 +292,7 @@ public final class Artifact {
             int length;
             try {
                 while ((length = file.read(result)) != -1) {
+                	// FIXME eol
                     digest.update(result, 0, length);
                 }
             } catch (IOException e) {
