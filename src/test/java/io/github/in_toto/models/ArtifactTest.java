@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -127,7 +128,6 @@ class ArtifactTest {
 	@Test
     @DisplayName("Test record with normalize line endings with file exactly digest size")
     public void testRecordWithNormalizeLineEndingsGtDigestSize() throws IOException {
-		Set<Artifact> artifacts = new HashSet<Artifact>();
 		String path = Files.createFile(temporaryFolder.resolve("file")).toString();
 		FileOutputStream writer = new FileOutputStream(path);
 		// reference with '\n'
@@ -140,6 +140,37 @@ class ArtifactTest {
 		        0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x0D, 0x0A,
 		        0x41, 0x41, 0x41, 0x41, 0x0D, 0x0A, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41        
 		    };
+		writer.write(testLF);
+        writer.flush();
+        writer.close();
+		Artifact artifactLF = Artifact.recordArtifacts(Arrays.asList(path.toString()), null, null, null, true).iterator().next();
+		writer = new FileOutputStream(path);
+        writer.write(testCRLF);
+        writer.flush();
+        writer.close();
+        Artifact artifactCRLF = Artifact.recordArtifacts(Arrays.asList(path.toString()), null, null, null, true).iterator().next();
+		// test result
+		assertEquals(artifactLF, artifactCRLF);
+	}
+	
+	@Test
+    @DisplayName("Test record with normalize line endings with CRLF over digest size")
+    public void testRecordWithNormalizeLineEndingsAndCRLFOnDigestSize() throws IOException {
+		String path = Files.createFile(temporaryFolder.resolve("file")).toString();
+		FileOutputStream writer = new FileOutputStream(path);
+		// reference with '\n'
+		int digestSize = new SHA256Digest().getDigestSize();
+		byte[] testLF = new byte[digestSize];
+		for (int i=0;i<testLF.length;i++) {
+			testLF[i] = 0x41;
+		}
+		testLF[digestSize-1] = 0x0A;
+		byte[] testCRLF = new byte[digestSize+1];
+		for (int i=0;i<testLF.length;i++) {
+			testCRLF[i] = 0x41;
+		}
+		testCRLF[digestSize-1] = 0x0D;
+		testCRLF[digestSize] = 0x0A;
 		writer.write(testLF);
         writer.flush();
         writer.close();

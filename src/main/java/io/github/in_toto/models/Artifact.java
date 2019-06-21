@@ -247,6 +247,7 @@ public final class Artifact {
             SHA256Digest digest =  new SHA256Digest();
             byte[] result = new byte[digest.getDigestSize()];
             int length;
+    		Byte saveByte = null; 
             try {
                 while ((length = file.read(result)) != -1) {
             		int outLength = length;
@@ -255,7 +256,6 @@ public final class Artifact {
                 		byte CR = 0x0D;
                 		byte LF = 0x0A;
                 		int outPointer = 0;
-                		Byte saveByte = null; 
                 		for (int inPointer=0; inPointer< length; inPointer++) {
                 			if (saveByte != null && saveByte == CR && result[inPointer] == LF) {
                 				saveByte = null;
