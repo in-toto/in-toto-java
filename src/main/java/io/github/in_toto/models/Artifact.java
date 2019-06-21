@@ -1,6 +1,5 @@
 package io.github.in_toto.models;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -24,6 +23,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.models.Artifact.ArtifactHash.ArtifactHashJsonAdapter;
 import io.github.in_toto.models.Artifact.ArtifactHash.HashAlgorithm;
 
@@ -33,16 +33,10 @@ import io.github.in_toto.models.Artifact.ArtifactHash.HashAlgorithm;
  * Used by the Link metadata type on the .add method.
  */
 public final class Artifact {
-
-
-    /**
-     * exclude pattern used to filter out redundant Artifacts
-     */
-    private String excludePattern = getDefaultExcludePattern();
     /**
      * default excludePattern used to filter out redundant Artifacts
      */
-    public final static String defaultExcludePattern = "**.{git,link}**";
+    public final static String DEFAULT_EXCLUDE_PATTERNS = "**.{git,link}**";
 
     /**
      * A URI representing the location of the Artifact
@@ -70,10 +64,7 @@ public final class Artifact {
     
     public Artifact(String filename, ArtifactHash hash) {
         this.URI = filename;
-        if (hash == null)
-        	this.hash = ArtifactHash.collect(filename);
-        else
-        	this.hash = hash;
+        this.hash = hash;
     }
 
     public String getURI() {
@@ -114,10 +105,10 @@ public final class Artifact {
 	 *                             materials or products for the link command.
 	 * @param excludePatterns      Artifacts matched by the pattern are excluded
 	 *                             from the result. Exclude patterns can be passed
-	 *                             as argument. If passed,
-	 *                             default patterns are overriden.
-	 * @param basePath             Artifacts will be recorded relative
-	 *                             from the basePath. If not passed, current working
+	 *                             as argument. If passed, default patterns are
+	 *                             overriden.
+	 * @param basePath             Artifacts will be recorded relative from the
+	 *                             basePath. If not passed, current working
 	 *                             directory is used as base_path. NOTE: The
 	 *                             basePath part of the recorded artifact is not
 	 *                             included in the returned paths.
@@ -129,17 +120,22 @@ public final class Artifact {
 	 *                             recorded, independently of this parameter. NOTE:
 	 *                             Beware of infinite recursions that can occur if a
 	 *                             symlink points to a parent directory or itself.
+	 * @param normalizeLineEndings If true, replaces windows and mac line endings
+	 *                             with unix line endings before hashing the content
+	 *                             of the passed files, for cross-platform support. 
+	 *                             Default is false.
 	 * @return A Set with Artifacts.
+	 * @throws ValueError 
 	 */
 	public static Set<Artifact> recordArtifacts(
 			List<String> filePaths, String excludePatterns, String basePath,
-			boolean followSymlinkDirs) {
+			Boolean followSymlinkDirs, Boolean normalizeLineEndings) throws ValueError {
 		
-		if (excludePatterns == null) 
-			excludePatterns = Artifact.getDefaultExcludePattern();
-		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:"+excludePatterns);
+		ArtifactCollector artifactCollector = new ArtifactCollector(excludePatterns, basePath, followSymlinkDirs, normalizeLineEndings);
 		
-		ArtifactCollector artifactCollector = new ArtifactCollector(matcher, basePath, followSymlinkDirs);
+		if (basePath != null && !Files.exists(Paths.get(basePath))) {
+			throw new ValueError(String.format("Base path %s doesn't exist", basePath));
+		}
 		
 		for (String path:filePaths) {
 			artifactCollector.recurseAndCollect(path);
@@ -147,18 +143,31 @@ public final class Artifact {
 		return artifactCollector.getArtifacts();
 	}
 	
+	public static Set<Artifact> recordArtifacts(
+			List<String> filePaths, String excludePatterns, String basePath) throws ValueError {
+		return Artifact.recordArtifacts(filePaths, excludePatterns, basePath, null, null);
+	}
+	
 	private static final class ArtifactCollector {
 		private Set<Artifact> artifacts;
 		private PathMatcher matcher;
 		private String basePath;
-		private boolean followSymlinkDirs;
+		private boolean followSymlinkDirs ;
+		private boolean normalizeLineEndings = false;
+	    private String excludePatterns = DEFAULT_EXCLUDE_PATTERNS;
 		
-		private ArtifactCollector(PathMatcher matcher, String basePath,
-				boolean followSymlinkDirs) {
-			this.artifacts = new HashSet<Artifact>();
+		private ArtifactCollector(String  excludePatterns, String basePath,
+				Boolean followSymlinkDirs, Boolean normalizeLineEndings) {
+			this.artifacts = new HashSet<Artifact>();			
+			if (excludePatterns != null) 
+				this.excludePatterns = excludePatterns;
+			PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:"+this.excludePatterns);
 			this.matcher = matcher;
 			this.basePath = basePath;
-			this.followSymlinkDirs = followSymlinkDirs;
+			if (followSymlinkDirs != null)
+				this.followSymlinkDirs = followSymlinkDirs;
+			if (normalizeLineEndings != null)
+				this.normalizeLineEndings = normalizeLineEndings;
 		}
 
 		private void recurseAndCollect(String file) {
@@ -172,7 +181,7 @@ public final class Artifact {
 			if (Files.exists(path)) {
 				if (Files.isRegularFile(path)) {
 					// normalize path separator and create Artifact
-					Artifact artifact = new Artifact(file.toString().replace("\\", "/"), ArtifactHash.collect(path.toString()));
+					Artifact artifact = new Artifact(file.toString().replace("\\", "/"), ArtifactHash.collect(path.toString(), this.normalizeLineEndings));
 					this.artifacts.add(artifact);
 				} else {
 					if ((Files.isSymbolicLink(path) && this.followSymlinkDirs) || (Files.isDirectory(path) && !Files.isSymbolicLink(path))) {
@@ -205,58 +214,6 @@ public final class Artifact {
 		}
 		
 	}
-	
-	
-
-	public String getExcludePattern() {
-		return excludePattern;
-	}
-
-	public void setExcludePattern(String pattern) {
-		this.excludePattern = pattern;
-	}
-
-	private static String getDefaultExcludePattern() {
-		return defaultExcludePattern;
-	}
-
-	@Override
-	public String toString() {
-		return "Artifact [excludePattern=" + excludePattern + ", URI=" + URI + ", hash=" + hash + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((URI == null) ? 0 : URI.hashCode());
-		result = prime * result + ((hash == null) ? 0 : hash.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Artifact other = (Artifact) obj;
-		if (URI == null) {
-			if (other.URI != null)
-				return false;
-		} else if (!URI.equals(other.URI))
-			return false;
-		if (hash == null) {
-			if (other.hash != null)
-				return false;
-		} else if (!hash.equals(other.hash))
-			return false;
-		return true;
-	}
-
-
 
 	/**
      * Nested subclass representing a hash object compliant with the in-toto specification.
@@ -277,7 +234,7 @@ public final class Artifact {
     		this.hash = hash;
     	}
 
-        private static ArtifactHash collect(String filename) {
+        private static ArtifactHash collect(String filename, boolean normalizeLineEndings) {
 
             FileInputStream file = null;
             try {
@@ -292,8 +249,29 @@ public final class Artifact {
             int length;
             try {
                 while ((length = file.read(result)) != -1) {
-                	// FIXME eol
-                    digest.update(result, 0, length);
+            		int outLength = length;
+                	if(normalizeLineEndings) {
+                		// ascii CR and LF
+                		byte CR = 0x0D;
+                		byte LF = 0x0A;
+                		int outPointer = 0;
+                		Byte saveByte = null; 
+                		for (int inPointer=0; inPointer< length; inPointer++) {
+                			if (saveByte != null && saveByte == CR && result[inPointer] == LF) {
+                				saveByte = null;
+                				outLength--;
+                				continue;
+                			}
+                			saveByte = result[inPointer];
+                			if (result[inPointer] == CR) {
+	                			result[outPointer] = LF;
+	                		} else {
+	                			result[outPointer] = result[inPointer];
+	                		}
+                			outPointer++;
+	                	}
+                	}
+                    digest.update(result, 0, outLength);
                 }
             } catch (IOException e) {
                 throw new RuntimeException("The file " + filename + " couldn't be recorded");
@@ -411,4 +389,43 @@ public final class Artifact {
 			return artifacts;
 		}		
 	}
+
+
+
+	@Override
+	public String toString() {
+		return "Artifact [URI=" + URI + ", hash=" + hash + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((URI == null) ? 0 : URI.hashCode());
+		result = prime * result + ((hash == null) ? 0 : hash.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Artifact other = (Artifact) obj;
+		if (URI == null) {
+			if (other.URI != null)
+				return false;
+		} else if (!URI.equals(other.URI))
+			return false;
+		if (hash == null) {
+			if (other.hash != null)
+				return false;
+		} else if (!hash.equals(other.hash))
+			return false;
+		return true;
+	}
+	
 }

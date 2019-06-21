@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.annotations.JsonAdapter;
+
+import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.models.Artifact.ArtifactSetJsonAdapter;
 
 /**
@@ -106,7 +108,8 @@ public final class Link implements Signable {
         private List<String> command = new ArrayList<String>();
         private String excludePatterns;
         private String basePath;
-        private boolean followSymlinkDirs = false;
+        private Boolean followSymlinkDirs;
+        private Boolean normalizeLineEndings;
 
 		public LinkBuilder(String name) {
         	this.name = name;        	
@@ -122,10 +125,11 @@ public final class Link implements Signable {
          *
          * @param filePaths List<String> of file paths to track
          * @return LinkBuilder object with added artifacts
+         * @throws ValueError 
          */
-        public LinkBuilder addMaterial(List<String> filePaths) {
-        	this.materials.addAll(Artifact.recordArtifacts(filePaths, excludePatterns, basePath,
-        			followSymlinkDirs));
+        public LinkBuilder addMaterial(List<String> filePaths) throws ValueError {
+        	this.materials.addAll(Artifact.recordArtifacts(filePaths, 
+        			this.excludePatterns, this.basePath, this.followSymlinkDirs, this.normalizeLineEndings));
             return this;
         }
 
@@ -135,10 +139,11 @@ public final class Link implements Signable {
          * 
          * @param filePaths List<String> of file paths to track
          * @return LinkBuilder object with added artifacts
+         * @throws ValueError 
          */
-        public LinkBuilder addProduct(List<String> filePaths) {
-        	this.products.addAll(Artifact.recordArtifacts(filePaths, excludePatterns, basePath,
-        			followSymlinkDirs));
+        public LinkBuilder addProduct(List<String> filePaths) throws ValueError {
+        	this.products.addAll(Artifact.recordArtifacts(filePaths, 
+        			this.excludePatterns, this.basePath, this.followSymlinkDirs, this.normalizeLineEndings));
             return this;
         }
         
@@ -194,6 +199,11 @@ public final class Link implements Signable {
 
     	public LinkBuilder setFollowSymlinkDirs(boolean followSymlinkDirs) {
 			this.followSymlinkDirs = followSymlinkDirs;
+            return this;
+		}
+
+    	public LinkBuilder setNormalizeLineEndings(boolean normalizeLineEndings) {
+			this.normalizeLineEndings = normalizeLineEndings;
             return this;
 		}
 

@@ -5,6 +5,7 @@ import io.github.in_toto.models.Artifact.ArtifactHash.HashAlgorithm;
 import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Link.LinkBuilder;
 import io.github.in_toto.keys.RSAKey;
+import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.keys.Key;
 
 import java.util.ArrayList;
@@ -33,8 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -88,12 +87,12 @@ class LinkTest
 
     @Test
     @DisplayName("Validate Link addMaterials")
-    public void testValidMaterial() throws IOException
+    public void testValidMaterial() throws IOException, ValueError
     {
 
         String keyFile = Files.createFile(temporaryFolder.resolve("alice")).toString();
         
-        Artifact pathArtifact = new Artifact(keyFile);
+        Artifact pathArtifact = Artifact.recordArtifacts(Arrays.asList(keyFile), null, null).iterator().next();;
         
         linkBuilder.addMaterial(Arrays.asList(keyFile));
         
@@ -104,11 +103,11 @@ class LinkTest
 
     @Test
     @DisplayName("Validate Link addProducts")
-    public void testValidProduct() throws IOException
+    public void testValidProduct() throws IOException, ValueError
     {
         String path = Files.createFile(temporaryFolder.resolve("bob")).toString();
         
-        Artifact pathArtifact = new Artifact(path); 
+        Artifact pathArtifact = Artifact.recordArtifacts(Arrays.asList(path), null, null).iterator().next();; 
         
         linkBuilder.addProduct(Arrays.asList(path));
         
@@ -172,18 +171,16 @@ class LinkTest
 
     @Test
     @DisplayName("Validate link serialization and deserialization with artifacts from object")
-    public void testLinkSerializationWithArtifactsFromObject() throws IOException, URISyntaxException
+    public void testLinkSerializationWithArtifactsFromObject() throws IOException, URISyntaxException, ValueError
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("serialize");
     	testLinkBuilder.setBasePath("src/test/resources/link_test/serialize");
-
-        String path1 = "src/test/resources/link_test/serialize/foo";
-        String path2 = "src/test/resources/link_test/serialize/baz";
-        String path3 = "src/test/resources/link_test/serialize/bar";
         
-        Artifact pathArtifact1 = new Artifact("foo", new Artifact(path1).getArtifactHashes());
-        Artifact pathArtifact2 = new Artifact("baz", new Artifact(path2).getArtifactHashes());
-        Artifact pathArtifact3 = new Artifact("bar", new Artifact(path3).getArtifactHashes());
+        Set<Artifact> artifacts = Artifact.recordArtifacts(Arrays.asList("foo", "baz", "bar"), null, "src/test/resources/link_test/serialize");
+        
+        Artifact pathArtifact1 = artifacts.iterator().next();
+        Artifact pathArtifact2 = artifacts.iterator().next();
+        Artifact pathArtifact3 = artifacts.iterator().next();        
 
         testLinkBuilder.addProduct(Arrays.asList(""));
         testLinkBuilder.addMaterial(Arrays.asList(""));
@@ -250,7 +247,7 @@ class LinkTest
 
     @Test
     @DisplayName("Test Apply Exclude Patterns")
-    public void testApplyExcludePatterns() throws IOException
+    public void testApplyExcludePatterns() throws IOException, ValueError
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
@@ -258,7 +255,7 @@ class LinkTest
         String path2 = Files.createFile(temporaryFolder.resolve("bar")).toString();
         String path3 = Files.createFile(temporaryFolder.resolve("baz")).toString();
         
-        Artifact pathArtifact3 = new Artifact(path3);
+        Artifact pathArtifact3 = Artifact.recordArtifacts(Arrays.asList(path3), null, null).iterator().next();;
 
         String pattern = "**{foo,bar}";
 
@@ -282,7 +279,7 @@ class LinkTest
 
     @Test
     @DisplayName("Test Apply Exclude Default Patterns")
-    public void testApplyExcludeDefaultPatterns() throws IOException
+    public void testApplyExcludeDefaultPatterns() throws IOException, ValueError
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
@@ -291,10 +288,10 @@ class LinkTest
         Path path3 = Files.createDirectory(temporaryFolder.resolve(".git"));
         
         String path4 = Files.createFile(Paths.get(path3.toString(),"baz")).toString();        
-        Artifact pathArtifact2 = new Artifact(path2);
+        Artifact pathArtifact2 = Artifact.recordArtifacts(Arrays.asList(path2), null, null).iterator().next();
 
-        testLinkBuilder.addProduct(Arrays.asList(path1, path2,path4));
-        testLinkBuilder.addMaterial(Arrays.asList(path1, path2,path4));
+        testLinkBuilder.addProduct(Arrays.asList(path1, path2, path4));
+        testLinkBuilder.addMaterial(Arrays.asList(path1, path2, path4));
         
         Link testLink = testLinkBuilder.build();
 
@@ -311,7 +308,7 @@ class LinkTest
 
     @Test
     @DisplayName("Test Apply Exclude All")
-    public void testApplyExcludeAll() throws IOException
+    public void testApplyExcludeAll() throws IOException, ValueError
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
@@ -339,7 +336,7 @@ class LinkTest
 
     @Test
     @DisplayName("Test Apply Exclude Multiple Star")
-    public void testApplyExcludeMultipleStar() throws IOException
+    public void testApplyExcludeMultipleStar() throws IOException, ValueError
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
@@ -347,7 +344,7 @@ class LinkTest
         String path2 = Files.createFile(temporaryFolder.resolve("bar")).toString();
         String path3 = Files.createFile(temporaryFolder.resolve("baz")).toString();
         
-        Artifact pathArtifact1 = new Artifact(path1);
+        Artifact pathArtifact1 = Artifact.recordArtifacts(Arrays.asList(path1), null, null).iterator().next();
 
         String pattern = "**a**";
 
@@ -371,7 +368,7 @@ class LinkTest
 
     @Test
     @DisplayName("Test Apply Exclude Question Mark")
-    public void testApplyExcludeQuestionMark() throws IOException
+    public void testApplyExcludeQuestionMark() throws IOException, ValueError
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
@@ -379,7 +376,7 @@ class LinkTest
         String path2 = Files.createFile(temporaryFolder.resolve("barfoo")).toString();
         String path3 = Files.createFile(temporaryFolder.resolve("bazfoo")).toString();
         
-        Artifact pathArtifact1 = new Artifact(path1);
+        Artifact pathArtifact1 = Artifact.recordArtifacts(Arrays.asList(path1), null, null).iterator().next();
 
         String pattern = "**ba?foo";
 
@@ -403,7 +400,7 @@ class LinkTest
 
     @Test
     @DisplayName("Test Apply Exclude Sequence")
-    public void testApplyExcludeSeq() throws IOException
+    public void testApplyExcludeSeq() throws IOException, ValueError
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
@@ -411,7 +408,7 @@ class LinkTest
         String path2 = Files.createFile(temporaryFolder.resolve("bazfoo")).toString();
         String path3 = Files.createFile(temporaryFolder.resolve("barfoo")).toString();
         
-        Artifact pathArtifact3 = new Artifact(path3);
+        Artifact pathArtifact3 = Artifact.recordArtifacts(Arrays.asList(path3), null, null).iterator().next();
 
         String pattern = "**ba[xz]foo";
 
@@ -436,7 +433,7 @@ class LinkTest
 
     @Test
     @DisplayName("Test Apply Exclude Negate Sequence")
-    public void testApplyExcludeNegSeq() throws IOException
+    public void testApplyExcludeNegSeq() throws IOException, ValueError
     {
     	LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
@@ -444,7 +441,7 @@ class LinkTest
         String path2 = Files.createFile(temporaryFolder.resolve("bazfoo")).toString();
         String path3 = Files.createFile(temporaryFolder.resolve("barfoo")).toString();
         
-        Artifact pathArtifact3 = new Artifact(path3);
+        Artifact pathArtifact3 = Artifact.recordArtifacts(Arrays.asList(path3), null, null).iterator().next();
 
         String pattern = "**ba[!r]foo";
 
