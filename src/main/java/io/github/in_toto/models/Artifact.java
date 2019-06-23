@@ -225,11 +225,13 @@ public final class Artifact {
      * </code>
      */
     @JsonAdapter(ArtifactHashJsonAdapter.class)
-    static final class ArtifactHash {
-    	private final HashAlgorithm algorithm;
-    	private final String hash;
+    public static final class ArtifactHash {
+    	private HashAlgorithm algorithm;
+    	private String hash;
     	
-    	ArtifactHash(HashAlgorithm algorithm, String hash) {
+    	public ArtifactHash() {};
+    	
+    	public ArtifactHash(HashAlgorithm algorithm, String hash) {
     		this.algorithm = algorithm;
     		this.hash = hash;
     	}

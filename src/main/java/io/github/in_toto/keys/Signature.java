@@ -9,21 +9,13 @@ package io.github.in_toto.keys;
  */
 public final class Signature 
 {
-    final String keyid;
-    final String sig;
+    public String keyid;
+    public String sig;
 
     public Signature(String keyid, String sig) {
         this.keyid = keyid;
         this.sig = sig;
     }
-
-    public String getKeyId() {
-        return this.keyid;
-    }
-
-	public String getSig() {
-		return sig;
-	}
 
 	@Override
 	public int hashCode() {
@@ -60,5 +52,23 @@ public final class Signature
 	public String toString() {
 		return "Signature [keyid=" + keyid + ", sig=" + sig + "]";
 	}
+
+	public String getKeyid() {
+		return keyid;
+	}
+
+	public void setKeyid(String keyid) {
+		this.keyid = keyid;
+	}
+
+	public String getSig() {
+		return sig;
+	}
+
+	public void setSig(String sig) {
+		this.sig = sig;
+	}
+	
+	
 	
 }

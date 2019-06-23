@@ -2,7 +2,6 @@ package io.github.in_toto.keys;
 
 import io.github.in_toto.keys.RSAKey;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,15 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-import org.junit.rules.TemporaryFolder;
-import org.junit.rules.ExpectedException;
-import org.junit.Rule;
 
 /**
  * RSAKey-specific tests
  */
-@EnableRuleMigrationSupport
 class RSAKeyTest
 {
 
@@ -78,7 +72,7 @@ class RSAKeyTest
      */
      
      
-    @Rule public ExpectedException thrown = ExpectedException.none();
+    //@Rule public ExpectedException thrown = ExpectedException.none();
      
     @TempDir
     Path temporaryFolder;

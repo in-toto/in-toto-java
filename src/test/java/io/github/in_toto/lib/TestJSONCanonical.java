@@ -36,22 +36,24 @@ class TestJSONCanonical {
         // linkMb = Metablock.load("src/test/resources/test_json_canonical/testvalues.link")
         // encode_canonical(
         //      linkMb.signed.signable_dict).encode("UTF-8").hex()
-        String referenceCanonicalLinkHex = "7b225f74797065223a226c696e6b222" +
-                "c22627970726f6475637473223a7b7d2c22636f6d6d616e64223a5b5d2" +
-                "c22656e7669726f6e6d656e74223a7b2261223a22575446222c2262223" +
-                "a747275652c2263223a66616c73652c2264223a6e756c6c2c2265223a3" +
-                "12c2266223a221befbfbf465c5c6e5c22227d2c226d6174657269616c7" +
-                "3223a7b7d2c226e616d65223a2274657374222c2270726f64756374732" +
-                "23a7b7d7d";
+        String referenceCanonicalLinkHex = "7b225f74797065223a226c696e6b222c22627970726f6475637473223a7b227265"
+        		+ "7475726e2d76616c7565223a6e756c6c2c22737464657272223a6e756c6c2c227374646f7574223a6e756c6c7d2"
+        		+ "c22636f6d6d616e64223a5b5d2c22656e7669726f6e6d656e74223a7b22776f726b646972223a22666f6f2f6261"
+        		+ "72227d2c226d6174657269616c73223a7b7d2c226e616d65223a2274657374222c2270726f6475637473223a7b7"
+        		+ "d7d";
+        
+        String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{},\"command\":[],\"environment\":{\"workdir\":\"foo/bar\"},\"materials\":{},\"name\":\"test\",\"products\":{}}";
 
         // Load test link with special values (edge cases) in opaque
         // environment field
         Metablock<Link> metablock = transporter.load(new URI("src/test/resources/test_json_canonical/testvalues.link"), metablockType);
 
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        String linkString = JSONEncoder.canonicalize(gson.toJsonTree(metablock.getSigned()));
+        assertEquals(referenceCanonical, linkString);
         // Assert that Java's canonical json representation of the link is
         // equal to reference implementation's canonical json representation
-        assertEquals(Hex.toHexString(metablock.getCanonicalJSON(true).getBytes()),
-                referenceCanonicalLinkHex);
+        assertEquals(referenceCanonicalLinkHex, Hex.toHexString(metablock.getCanonicalJSON(true).getBytes()));
     }
     
     @Test
@@ -69,7 +71,7 @@ class TestJSONCanonical {
     	
     	Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
         testMetablockLink.sign(key);
-        Gson gson = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         String linkString = JSONEncoder.canonicalize(gson.toJsonTree(testMetablockLink.getSigned()));
         assertEquals(referenceCanonical, linkString);
     }

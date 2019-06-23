@@ -1,19 +1,10 @@
 package io.github.in_toto.models;
 
-import com.google.gson.annotations.SerializedName;
-
-import io.github.in_toto.lib.JSONEncoder;
-
-/**
- * A signable class is an abstract superclass that provides a representation method
- * to prepare for signing
- *
- */
-public abstract class Signable implements JSONEncoder {
-	private final String name;
-	@SerializedName("_type")
-	private final SignableType type;
-	public Signable(String name, SignableType type) {
+public class SupplyChainItem {
+	private String name;
+	private SignableType type;
+	
+	public SupplyChainItem(String name, SignableType type) {
 		super();
 		this.name = name;
 		this.type = type;
@@ -22,15 +13,21 @@ public abstract class Signable implements JSONEncoder {
 	public String getName() {
 		return name;
 	}
-
+	public void setName(String name) {
+		this.name = name;
+	}
 	public SignableType getType() {
 		return type;
+	}
+	public void setType(SignableType type) {
+		this.type = type;
 	}
 
 	@Override
 	public String toString() {
-		return "Signable [name=" + name + ", type=" + type + "]";
+		return "SupplyChainItem [name=" + name + ", type=" + type + "]";
 	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -39,6 +36,7 @@ public abstract class Signable implements JSONEncoder {
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -47,7 +45,7 @@ public abstract class Signable implements JSONEncoder {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Signable other = (Signable) obj;
+		SupplyChainItem other = (SupplyChainItem) obj;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -57,7 +55,5 @@ public abstract class Signable implements JSONEncoder {
 			return false;
 		return true;
 	}
-	
-	
 	
 }

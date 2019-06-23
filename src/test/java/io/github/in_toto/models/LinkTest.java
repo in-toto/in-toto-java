@@ -5,6 +5,7 @@ import io.github.in_toto.models.Artifact.ArtifactHash.HashAlgorithm;
 import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Link.LinkBuilder;
 import io.github.in_toto.keys.RSAKey;
+import io.github.in_toto.lib.JSONEncoder;
 import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.keys.Key;
 
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,11 +37,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-
-import org.junit.rules.ExpectedException;
-import org.junit.Rule;
-
 /**
  * Link-specific tests
  */
@@ -56,9 +56,6 @@ class LinkTest
     
     @TempDir
     Path temporaryFolder;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     @DisplayName("Test Link Constructor")
@@ -77,8 +74,8 @@ class LinkTest
         // test link data types
 
         assertTrue(link instanceof Link);
-        assertTrue(link.getByproducts() instanceof Map);
-        assertTrue(link.getEnvironment() instanceof Map);
+        assertTrue(link.getByproducts() instanceof ByProducts);
+        assertTrue(link.getEnvironment() instanceof Environment);
         assertTrue(link.getName() instanceof String);
         assertTrue(link.getProducts() instanceof Set);
         assertTrue(link.getMaterials() instanceof Set);
@@ -122,8 +119,7 @@ class LinkTest
     @DisplayName("Validate Link setByproducts")
     public void testValidByproduct()
     {
-        HashMap<String, Object> byproduct = new HashMap<>();
-        byproduct.put("stdin","");
+        ByProducts byproduct = new ByProducts("", null, null);
         
         linkBuilder.setByproducts(byproduct);
         
@@ -135,8 +131,7 @@ class LinkTest
     @DisplayName("Validate Link setEnvironments")
     public void testValidEnvironment()
     {
-        HashMap<String, Object> environment = new HashMap<>();
-        environment.put("variables", "<ENV>");
+        Environment environment = new Environment("<ENV>");
         
         linkBuilder.setEnvironment(environment);
         Link link = linkBuilder.build();
@@ -188,7 +183,7 @@ class LinkTest
         Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
         testMetablockLink.sign(key);
         
-        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).getKeyId());
+        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).keyid);
         
         transporter.dump(linkFile, testMetablockLink);
 
@@ -198,7 +193,7 @@ class LinkTest
         
         newLinkMetablock.sign(key);
         
-        assertEquals(newLinkMetablock.signatures.get(0).getSig(), testMetablockLink.signatures.get(0).getSig());
+        assertEquals(newLinkMetablock.signatures.get(0).sig, testMetablockLink.signatures.get(0).sig);
 
         assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
         assertTrue(newLinkMetablock.signed.getProducts().contains(pathArtifact1));
@@ -233,7 +228,7 @@ class LinkTest
         assertEquals(testMetablockLink.signed.getName(), "clone");
         assertTrue(testMetablockLink.signed.getProducts().contains(testproduct));
 
-        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).getKeyId());
+        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).keyid);
         
         transporter.dump(linkFile, testMetablockLink);
 
@@ -244,6 +239,34 @@ class LinkTest
         assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
         assertTrue(newLinkMetablock.signed.getProducts().contains(testproduct));
     }
+    
+    @Test
+    @DisplayName("Validate link deserialization and serialization with byproducts")
+    public void testLinkDeserializationSerializationWithByProducts() throws IOException, URISyntaxException, ValueError
+    {
+    	String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{\"return-value\":\"0\",\"stderr\":\"\",\"stdout\":\"demo-project/\n" + 
+    			"demo-project/foo.py\n" + 
+    			"\"},\"command\":[\"tar\",\"--exclude\",\".git\",\"-zcvf\",\"demo-project.tar.gz\",\"demo-project\"],\"environment\":{}"
+    			+ ",\"materials\":{\"demo-project/foo.py\":{\"sha256\":\"c2c0ea54fa94fac3a4e1575d6ed3bbd1b01a6d0b8deb39196bdc31c457ef731b\"}}"
+    			+ ",\"name\":\"package\",\"products\":{\"demo-project.tar.gz\":{\"sha256\":\"17ffccbc3bb4822a63bef7433a9bea79d726d4e02606242b9b97e317fd89c462\"}}}";
+    	String referenceCanonicalLinkHex = "7b225f74797065223a226c696e6b222c22627970726f6475637473223a7b2272657475726e2d76616c7565223a2230"
+    			+ "222c22737464657272223a22222c227374646f7574223a2264656d6f2d70726f6a6563742f0a64656d6f2d70726f6a6563742f666f6f2e70790a227"
+    			+ "d2c22636f6d6d616e64223a5b22746172222c222d2d6578636c756465222c222e676974222c222d7a637666222c2264656d6f2d70726f6a6563742e"
+    			+ "7461722e677a222c2264656d6f2d70726f6a656374225d2c22656e7669726f6e6d656e74223a7b22776f726b646972223a6e756c6c7d2c226d61746"
+    			+ "57269616c73223a7b2264656d6f2d70726f6a6563742f666f6f2e7079223a7b22736861323536223a22633263306561353466613934666163336134"
+    			+ "65313537356436656433626264316230316136643062386465623339313936626463333163343537656637333162227d7d2c226e616d65223a22706"
+    			+ "1636b616765222c2270726f6475637473223a7b2264656d6f2d70726f6a6563742e7461722e677a223a7b22736861323536223a2231376666636362"
+    			+ "633362623438323261363362656637343333613962656137396437323664346530323630363234326239623937653331376664383963343632227d7"
+    			+ "d7d";
+    	Metablock<Link> testMetablockLink = transporter.load(new URI("src/test/resources/link_test/byproducts.link"), metablockType);
+    	
+    	Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        String linkString = JSONEncoder.canonicalize(gson.toJsonTree(testMetablockLink.getSigned()));
+        assertEquals(referenceCanonical, linkString);
+    	
+    	assertEquals(referenceCanonicalLinkHex, Hex.toHexString(testMetablockLink.getCanonicalJSON(true).getBytes()));
+    }
+
 
     @Test
     @DisplayName("Test Apply Exclude Patterns")

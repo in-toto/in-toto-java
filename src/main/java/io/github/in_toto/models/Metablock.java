@@ -1,7 +1,7 @@
 package io.github.in_toto.models;
 
 import java.util.ArrayList;
-
+import java.util.List;
 import java.lang.reflect.Type;
 import java.io.IOException;
 
@@ -27,16 +27,15 @@ import org.bouncycastle.crypto.CryptoException;
  * - A signed field, with the signable portion of a piece of metadata.
  * - A signatures field, a list of the signatures on this metadata.
  */
-public final class Metablock<S extends Signable> {
-	transient Transporter transporter = new FileTransporter();
+public final class Metablock<S extends Signable> extends SupplyChainItem {
     S signed;
-    ArrayList<Signature> signatures;
+    List<Signature> signatures;
 
     public void setSigned(S signed) {
 		this.signed = signed;
 	}
 
-	public void setSignatures(ArrayList<Signature> signatures) {
+	public void setSignatures(List<Signature> signatures) {
 		this.signatures = signatures;
 	}
 
@@ -45,7 +44,8 @@ public final class Metablock<S extends Signable> {
      *
      * Ensures that, at the least, there is an empty list of signatures.
      */
-    public Metablock(S signed, ArrayList<Signature> signatures) {
+    public Metablock(S signed, List<Signature> signatures) {
+    	super(signed.getName(), signed.getType());
         this.signed = signed;
 
         if (signatures == null)
@@ -146,19 +146,11 @@ public final class Metablock<S extends Signable> {
     public String getShortKeyId() {
     	if (this.signatures == null || this.signatures.isEmpty())
             return "UNSIGNED";
-        String keyId = this.signatures.get(0).getKeyId();
+        String keyId = this.signatures.get(0).keyid;
         return keyId.substring(0, 8);
     }
 
-	public Transporter getTransporter() {
-		return transporter;
-	}
-
-	public void setTransporter(Transporter transporter) {
-		this.transporter = transporter;
-	}
-
-	public ArrayList<Signature> getSignatures() {
+	public List<Signature> getSignatures() {
 		return signatures;
 	}
 
@@ -168,7 +160,7 @@ public final class Metablock<S extends Signable> {
 
 	@Override
 	public String toString() {
-		return "Metablock [transporter=" + transporter + ", signed=" + signed + ", signatures=" + signatures + "]";
+		return "Metablock [signed=" + signed + ", signatures=" + signatures + "]";
 	}
 
 	@Override
@@ -202,6 +194,14 @@ public final class Metablock<S extends Signable> {
 			return false;
 		return true;
 	}
-    
-	
+
+	@Override
+	public String getName() {
+		return signed.getName();
+	}
+
+	@Override
+	public SignableType getType() {
+		return SignableType.metablock;
+	}
 }

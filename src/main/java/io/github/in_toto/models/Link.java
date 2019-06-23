@@ -17,10 +17,8 @@ import io.github.in_toto.models.Artifact.ArtifactSetJsonAdapter;
  * Implementation of the in-toto Link metadata type.
  *
  */
-public final class Link implements Signable {
-    private final String _type = getType();
-    private final String name;
-    @JsonAdapter(ArtifactSetJsonAdapter.class)
+public final class Link extends Signable {
+	@JsonAdapter(ArtifactSetJsonAdapter.class)
     private final Set<Artifact> materials;
     @JsonAdapter(ArtifactSetJsonAdapter.class)
     private final Set<Artifact> products;
@@ -30,8 +28,8 @@ public final class Link implements Signable {
     // {"byproducts": {"return-value": 1}}
     // is parsed as
     // {"byproducts": {"return-value": 1.0}}
-    private final Map<String, Object> byproducts;
-    private final Map<String, Object> environment;
+    private final ByProducts byproducts;
+    private final Environment environment;
     private final List<String> command;
 
 
@@ -50,13 +48,11 @@ public final class Link implements Signable {
      *
      * @see io.github.in_toto.models.Artifact
      */
-    private Link( String name, Set<Artifact> materials,
+    public Link(String name, Set<Artifact> materials,
             Set<Artifact> products,
-            Map<String, Object> environment, List<String> command,
-            Map<String, Object> byproducts) {
-    	super();
-
-    	this.name = name;
+            Environment environment, List<String> command,
+            ByProducts byproducts) {
+    	super(name, SignableType.link);
 
         if (materials == null)
             this.materials = Collections.unmodifiableSet(new HashSet<Artifact>());
@@ -69,9 +65,9 @@ public final class Link implements Signable {
         	this.products = Collections.unmodifiableSet(products);
 
         if (environment == null)
-            this.environment = Collections.unmodifiableMap(new HashMap<String, Object>());
+            this.environment = new Environment();
         else
-        	this.environment = Collections.unmodifiableMap(environment);
+        	this.environment = environment;
 
         if (command == null)
             this.command = Collections.unmodifiableList(new ArrayList<String>());
@@ -79,9 +75,9 @@ public final class Link implements Signable {
             this.command = Collections.unmodifiableList(command);        	
 
         if (byproducts == null)
-            this.byproducts = Collections.unmodifiableMap(new HashMap<String, Object>());
+            this.byproducts = new ByProducts();
         else
-        	this.byproducts = Collections.unmodifiableMap(byproducts);
+        	this.byproducts = byproducts;
     }
     
     private Link(LinkBuilder builder) {   	
@@ -103,8 +99,8 @@ public final class Link implements Signable {
         private final String name;
         private Set<Artifact> materials = new HashSet<Artifact>();
         private Set<Artifact> products = new HashSet<Artifact>();
-        private Map<String, Object> byproducts = new HashMap<String, Object>();
-        private Map<String, Object> environment = new HashMap<String, Object>();
+        private ByProducts byproducts = new ByProducts();
+        private Environment environment = new Environment();
         private List<String> command = new ArrayList<String>();
         private String excludePatterns;
         private String basePath;
@@ -152,7 +148,7 @@ public final class Link implements Signable {
          * @param environment
          * @return
          */
-        public LinkBuilder setEnvironment(Map<String, Object> environment) {
+        public LinkBuilder setEnvironment(Environment environment) {
             this.environment = environment;
             return this;
         }
@@ -172,7 +168,7 @@ public final class Link implements Signable {
          * @param byproducts
          * @return
          */
-        public LinkBuilder setByproducts(Map<String, Object> byproducts) {
+        public LinkBuilder setByproducts(ByProducts byproducts) {
             this.byproducts = byproducts;
             return this;
         }
@@ -219,11 +215,11 @@ public final class Link implements Signable {
     		return products;
     	}
 
-    	private Map<String, Object> getByproducts() {
+    	private ByProducts getByproducts() {
     		return byproducts;
     	}
 
-    	private Map<String, Object> getEnvironment() {
+    	private Environment getEnvironment() {
     		return environment;
     	}
 
@@ -231,10 +227,6 @@ public final class Link implements Signable {
     		return command;
     	}
     }
-
-	public String getType() {
-		return "link";
-	}
 	
 	/**
      * get full link name, including keyid bytes in the form of
@@ -259,11 +251,11 @@ public final class Link implements Signable {
 		return products;
 	}
 
-	public Map<String, Object> getByproducts() {
+	public ByProducts getByproducts() {
 		return byproducts;
 	}
 
-	public Map<String, Object> getEnvironment() {
+	public Environment getEnvironment() {
 		return environment;
 	}
 
@@ -271,26 +263,20 @@ public final class Link implements Signable {
 		return command;
 	}
 
-	public String getName() {
-		return name;
-	}
-
 	@Override
 	public String toString() {
-		return "Link [_type=" + _type + ", name=" + name + ", materials=" + materials + ", products=" + products
-				+ ", byproducts=" + byproducts + ", environment=" + environment + ", command=" + command + "]";
+		return "Link [materials=" + materials + ", products=" + products + ", byproducts=" + byproducts
+				+ ", environment=" + environment + ", command=" + command + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((_type == null) ? 0 : _type.hashCode());
+		int result = super.hashCode();
 		result = prime * result + ((byproducts == null) ? 0 : byproducts.hashCode());
 		result = prime * result + ((command == null) ? 0 : command.hashCode());
 		result = prime * result + ((environment == null) ? 0 : environment.hashCode());
 		result = prime * result + ((materials == null) ? 0 : materials.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((products == null) ? 0 : products.hashCode());
 		return result;
 	}
@@ -299,16 +285,11 @@ public final class Link implements Signable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Link other = (Link) obj;
-		if (_type == null) {
-			if (other._type != null)
-				return false;
-		} else if (!_type.equals(other._type))
-			return false;
 		if (byproducts == null) {
 			if (other.byproducts != null)
 				return false;
@@ -329,11 +310,6 @@ public final class Link implements Signable {
 				return false;
 		} else if (!materials.equals(other.materials))
 			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
 		if (products == null) {
 			if (other.products != null)
 				return false;
@@ -341,7 +317,6 @@ public final class Link implements Signable {
 			return false;
 		return true;
 	}
-    
 }
 
 
