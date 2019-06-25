@@ -183,7 +183,7 @@ class LinkTest
         Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
         testMetablockLink.sign(key);
         
-        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).keyid);
+        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).getKeyid());
         
         transporter.dump(linkFile, testMetablockLink);
 
@@ -193,7 +193,7 @@ class LinkTest
         
         newLinkMetablock.sign(key);
         
-        assertEquals(newLinkMetablock.signatures.get(0).sig, testMetablockLink.signatures.get(0).sig);
+        assertEquals(newLinkMetablock.signatures.get(0).getSig(), testMetablockLink.signatures.get(0).getSig());
 
         assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
         assertTrue(newLinkMetablock.signed.getProducts().contains(pathArtifact1));
@@ -228,7 +228,7 @@ class LinkTest
         assertEquals(testMetablockLink.signed.getName(), "clone");
         assertTrue(testMetablockLink.signed.getProducts().contains(testproduct));
 
-        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).keyid);
+        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).getKeyid());
         
         transporter.dump(linkFile, testMetablockLink);
 

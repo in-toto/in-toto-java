@@ -9,8 +9,8 @@ package io.github.in_toto.keys;
  */
 public final class Signature 
 {
-    public String keyid;
-    public String sig;
+    private String keyid;
+    private String sig;
 
     public Signature(String keyid, String sig) {
         this.keyid = keyid;

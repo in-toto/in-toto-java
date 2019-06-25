@@ -146,7 +146,7 @@ public final class Metablock<S extends Signable> extends SupplyChainItem {
     public String getShortKeyId() {
     	if (this.signatures == null || this.signatures.isEmpty())
             return "UNSIGNED";
-        String keyId = this.signatures.get(0).keyid;
+        String keyId = this.signatures.get(0).getKeyid();
         return keyId.substring(0, 8);
     }
 
