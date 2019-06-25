@@ -28,12 +28,8 @@ import org.bouncycastle.crypto.CryptoException;
  * - A signatures field, a list of the signatures on this metadata.
  */
 public final class Metablock<S extends Signable> extends SupplyChainItem {
-    S signed;
+    final S signed;
     List<Signature> signatures;
-
-    public void setSigned(S signed) {
-		this.signed = signed;
-	}
 
 	public void setSignatures(List<Signature> signatures) {
 		this.signatures = signatures;
