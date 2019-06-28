@@ -3,7 +3,7 @@
     "_type": "link", "name": "test", "command": [],
     "byproducts": {},"products": {}, "materials": {},
     "environment": {
-      "workdir": "foo/bar"
+      "workdir": "foo"
     }
   }
 }

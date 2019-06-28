@@ -115,28 +115,12 @@ public interface JSONEncoder
      * Method to create a canonical json encoded string of the calling object
      * using the specification at http://wiki.laptop.org/go/Canonical_JSON.
      *
-     * Attributes with `null` values are encoded as {@code "<name>": null}.
+     * Attributes with `null` values are not encoded.
      *
      * @return A canonical json encoded string of the calling object.
      */
     default public String JSONEncodeCanonical() {
-        return this.JSONEncodeCanonical(true);
-    }
-
-    /**
-     * Method to create a canonical json encoded string of the calling object
-     * using the specification at http://wiki.laptop.org/go/Canonical_JSON
-     *
-     * @param serializeNulls if true attributes with null values are
-     * are encoded as {@code "<name>": null} and omitted otherwise.
-     *
-     * @return A canonical json encoded string of the calling object.
-     */
-    default public String JSONEncodeCanonical(boolean serializeNulls) {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        if (serializeNulls) {
-            gsonBuilder.serializeNulls();
-        }
         Gson gson = gsonBuilder.disableHtmlEscaping().create();
 
         return canonicalize(gson.toJsonTree(this));

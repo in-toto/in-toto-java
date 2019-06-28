@@ -27,20 +27,22 @@ import org.bouncycastle.crypto.CryptoException;
  * - A signed field, with the signable portion of a piece of metadata.
  * - A signatures field, a list of the signatures on this metadata.
  */
-public final class Metablock<S extends Signable> extends SupplyChainItem {
-    final S signed;
-    Set<Signature> signatures;
+public class Metablock<S extends Signable> extends SupplyChainItem {
+    S signed;
+    Set<Signature> signatures = new HashSet<Signature>();
 
-	public void setSignatures(Set<Signature> signatures) {
+	public void setSignatures(HashSet<Signature> signatures) {
 		this.signatures = signatures;
 	}
+	
+	public Metablock() {}
 
 	/**
      * Base constructor.
      *
      * Ensures that, at the least, there is an empty list of signatures.
      */
-    public Metablock(S signed, Set<Signature> signatures) {
+    public Metablock(S signed, HashSet<Signature> signatures) {
     	super(signed.getName(), signed.getType());
         this.signed = signed;
 
@@ -124,12 +126,10 @@ public final class Metablock<S extends Signable> extends SupplyChainItem {
      * Public shortcut to call JSONEncodeCanonical on the signed field of
      * this metablock.
      *
-     * @param serializeNulls if nulls should be included or not when encoding
-     *
      * @return a JSON string representation of this obj
      */
-    public String getCanonicalJSON(boolean serializeNulls) {
-        return this.signed.JSONEncodeCanonical(serializeNulls);
+    public String getCanonicalJSON() {
+        return this.signed.JSONEncodeCanonical();
     }
     
     /**

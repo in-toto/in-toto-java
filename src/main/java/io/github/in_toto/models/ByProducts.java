@@ -7,11 +7,11 @@ public class ByProducts {
 	private String stdout;
 	private String stderr;
 	@SerializedName("return-value")
-	private String returnValue;
+	private Integer returnValue;
 	
 	public ByProducts() {}
 	
-	public ByProducts(String stdout, String stderr, String returnValue) {
+	public ByProducts(String stdout, String stderr, Integer returnValue) {
 		super();
 		this.stdout = stdout;
 		this.stderr = stderr;
@@ -24,7 +24,6 @@ public class ByProducts {
 		return "ByProducts [stdout=" + stdout + ", stderr=" + stderr + ", returnValue=" + returnValue + "]";
 	}
 
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -34,7 +33,6 @@ public class ByProducts {
 		result = prime * result + ((stdout == null) ? 0 : stdout.hashCode());
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -62,6 +60,7 @@ public class ByProducts {
 			return false;
 		return true;
 	}
+	
 	
 
 }

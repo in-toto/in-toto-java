@@ -36,31 +36,74 @@ class TestJSONCanonical {
         // linkMb = Metablock.load("src/test/resources/test_json_canonical/testvalues.link")
         // encode_canonical(
         //      linkMb.signed.signable_dict).encode("UTF-8").hex()
-        String referenceCanonicalLinkHex = "7b225f74797065223a226c696e6b222c22627970726f6475637473223a7b227265"
-        		+ "7475726e2d76616c7565223a6e756c6c2c22737464657272223a6e756c6c2c227374646f7574223a6e756c6c7d2"
-        		+ "c22636f6d6d616e64223a5b5d2c22656e7669726f6e6d656e74223a7b22776f726b646972223a22666f6f2f6261"
-        		+ "72227d2c226d6174657269616c73223a7b7d2c226e616d65223a2274657374222c2270726f6475637473223a7b7"
-        		+ "d7d";
+        String referenceCanonicalLinkHex = "7b225f74797065223a226c696e6b222c22627970726f6475637473223a7b7d2c22636f"
+        		+ "6d6d616e64223a5b5d2c22656e7669726f6e6d656e74223a7b22776f726b646972223a22666f6f227d2c226d6174657"
+        		+ "269616c73223a7b7d2c226e616d65223a2274657374222c2270726f6475637473223a7b7d7d";
         
-        String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{},\"command\":[],\"environment\":{\"workdir\":\"foo/bar\"},\"materials\":{},\"name\":\"test\",\"products\":{}}";
+        String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{},\"command\":[],\"environment\":{\"workdir\":\"foo\"},\"materials\":{},\"name\":\"test\",\"products\":{}}";
 
         // Load test link with special values (edge cases) in opaque
         // environment field
         Metablock<Link> metablock = transporter.load(new URI("src/test/resources/test_json_canonical/testvalues.link"), metablockType);
 
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        String linkString = JSONEncoder.canonicalize(gson.toJsonTree(metablock.getSigned()));
+        String linkString = metablock.getCanonicalJSON();
         assertEquals(referenceCanonical, linkString);
         // Assert that Java's canonical json representation of the link is
         // equal to reference implementation's canonical json representation
-        assertEquals(referenceCanonicalLinkHex, Hex.toHexString(metablock.getCanonicalJSON(true).getBytes()));
+        assertEquals(referenceCanonicalLinkHex, Hex.toHexString(linkString.getBytes()));
     }
     
     @Test
     @DisplayName("Validate canonical")
     public void testCanonicalJSON() throws IOException
     {
-    	String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{},\"command\":[],\"environment\":{},\"materials\":{\"src/test/resources/test_json_canonical/serialize/bar\":{\"sha256\":\"fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9\"},\"src/test/resources/test_json_canonical/serialize/baz\":{\"sha256\":\"baa5a0964d3320fbc0c6a922140453c8513ea24ab8fd0577034804a967248096\"},\"src/test/resources/test_json_canonical/serialize/foo\":{\"sha256\":\"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\"}},\"name\":\"serialize\",\"products\":{\"src/test/resources/test_json_canonical/serialize/bar\":{\"sha256\":\"fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9\"},\"src/test/resources/test_json_canonical/serialize/baz\":{\"sha256\":\"baa5a0964d3320fbc0c6a922140453c8513ea24ab8fd0577034804a967248096\"},\"src/test/resources/test_json_canonical/serialize/foo\":{\"sha256\":\"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\"}}}";
+    	String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{},\"command\":[],\"environment\":{},"
+    			+ "\"materials\":{\"src/test/resources/test_json_canonical/serialize/bar\":{\"sha256\":\"fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9\"},"
+    			+ "\"src/test/resources/test_json_canonical/serialize/baz\":{\"sha256\":\"baa5a0964d3320fbc0c6a922140453c8513ea24ab8fd0577034804a967248096\"},"
+    			+ "\"src/test/resources/test_json_canonical/serialize/foo\":{\"sha256\":\"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\"}},"
+    			+ "\"name\":\"serialize\",\"products\":{\"src/test/resources/test_json_canonical/serialize/bar\":{\"sha256\":\"fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea"
+    			+ "04fae5511b68fbf8fb9\"},\"src/test/resources/test_json_canonical/serialize/baz\":{\"sha256\":\"baa5a0964d3320fbc0c6a922140453c8513ea24ab8fd0577034804a967248096\"},"
+    			+ "\"src/test/resources/test_json_canonical/serialize/foo\":{\"sha256\":\"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\"}}}";
+    	LinkBuilder testLinkBuilder = new LinkBuilder("serialize");
+
+        String path1 = "src/test/resources/test_json_canonical/serialize";
+        
+        testLinkBuilder.addProduct(Arrays.asList(path1));
+
+        testLinkBuilder.addMaterial(Arrays.asList(path1));
+    	
+    	Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
+        testMetablockLink.sign(key);
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        String linkString = JSONEncoder.canonicalize(gson.toJsonTree(testMetablockLink.getSigned()));
+        assertEquals(referenceCanonical, linkString);
+    }
+    
+    @Test
+    @DisplayName("Validate canonical")
+    public void testEncodeCanonical() throws IOException
+    {
+
+        /*
+         * self.assertEqual('""', encode(""))
+        self.assertEqual('[1,2,3]', encode([1, 2, 3]))
+        self.assertEqual('[1,2,3]', encode([1,2,3]))
+        self.assertEqual('[]', encode([]))
+        self.assertEqual('{}', encode({}))
+        self.assertEqual('{"A":[99]}', encode({"A": [99]}))
+        self.assertEqual('{"A":true}', encode({"A": True}))
+        self.assertEqual('{"B":false}', encode({"B": False}))
+        self.assertEqual('{"x":3,"y":2}', encode({"x": 3, "y": 2}))
+
+        self.assertEqual('{"x":3,"y":null}', encode({"x": 3, "y": None}))
+         */
+    	String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{},\"command\":[],\"environment\":{},"
+    			+ "\"materials\":{\"src/test/resources/test_json_canonical/serialize/bar\":{\"sha256\":\"fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9\"},"
+    			+ "\"src/test/resources/test_json_canonical/serialize/baz\":{\"sha256\":\"baa5a0964d3320fbc0c6a922140453c8513ea24ab8fd0577034804a967248096\"},"
+    			+ "\"src/test/resources/test_json_canonical/serialize/foo\":{\"sha256\":\"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\"}},"
+    			+ "\"name\":\"serialize\",\"products\":{\"src/test/resources/test_json_canonical/serialize/bar\":{\"sha256\":\"fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea"
+    			+ "04fae5511b68fbf8fb9\"},\"src/test/resources/test_json_canonical/serialize/baz\":{\"sha256\":\"baa5a0964d3320fbc0c6a922140453c8513ea24ab8fd0577034804a967248096\"},"
+    			+ "\"src/test/resources/test_json_canonical/serialize/foo\":{\"sha256\":\"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\"}}}";
     	LinkBuilder testLinkBuilder = new LinkBuilder("serialize");
 
         String path1 = "src/test/resources/test_json_canonical/serialize";

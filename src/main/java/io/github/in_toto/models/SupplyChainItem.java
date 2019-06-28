@@ -4,6 +4,8 @@ public class SupplyChainItem {
 	private String name;
 	private SignableType type;
 	
+	public SupplyChainItem() {}
+	
 	public SupplyChainItem(String name, SignableType type) {
 		super();
 		this.name = name;

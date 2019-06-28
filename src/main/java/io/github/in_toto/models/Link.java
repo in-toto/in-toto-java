@@ -2,11 +2,14 @@ package io.github.in_toto.models;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.annotations.SerializedName;
 
 import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.models.Artifact.ArtifactSetJsonAdapter;
@@ -15,20 +18,26 @@ import io.github.in_toto.models.Artifact.ArtifactSetJsonAdapter;
  * Implementation of the in-toto Link metadata type.
  *
  */
-public final class Link extends Signable {
+public final class Link implements Signable {
+	private String name;
+	@SerializedName("_type")
+	private SignableType type = SignableType.link;
 	@JsonAdapter(ArtifactSetJsonAdapter.class)
-    private final Set<Artifact> materials;
+    private Set<Artifact> materials = new HashSet<Artifact>();
     @JsonAdapter(ArtifactSetJsonAdapter.class)
-    private final Set<Artifact> products;
+    private Set<Artifact> products = new HashSet<Artifact>();
     // NOTE: Caution when dealing with numeric values!
     // Since gson does not know the type of the target, it will
     // store any numeric value as `Double`, e.g.:
     // {"byproducts": {"return-value": 1}}
     // is parsed as
     // {"byproducts": {"return-value": 1.0}}
-    private final ByProducts byproducts;
-    private final Environment environment;
-    private final List<String> command;
+    private ByProducts byproducts;
+    private Map<String, String> environment = new HashMap<String,String>();
+    private List<String> command = new ArrayList<String>();
+    
+    
+    public Link() {}
 
 
 	/**
@@ -46,31 +55,31 @@ public final class Link extends Signable {
      *
      * @see io.github.in_toto.models.Artifact
      */
-    public Link(String name, Set<Artifact> materials,
-            Set<Artifact> products,
-            Environment environment, List<String> command,
+    public Link(String name, HashSet<Artifact> materials,
+            HashSet<Artifact> products,
+            Map<String, String> environment, List<String> command,
             ByProducts byproducts) {
-    	super(name, SignableType.link);
+    	this.name = name;
+    	
+    	HashSet<Artifact> tempArtifacts = new HashSet<Artifact>();
+        if (materials != null)
+        	tempArtifacts.addAll(materials);
+        this.materials = tempArtifacts;
+        
+        tempArtifacts = new HashSet<Artifact>();
+        if (products != null)
+        	tempArtifacts.addAll(products);
+        this.products = tempArtifacts;
 
-        if (materials == null)
-            this.materials = Collections.unmodifiableSet(new HashSet<Artifact>());
-        else
-        	this.materials = Collections.unmodifiableSet(materials);
-
-        if (products == null)
-            this.products = Collections.unmodifiableSet(new HashSet<Artifact>());
-        else
-        	this.products = Collections.unmodifiableSet(products);
-
-        if (environment == null)
-            this.environment = new Environment();
-        else
-        	this.environment = environment;
-
-        if (command == null)
-            this.command = Collections.unmodifiableList(new ArrayList<String>());
-        else
-            this.command = Collections.unmodifiableList(command);        	
+        ArrayList<String> tempCommands = new ArrayList<String>();
+        if (command != null)
+        	tempCommands.addAll(command);
+        this.command = tempCommands;
+        
+        HashMap<String, String> tempEnv = new HashMap<String, String>();
+        if (environment != null)
+            tempEnv.putAll(environment);
+        this.environment = tempEnv;
 
         if (byproducts == null)
             this.byproducts = new ByProducts();
@@ -95,10 +104,10 @@ public final class Link extends Signable {
      */
     public static final class LinkBuilder {
         private final String name;
-        private Set<Artifact> materials = new HashSet<Artifact>();
-        private Set<Artifact> products = new HashSet<Artifact>();
+        private HashSet<Artifact> materials = new HashSet<Artifact>();
+        private HashSet<Artifact> products = new HashSet<Artifact>();
         private ByProducts byproducts = new ByProducts();
-        private Environment environment = new Environment();
+        private Map<String, String> environment = new HashMap<String, String>();
         private List<String> command = new ArrayList<String>();
         private String excludePatterns;
         private String basePath;
@@ -146,7 +155,7 @@ public final class Link extends Signable {
          * @param environment
          * @return
          */
-        public LinkBuilder setEnvironment(Environment environment) {
+        public LinkBuilder setEnvironment(Map<String, String> environment) {
             this.environment = environment;
             return this;
         }
@@ -205,11 +214,11 @@ public final class Link extends Signable {
     		return name;
     	}
 
-    	private Set<Artifact> getMaterials() {
+    	private HashSet<Artifact> getMaterials() {
     		return materials;
     	}
 
-    	private Set<Artifact> getProducts() {
+    	private HashSet<Artifact> getProducts() {
     		return products;
     	}
 
@@ -217,7 +226,7 @@ public final class Link extends Signable {
     		return byproducts;
     	}
 
-    	private Environment getEnvironment() {
+    	private Map<String, String> getEnvironment() {
     		return environment;
     	}
 
@@ -253,7 +262,7 @@ public final class Link extends Signable {
 		return byproducts;
 	}
 
-	public Environment getEnvironment() {
+	public Map<String, String> getEnvironment() {
 		return environment;
 	}
 
@@ -262,20 +271,67 @@ public final class Link extends Signable {
 	}
 
 	@Override
+	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public SignableType getType() {
+		return this.type;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	public void setType(SignableType type) {
+		this.type = type;
+	}
+
+
+	public void setMaterials(Set<Artifact> materials) {
+		this.materials = materials;
+	}
+
+
+	public void setProducts(Set<Artifact> products) {
+		this.products = products;
+	}
+
+
+	public void setByproducts(ByProducts byproducts) {
+		this.byproducts = byproducts;
+	}
+
+
+	public void setEnvironment(Map<String, String> environment) {
+		this.environment = environment;
+	}
+
+
+	public void setCommand(List<String> command) {
+        this.command = command;
+	}
+
+
+	@Override
 	public String toString() {
-		return "Link [materials=" + materials + ", products=" + products + ", byproducts=" + byproducts
-				+ ", environment=" + environment + ", command=" + command + "]";
+		return "Link [name=" + name + ", type=" + type + ", materials=" + materials + ", products=" + products
+				+ ", byproducts=" + byproducts + ", environment=" + environment + ", command=" + command + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result + ((byproducts == null) ? 0 : byproducts.hashCode());
 		result = prime * result + ((command == null) ? 0 : command.hashCode());
 		result = prime * result + ((environment == null) ? 0 : environment.hashCode());
 		result = prime * result + ((materials == null) ? 0 : materials.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((products == null) ? 0 : products.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
@@ -283,7 +339,7 @@ public final class Link extends Signable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -308,13 +364,22 @@ public final class Link extends Signable {
 				return false;
 		} else if (!materials.equals(other.materials))
 			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
 		if (products == null) {
 			if (other.products != null)
 				return false;
 		} else if (!products.equals(other.products))
 			return false;
+		if (type != other.type)
+			return false;
 		return true;
 	}
+	
+	
 }
 
 

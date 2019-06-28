@@ -116,7 +116,7 @@ class ArtifactTest {
             writer.flush();
             writer.close();
             Artifact artifact = Artifact.recordArtifacts(Arrays.asList(path.toString()), null, null, null, true).iterator().next();
-			artifacts.add(new Artifact("file", artifact.getArtifactHashes()));
+			artifacts.add(new Artifact("file", artifact.getHash()));
 		}
 		Iterator<Artifact> it = artifacts.iterator();
 		Artifact prev = it.next();

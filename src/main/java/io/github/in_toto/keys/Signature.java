@@ -11,6 +11,8 @@ public final class Signature
 {
     private String keyid;
     private String sig;
+    
+    public Signature() {}
 
     public Signature(String keyid, String sig) {
         this.keyid = keyid;
@@ -22,7 +24,6 @@ public final class Signature
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((keyid == null) ? 0 : keyid.hashCode());
-		result = prime * result + ((sig == null) ? 0 : sig.hashCode());
 		return result;
 	}
 
@@ -40,12 +41,9 @@ public final class Signature
 				return false;
 		} else if (!keyid.equals(other.keyid))
 			return false;
-		if (sig == null) {
-			if (other.sig != null)
-				return false;
-		} else if (!sig.equals(other.sig))
-			return false;
 		return true;
+		// every sig is different, so not part of equals
+		// if this.keyid == other.keyid => signature is made with same key so equal
 	}
 
 	@Override

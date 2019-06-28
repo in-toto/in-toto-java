@@ -1,18 +1,17 @@
 package io.github.in_toto.models;
 
-import io.github.in_toto.models.Artifact.ArtifactHash;
-import io.github.in_toto.models.Artifact.ArtifactHash.HashAlgorithm;
 import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Link.LinkBuilder;
 import io.github.in_toto.keys.RSAKey;
-import io.github.in_toto.lib.JSONEncoder;
 import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.keys.Key;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
+import java.util.Map;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -73,7 +72,7 @@ class LinkTest
 
         assertTrue(link instanceof Link);
         assertTrue(link.getByproducts() instanceof ByProducts);
-        assertTrue(link.getEnvironment() instanceof Environment);
+        assertTrue(link.getEnvironment() instanceof Map);
         assertTrue(link.getName() instanceof String);
         assertTrue(link.getProducts() instanceof Set);
         assertTrue(link.getMaterials() instanceof Set);
@@ -129,7 +128,9 @@ class LinkTest
     @DisplayName("Validate Link setEnvironments")
     public void testValidEnvironment()
     {
-        Environment environment = new Environment("<ENV>");
+    	Map<String, String> environment = new HashMap<String, String>();
+    	
+    	environment.put("bar", "foo");
         
         linkBuilder.setEnvironment(environment);
         Link link = linkBuilder.build();
@@ -189,7 +190,7 @@ class LinkTest
         
         newLinkMetablock.sign(key);
         
-        assertEquals(newLinkMetablock.signatures.iterator().next().getSig(), testMetablockLink.signatures.iterator().next().getSig());
+        assertEquals(newLinkMetablock.signatures, testMetablockLink.signatures);
 
         assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
         assertTrue(newLinkMetablock.signed.getProducts().contains(pathArtifact1));
@@ -209,7 +210,7 @@ class LinkTest
         assertTrue(metablockFromFile.signed.getMaterials().contains(pathArtifact1));
         assertTrue(metablockFromFile.signed.getMaterials().contains(pathArtifact2));
         assertTrue(metablockFromFile.signed.getMaterials().contains(pathArtifact3));        
-        //assertEquals(metablockFromFile.signatures.get(0).getSig(), testMetablockLink.signatures.get(0).getSig());
+        assertEquals(metablockFromFile.signatures, testMetablockLink.signatures);
     }
 
     
@@ -217,7 +218,7 @@ class LinkTest
     @DisplayName("Validate link serialization and de-serialization with artifacts from file")
     public void testLinkDeSerializationWithArtifactsFromFile() throws URISyntaxException, IOException
     {
-    	Artifact testproduct = new Artifact("demo-project/foo.py", new ArtifactHash(HashAlgorithm.sha256, "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235"));
+    	Artifact testproduct = new Artifact("demo-project/foo.py", "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235");
 
         Metablock<Link> testMetablockLink = transporter.load(new URI("src/test/resources/link_test/clone.776a00e2.link"), metablockType);
         assertTrue(testMetablockLink.signed.getName() != null);
@@ -238,27 +239,24 @@ class LinkTest
     @DisplayName("Validate link deserialization and serialization with byproducts")
     public void testLinkDeserializationSerializationWithByProducts() throws IOException, URISyntaxException, ValueError
     {
-    	String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{\"return-value\":\"0\",\"stderr\":\"\",\"stdout\":\"demo-project/\n" + 
+    	String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{\"return-value\":0,\"stderr\":\"\",\"stdout\":\"demo-project/\n" + 
     			"demo-project/foo.py\n" + 
-    			"\"},\"command\":[\"tar\",\"--exclude\",\".git\",\"-zcvf\",\"demo-project.tar.gz\",\"demo-project\"],\"environment\":{}"
-    			+ ",\"materials\":{\"demo-project/foo.py\":{\"sha256\":\"c2c0ea54fa94fac3a4e1575d6ed3bbd1b01a6d0b8deb39196bdc31c457ef731b\"}}"
-    			+ ",\"name\":\"package\",\"products\":{\"demo-project.tar.gz\":{\"sha256\":\"17ffccbc3bb4822a63bef7433a9bea79d726d4e02606242b9b97e317fd89c462\"}}}";
-    	String referenceCanonicalLinkHex = "7b225f74797065223a226c696e6b222c22627970726f6475637473223a7b2272657475726e2d76616c7565223a2230"
-    			+ "222c22737464657272223a22222c227374646f7574223a2264656d6f2d70726f6a6563742f0a64656d6f2d70726f6a6563742f666f6f2e70790a227"
-    			+ "d2c22636f6d6d616e64223a5b22746172222c222d2d6578636c756465222c222e676974222c222d7a637666222c2264656d6f2d70726f6a6563742e"
-    			+ "7461722e677a222c2264656d6f2d70726f6a656374225d2c22656e7669726f6e6d656e74223a7b22776f726b646972223a6e756c6c7d2c226d61746"
-    			+ "57269616c73223a7b2264656d6f2d70726f6a6563742f666f6f2e7079223a7b22736861323536223a22633263306561353466613934666163336134"
-    			+ "65313537356436656433626264316230316136643062386465623339313936626463333163343537656637333162227d7d2c226e616d65223a22706"
-    			+ "1636b616765222c2270726f6475637473223a7b2264656d6f2d70726f6a6563742e7461722e677a223a7b22736861323536223a2231376666636362"
-    			+ "633362623438323261363362656637343333613962656137396437323664346530323630363234326239623937653331376664383963343632227d7"
-    			+ "d7d";
+    			"\"},\"command\":[\"tar\",\"--exclude\",\".git\",\"-zcvf\",\"demo-project.tar.gz\",\"demo-project\"],\"environment\":{},"
+    			+ "\"materials\":{\"demo-project/foo.py\":{\"sha256\":\"c2c0ea54fa94fac3a4e1575d6ed3bbd1b01a6d0b8deb39196bdc31c457ef731b\"}},"
+    			+ "\"name\":\"package\",\"products\":{\"demo-project.tar.gz\":{\"sha256\":\"17ffccbc3bb4822a63bef7433a9bea79d726d4e02606242b9b97e317fd89c462\"}}}";
+    	String referenceCanonicalLinkHex = "7b225f74797065223a226c696e6b222c22627970726f6475637473223a7b2272657475726e2d76616c7565223a302c22737464657272223a22222c"
+    			+ "227374646f7574223a2264656d6f2d70726f6a6563742f0a64656d6f2d70726f6a6563742f666f6f2e70790a227d2c22636f6d6d616e64223a5b22746172222c222d2d6578636c7"
+    			+ "56465222c222e676974222c222d7a637666222c2264656d6f2d70726f6a6563742e7461722e677a222c2264656d6f2d70726f6a656374225d2c22656e7669726f6e6d656e74223a"
+    			+ "7b7d2c226d6174657269616c73223a7b2264656d6f2d70726f6a6563742f666f6f2e7079223a7b22736861323536223a22633263306561353466613934666163336134653135373"
+    			+ "56436656433626264316230316136643062386465623339313936626463333163343537656637333162227d7d2c226e616d65223a227061636b616765222c2270726f64756374732"
+    			+ "23a7b2264656d6f2d70726f6a6563742e7461722e677a223a7b22736861323536223a223137666663636263336262343832326136336265663734333361396265613739643732366"
+    			+ "4346530323630363234326239623937653331376664383963343632227d7d7d";
     	Metablock<Link> testMetablockLink = transporter.load(new URI("src/test/resources/link_test/byproducts.link"), metablockType);
     	
-    	Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        String linkString = JSONEncoder.canonicalize(gson.toJsonTree(testMetablockLink.getSigned()));
+    	String linkString = testMetablockLink.getSigned().JSONEncodeCanonical();
         assertEquals(referenceCanonical, linkString);
     	
-    	assertEquals(referenceCanonicalLinkHex, Hex.toHexString(testMetablockLink.getCanonicalJSON(true).getBytes()));
+    	assertEquals(referenceCanonicalLinkHex, Hex.toHexString(testMetablockLink.getCanonicalJSON().getBytes()));
     }
 
 
