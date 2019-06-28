@@ -1,7 +1,7 @@
 package io.github.in_toto.models;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.lang.reflect.Type;
 import java.io.IOException;
 
@@ -29,9 +29,9 @@ import org.bouncycastle.crypto.CryptoException;
  */
 public final class Metablock<S extends Signable> extends SupplyChainItem {
     final S signed;
-    List<Signature> signatures;
+    Set<Signature> signatures;
 
-	public void setSignatures(List<Signature> signatures) {
+	public void setSignatures(Set<Signature> signatures) {
 		this.signatures = signatures;
 	}
 
@@ -40,12 +40,12 @@ public final class Metablock<S extends Signable> extends SupplyChainItem {
      *
      * Ensures that, at the least, there is an empty list of signatures.
      */
-    public Metablock(S signed, List<Signature> signatures) {
+    public Metablock(S signed, Set<Signature> signatures) {
     	super(signed.getName(), signed.getType());
         this.signed = signed;
 
         if (signatures == null)
-            signatures = new ArrayList<Signature>();
+            signatures = new HashSet<Signature>();
         this.signatures = signatures;
     }
 
@@ -142,11 +142,11 @@ public final class Metablock<S extends Signable> extends SupplyChainItem {
     public String getShortKeyId() {
     	if (this.signatures == null || this.signatures.isEmpty())
             return "UNSIGNED";
-        String keyId = this.signatures.get(0).getKeyid();
+        String keyId = this.signatures.iterator().next().getKeyid();
         return keyId.substring(0, 8);
     }
 
-	public List<Signature> getSignatures() {
+	public Set<Signature> getSignatures() {
 		return signatures;
 	}
 

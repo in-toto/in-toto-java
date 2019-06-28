@@ -11,9 +11,7 @@ import io.github.in_toto.keys.Key;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
@@ -183,17 +181,15 @@ class LinkTest
         Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
         testMetablockLink.sign(key);
         
-        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).getKeyid());
+        URI linkFile = new URI(Files.createFile(temporaryFolder.resolve("linkFile")).toString());
         
         transporter.dump(linkFile, testMetablockLink);
 
         Metablock<Link> newLinkMetablock = transporter.load(linkFile, metablockType);
-        File tempFile = new File(linkFile.getPath());
-        tempFile.delete();
         
         newLinkMetablock.sign(key);
         
-        assertEquals(newLinkMetablock.signatures.get(0).getSig(), testMetablockLink.signatures.get(0).getSig());
+        assertEquals(newLinkMetablock.signatures.iterator().next().getSig(), testMetablockLink.signatures.iterator().next().getSig());
 
         assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
         assertTrue(newLinkMetablock.signed.getProducts().contains(pathArtifact1));
@@ -219,7 +215,7 @@ class LinkTest
     
     @Test
     @DisplayName("Validate link serialization and de-serialization with artifacts from file")
-    public void testLinkDeSerializationWithArtifactsFromFile() throws URISyntaxException
+    public void testLinkDeSerializationWithArtifactsFromFile() throws URISyntaxException, IOException
     {
     	Artifact testproduct = new Artifact("demo-project/foo.py", new ArtifactHash(HashAlgorithm.sha256, "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235"));
 
@@ -228,13 +224,11 @@ class LinkTest
         assertEquals(testMetablockLink.signed.getName(), "clone");
         assertTrue(testMetablockLink.signed.getProducts().contains(testproduct));
 
-        URI linkFile = new URI(testMetablockLink.getSignatures().get(0).getKeyid());
+        URI linkFile = new URI(Files.createFile(temporaryFolder.resolve("cloneFile")).toString());
         
         transporter.dump(linkFile, testMetablockLink);
 
         Metablock<Link> newLinkMetablock = transporter.load(linkFile, metablockType);
-        File tempFile = new File(linkFile.getPath());
-        tempFile.delete();
 
         assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
         assertTrue(newLinkMetablock.signed.getProducts().contains(testproduct));
