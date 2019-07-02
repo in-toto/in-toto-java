@@ -11,7 +11,7 @@ public interface Transporter {
      * @param uri {@code URI} to dump to
 	 * @param metablock {@code Metablock} to dump to {@code URI} uri
      */
-	public <S extends Signable> void dump(URI uri, Metablock<S> metablock);
+	public <S extends Signable> void dump(String id, Metablock<S> metablock);
 	
 	/**
 	 * Read a {@code Metablock} from an URI.
@@ -24,6 +24,6 @@ public interface Transporter {
 	 * @param type the type of {@code Metablock<S extends Signable type}
 	 * @return metablock
 	 */
-	public <S extends Signable> Metablock<S> load(URI uri, Type type);
+	public <S extends Signable> Metablock<S> load(String uri, Type type);
 
 }

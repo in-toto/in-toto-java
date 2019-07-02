@@ -60,6 +60,32 @@ public class ByProducts {
 			return false;
 		return true;
 	}
+
+	public String getStdout() {
+		return stdout;
+	}
+
+	public void setStdout(String stdout) {
+		this.stdout = stdout;
+	}
+
+	public String getStderr() {
+		return stderr;
+	}
+
+	public void setStderr(String stderr) {
+		this.stderr = stderr;
+	}
+
+	public Integer getReturnValue() {
+		return returnValue;
+	}
+
+	public void setReturnValue(Integer returnValue) {
+		this.returnValue = returnValue;
+	}
+	
+	
 	
 	
 

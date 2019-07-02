@@ -156,8 +156,7 @@ class LinkTest
     {
         Metablock<Link> metablock = new Metablock<Link>(link, null);
         metablock.sign(key);
-    	URI uri = new URI("test.0b70eafb.link");
-        transporter.dump(uri, metablock);
+    	transporter.dump("test.0b70eafb.link", metablock);
         File fl = new File("test.0b70eafb.link");
         assertTrue(fl.exists());
         fl.delete();
@@ -182,7 +181,7 @@ class LinkTest
         Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
         testMetablockLink.sign(key);
         
-        URI linkFile = new URI(Files.createFile(temporaryFolder.resolve("linkFile")).toString());
+        String linkFile = Files.createFile(temporaryFolder.resolve("linkFile")).toString();
         
         transporter.dump(linkFile, testMetablockLink);
 
@@ -200,7 +199,7 @@ class LinkTest
         assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact2));
         assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact3));
         
-        Metablock<Link> metablockFromFile = transporter.load(new URI("src/test/resources/link_test/serialize/serialize.link"), metablockType);
+        Metablock<Link> metablockFromFile = transporter.load("src/test/resources/link_test/serialize/serialize.link", metablockType);
         metablockFromFile.sign(key);
         
         assertEquals(metablockFromFile.signed.getName(), testMetablockLink.signed.getName());
@@ -220,12 +219,12 @@ class LinkTest
     {
     	Artifact testproduct = new Artifact("demo-project/foo.py", "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235");
 
-        Metablock<Link> testMetablockLink = transporter.load(new URI("src/test/resources/link_test/clone.776a00e2.link"), metablockType);
+        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/clone.776a00e2.link", metablockType);
         assertTrue(testMetablockLink.signed.getName() != null);
         assertEquals(testMetablockLink.signed.getName(), "clone");
         assertTrue(testMetablockLink.signed.getProducts().contains(testproduct));
 
-        URI linkFile = new URI(Files.createFile(temporaryFolder.resolve("cloneFile")).toString());
+        String linkFile = Files.createFile(temporaryFolder.resolve("cloneFile")).toString();
         
         transporter.dump(linkFile, testMetablockLink);
 
@@ -251,7 +250,7 @@ class LinkTest
     			+ "56436656433626264316230316136643062386465623339313936626463333163343537656637333162227d7d2c226e616d65223a227061636b616765222c2270726f64756374732"
     			+ "23a7b2264656d6f2d70726f6a6563742e7461722e677a223a7b22736861323536223a223137666663636263336262343832326136336265663734333361396265613739643732366"
     			+ "4346530323630363234326239623937653331376664383963343632227d7d7d";
-    	Metablock<Link> testMetablockLink = transporter.load(new URI("src/test/resources/link_test/byproducts.link"), metablockType);
+    	Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/byproducts.link", metablockType);
     	
     	String linkString = testMetablockLink.getSigned().JSONEncodeCanonical();
         assertEquals(referenceCanonical, linkString);

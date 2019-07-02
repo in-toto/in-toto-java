@@ -116,8 +116,12 @@ public class Metablock<S extends Signable> {
             System.out.println("Coudln't sign payload!");
             return;
         }
-
-        this.signatures.add(new Signature(keyid, sig));
+        
+        Signature signature = new Signature(keyid, sig);
+        // first remove if available
+        // because oldSig.equals(newSig) because keyIdOld == keyIdNew
+        this.signatures.remove(signature);
+        this.signatures.add(signature);
 
     }
     
@@ -125,14 +129,34 @@ public class Metablock<S extends Signable> {
      * Get short key id.
      * 
      * The short key are the first 8 characters of the key
+     * 
+     * Only valid for Metablock<Link> because this is only signed once.
      *  
      * @return String  
      */
     public String getShortKeyId() {
     	if (this.signatures == null || this.signatures.isEmpty())
             return "UNSIGNED";
+    	else if (this.signatures.size() > 1) {
+    		throw new RuntimeException("Short Key id is ambiguous because there is more than 1 key id available");
+    	}
         String keyId = this.signatures.iterator().next().getKeyid();
         return keyId.substring(0, 8);
+    }
+    
+	/**
+     * get full link name, including keyid bytes in the form of
+     *
+     *  {@literal <stepname>.<keyid_bytes>.link }
+     *
+     *  This method will always use the keyid of the first signature in the
+     *  metadata.
+     *
+     *  @return a string containing this name or null if no signatures are
+     *  present
+     */
+	public String getFullName() {
+        return this.signed.getFullName(getShortKeyId());
     }
 
 	public Set<Signature> getSignatures() {

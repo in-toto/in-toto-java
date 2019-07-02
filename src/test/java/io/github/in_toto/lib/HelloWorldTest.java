@@ -52,12 +52,7 @@ class HelloWorldTest {
 		Metablock<Link> linkMetablock = new Metablock<Link>(link, null);
 		linkMetablock.sign(thiskey);
 		FileTransporter transport = new FileTransporter();
-		try {
-			transport.dump(new URI("test.0b70eafb.link"), linkMetablock);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		transport.dump("test.0b70eafb.link", linkMetablock);
 	}
 
 }

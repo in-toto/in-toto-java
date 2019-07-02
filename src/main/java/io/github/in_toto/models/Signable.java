@@ -1,7 +1,5 @@
 package io.github.in_toto.models;
 
-import com.google.gson.annotations.SerializedName;
-
 import io.github.in_toto.lib.JSONEncoder;
 
 /**
@@ -12,6 +10,8 @@ import io.github.in_toto.lib.JSONEncoder;
 public interface Signable extends JSONEncoder {
 	
 	public String getName();
+	
+	public String getFullName(String shortKey);
 
 	public SignableType getType();
 }

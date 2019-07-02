@@ -44,7 +44,7 @@ class TestJSONCanonical {
 
         // Load test link with special values (edge cases) in opaque
         // environment field
-        Metablock<Link> metablock = transporter.load(new URI("src/test/resources/test_json_canonical/testvalues.link"), metablockType);
+        Metablock<Link> metablock = transporter.load("src/test/resources/test_json_canonical/testvalues.link", metablockType);
 
         String linkString = metablock.getSigned().JSONEncodeCanonical();
         assertEquals(referenceCanonical, linkString);

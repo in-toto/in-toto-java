@@ -15,13 +15,13 @@ public final class FileTransporter implements Transporter {
 	}
 	
 	@Override
-	public <S extends Signable> void dump(URI uri, Metablock<S> metablock) {
+	public <S extends Signable> void dump(String id, Metablock<S> metablock) {
 
         FileWriter writer = null;
         String jsonString = metablock.toJson();
 
         try {
-            writer = new FileWriter(uri.getPath());
+            writer = new FileWriter(id);
             writer.write(jsonString);
             writer.flush();
             writer.close();
@@ -31,10 +31,10 @@ public final class FileTransporter implements Transporter {
 	}
 
 	@Override
-	public <S extends Signable> Metablock<S> load(URI uri, Type type) {
+	public <S extends Signable> Metablock<S> load(String uri, Type type) {
 		String jsonString = null;
 		try {
-			jsonString = new String ( Files.readAllBytes( Paths.get(uri.getPath()) ) );
+			jsonString = new String ( Files.readAllBytes( Paths.get(uri) ) );
 	    }
 	    catch (IOException e) {
 	    	throw new RuntimeException("Couldn't read file: " + e.toString());

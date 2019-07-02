@@ -1,7 +1,6 @@
 package io.github.in_toto.models;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +31,7 @@ public final class Link implements Signable {
     // {"byproducts": {"return-value": 1}}
     // is parsed as
     // {"byproducts": {"return-value": 1.0}}
-    private ByProducts byproducts;
+    private ByProducts byproducts = new ByProducts();
     private Map<String, String> environment = new HashMap<String,String>();
     private List<String> command = new ArrayList<String>();
     
@@ -59,32 +58,33 @@ public final class Link implements Signable {
             HashSet<Artifact> products,
             Map<String, String> environment, List<String> command,
             ByProducts byproducts) {
-    	this.name = name;
-    	
-    	HashSet<Artifact> tempArtifacts = new HashSet<Artifact>();
-        if (materials != null)
-        	tempArtifacts.addAll(materials);
-        this.materials = tempArtifacts;
-        
-        tempArtifacts = new HashSet<Artifact>();
-        if (products != null)
-        	tempArtifacts.addAll(products);
-        this.products = tempArtifacts;
+		this.name = name;
+		if (materials != null) {
+			HashSet<Artifact> tempArtifacts = new HashSet<Artifact>();
+			tempArtifacts.addAll(materials);
+			this.materials = tempArtifacts;
+		}
 
-        ArrayList<String> tempCommands = new ArrayList<String>();
-        if (command != null)
-        	tempCommands.addAll(command);
-        this.command = tempCommands;
-        
-        HashMap<String, String> tempEnv = new HashMap<String, String>();
-        if (environment != null)
-            tempEnv.putAll(environment);
-        this.environment = tempEnv;
+		if (products != null) {
+			HashSet<Artifact> tempArtifacts = new HashSet<Artifact>();
+			tempArtifacts.addAll(products);
+			this.products = tempArtifacts;
+		}
 
-        if (byproducts == null)
-            this.byproducts = new ByProducts();
-        else
-        	this.byproducts = byproducts;
+		if (command != null) {
+			ArrayList<String> tempCommands = new ArrayList<String>();
+			tempCommands.addAll(command);
+			this.command = tempCommands;
+		}
+
+		if (environment != null) {
+			HashMap<String, String> tempEnv = new HashMap<String, String>();
+			tempEnv.putAll(environment);
+			this.environment = tempEnv;
+		}
+
+		if (byproducts != null)
+			this.byproducts = byproducts;
     }
     
     private Link(LinkBuilder builder) {   	
