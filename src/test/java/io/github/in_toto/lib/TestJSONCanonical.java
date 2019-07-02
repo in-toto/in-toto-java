@@ -46,7 +46,7 @@ class TestJSONCanonical {
         // environment field
         Metablock<Link> metablock = transporter.load(new URI("src/test/resources/test_json_canonical/testvalues.link"), metablockType);
 
-        String linkString = metablock.getCanonicalJSON();
+        String linkString = metablock.getSigned().JSONEncodeCanonical();
         assertEquals(referenceCanonical, linkString);
         // Assert that Java's canonical json representation of the link is
         // equal to reference implementation's canonical json representation

@@ -27,7 +27,7 @@ import org.bouncycastle.crypto.CryptoException;
  * - A signed field, with the signable portion of a piece of metadata.
  * - A signatures field, a list of the signatures on this metadata.
  */
-public class Metablock<S extends Signable> extends SupplyChainItem {
+public class Metablock<S extends Signable> {
     S signed;
     Set<Signature> signatures = new HashSet<Signature>();
 
@@ -43,7 +43,6 @@ public class Metablock<S extends Signable> extends SupplyChainItem {
      * Ensures that, at the least, there is an empty list of signatures.
      */
     public Metablock(S signed, HashSet<Signature> signatures) {
-    	super(signed.getName(), signed.getType());
         this.signed = signed;
 
         if (signatures == null)
@@ -121,16 +120,6 @@ public class Metablock<S extends Signable> extends SupplyChainItem {
         this.signatures.add(new Signature(keyid, sig));
 
     }
-
-    /**
-     * Public shortcut to call JSONEncodeCanonical on the signed field of
-     * this metablock.
-     *
-     * @return a JSON string representation of this obj
-     */
-    public String getCanonicalJSON() {
-        return this.signed.JSONEncodeCanonical();
-    }
     
     /**
      * Get short key id.
@@ -189,15 +178,5 @@ public class Metablock<S extends Signable> extends SupplyChainItem {
 		} else if (!signed.equals(other.signed))
 			return false;
 		return true;
-	}
-
-	@Override
-	public String getName() {
-		return signed.getName();
-	}
-
-	@Override
-	public SignableType getType() {
-		return SignableType.metablock;
 	}
 }

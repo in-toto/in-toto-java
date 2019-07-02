@@ -256,7 +256,7 @@ class LinkTest
     	String linkString = testMetablockLink.getSigned().JSONEncodeCanonical();
         assertEquals(referenceCanonical, linkString);
     	
-    	assertEquals(referenceCanonicalLinkHex, Hex.toHexString(testMetablockLink.getCanonicalJSON().getBytes()));
+    	assertEquals(referenceCanonicalLinkHex, Hex.toHexString(testMetablockLink.getSigned().JSONEncodeCanonical().getBytes()));
     }
 
 
