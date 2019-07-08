@@ -3,7 +3,7 @@ package io.github.in_toto.models;
 import java.lang.reflect.Type;
 import java.net.URI;
 
-public interface Transporter {
+public interface LinkTransporter {
 	
 	/**
      * Dumps the metablock to an external URI.
@@ -11,7 +11,7 @@ public interface Transporter {
      * @param uri {@code URI} to dump to
 	 * @param metablock {@code Metablock} to dump to {@code URI} uri
      */
-	public <S extends Signable> void dump(String id, Metablock<S> metablock);
+	public void dump(Metablock<Link> metablock);
 	
 	/**
 	 * Read a {@code Metablock} from an URI.
@@ -24,6 +24,6 @@ public interface Transporter {
 	 * @param type the type of {@code Metablock<S extends Signable type}
 	 * @return metablock
 	 */
-	public <S extends Signable> Metablock<S> load(String uri, Type type);
+	public Metablock<Link> load(String id);
 
 }

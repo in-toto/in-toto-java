@@ -2,7 +2,7 @@ package io.github.in_toto.lib;
 
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.RSAKey;
-import io.github.in_toto.models.FileTransporter;
+import io.github.in_toto.models.FileLinkTransporter;
 import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Metablock;
 import io.github.in_toto.models.Link.LinkBuilder;
@@ -26,8 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestJSONCanonical {
 
     private Key key = RSAKey.read("src/test/resources/test_json_canonical/somekey.pem");
-    private FileTransporter transporter = new FileTransporter();
-    private Type metablockType = new TypeToken<Metablock<Link>>() {}.getType();
+    private FileLinkTransporter transporter = new FileLinkTransporter();
     
     @Test
     public void testCanonicalJSONEdgeCases () throws IOException, URISyntaxException {
@@ -44,7 +43,7 @@ class TestJSONCanonical {
 
         // Load test link with special values (edge cases) in opaque
         // environment field
-        Metablock<Link> metablock = transporter.load("src/test/resources/test_json_canonical/testvalues.link", metablockType);
+        Metablock<Link> metablock = transporter.load("src/test/resources/test_json_canonical/testvalues.link");
 
         String linkString = metablock.getSigned().JSONEncodeCanonical();
         assertEquals(referenceCanonical, linkString);

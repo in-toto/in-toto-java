@@ -3,25 +3,31 @@ package io.github.in_toto.models;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-public final class FileTransporter implements Transporter {
+public final class FileLinkTransporter implements LinkTransporter {
+	private String directoryPath;
 	
-	public FileTransporter() {	
+
+	
+	public FileLinkTransporter() {}
+	
+	public FileLinkTransporter(String dir) {
+		this.directoryPath = dir;
 	}
 	
 	@Override
-	public <S extends Signable> void dump(String id, Metablock<S> metablock) {
+	public void dump(Metablock<Link> metablock) {
 
         FileWriter writer = null;
         String jsonString = metablock.toJson();
 
         try {
-            writer = new FileWriter(id);
+            writer = new FileWriter(Paths.get(directoryPath, metablock.getFullName()).toString());
             writer.write(jsonString);
             writer.flush();
             writer.close();
@@ -31,7 +37,7 @@ public final class FileTransporter implements Transporter {
 	}
 
 	@Override
-	public <S extends Signable> Metablock<S> load(String uri, Type type) {
+	public Metablock<Link> load(String uri) {
 		String jsonString = null;
 		try {
 			jsonString = new String ( Files.readAllBytes( Paths.get(uri) ) );
@@ -39,8 +45,9 @@ public final class FileTransporter implements Transporter {
 	    catch (IOException e) {
 	    	throw new RuntimeException("Couldn't read file: " + e.toString());
 	    }
+		Type metablockType = new TypeToken<Metablock<Link>>() {}.getType();
 		Gson gson = new Gson();
-	    Metablock<S> metablock = gson.fromJson(jsonString, type);
+	    Metablock<Link> metablock = gson.fromJson(jsonString, metablockType);
 	    return metablock;
 	}
 }

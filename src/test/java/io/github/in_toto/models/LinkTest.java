@@ -48,8 +48,6 @@ class LinkTest
     private LinkBuilder linkBuilder =  new LinkBuilder("test");
 	private Link link = linkBuilder.build();
     private Key key = RSAKey.read("src/test/resources/link_test/somekey.pem");
-    private FileTransporter transporter = new FileTransporter();
-    private Type metablockType = new TypeToken<Metablock<Link>>() {}.getType();
     
     @TempDir
     Path temporaryFolder;
@@ -149,17 +147,16 @@ class LinkTest
         assertEquals(command.get(0), link.getCommand().get(0));
     }
 
-    @AfterAll
     @Test
     @DisplayName("Validate Link sign & dump")
-    public void testLinkSignDump() throws URISyntaxException
+    public void testLinkSignDump() throws URISyntaxException, IOException
     {
         Metablock<Link> metablock = new Metablock<Link>(link, null);
         metablock.sign(key);
-    	transporter.dump("test.0b70eafb.link", metablock);
-        File fl = new File("test.0b70eafb.link");
-        assertTrue(fl.exists());
-        fl.delete();
+        String linkFile = Files.createFile(temporaryFolder.resolve(metablock.getFullName())).toString();
+        FileLinkTransporter transporter = new FileLinkTransporter(temporaryFolder.toString());
+    	transporter.dump(metablock);
+        assertTrue(Files.exists(Paths.get(linkFile)));
     }
 
     @Test
@@ -181,11 +178,13 @@ class LinkTest
         Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
         testMetablockLink.sign(key);
         
-        String linkFile = Files.createFile(temporaryFolder.resolve("linkFile")).toString();
-        
-        transporter.dump(linkFile, testMetablockLink);
+        String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).toString();
 
-        Metablock<Link> newLinkMetablock = transporter.load(linkFile, metablockType);
+        FileLinkTransporter transporter = new FileLinkTransporter(temporaryFolder.toString());
+        
+        transporter.dump(testMetablockLink);
+
+        Metablock<Link> newLinkMetablock = transporter.load(linkFile);
         
         newLinkMetablock.sign(key);
         
@@ -199,7 +198,7 @@ class LinkTest
         assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact2));
         assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact3));
         
-        Metablock<Link> metablockFromFile = transporter.load("src/test/resources/link_test/serialize/serialize.link", metablockType);
+        Metablock<Link> metablockFromFile = transporter.load("src/test/resources/link_test/serialize/serialize.link");
         metablockFromFile.sign(key);
         
         assertEquals(metablockFromFile.signed.getName(), testMetablockLink.signed.getName());
@@ -219,16 +218,21 @@ class LinkTest
     {
     	Artifact testproduct = new Artifact("demo-project/foo.py", "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235");
 
-        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/clone.776a00e2.link", metablockType);
+
+        FileLinkTransporter transporter = new FileLinkTransporter();
+
+        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/clone.776a00e2.link");
         assertTrue(testMetablockLink.signed.getName() != null);
         assertEquals(testMetablockLink.signed.getName(), "clone");
         assertTrue(testMetablockLink.signed.getProducts().contains(testproduct));
-
-        String linkFile = Files.createFile(temporaryFolder.resolve("cloneFile")).toString();
         
-        transporter.dump(linkFile, testMetablockLink);
+        String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).toString();
 
-        Metablock<Link> newLinkMetablock = transporter.load(linkFile, metablockType);
+        transporter = new FileLinkTransporter(temporaryFolder.toString());
+        
+        transporter.dump(testMetablockLink);
+
+        Metablock<Link> newLinkMetablock = transporter.load(linkFile);
 
         assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
         assertTrue(newLinkMetablock.signed.getProducts().contains(testproduct));
@@ -250,7 +254,11 @@ class LinkTest
     			+ "56436656433626264316230316136643062386465623339313936626463333163343537656637333162227d7d2c226e616d65223a227061636b616765222c2270726f64756374732"
     			+ "23a7b2264656d6f2d70726f6a6563742e7461722e677a223a7b22736861323536223a223137666663636263336262343832326136336265663734333361396265613739643732366"
     			+ "4346530323630363234326239623937653331376664383963343632227d7d7d";
-    	Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/byproducts.link", metablockType);
+    	
+
+
+        FileLinkTransporter transporter = new FileLinkTransporter();
+    	Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/byproducts.link");
     	
     	String linkString = testMetablockLink.getSigned().JSONEncodeCanonical();
         assertEquals(referenceCanonical, linkString);
