@@ -84,9 +84,5 @@ public class ByProducts {
 	public void setReturnValue(Integer returnValue) {
 		this.returnValue = returnValue;
 	}
-	
-	
-	
-	
 
 }

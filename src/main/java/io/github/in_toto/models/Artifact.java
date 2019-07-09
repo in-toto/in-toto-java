@@ -353,7 +353,5 @@ public final class Artifact {
 			return false;
 		return true;
 	}
-	
-	
 
 }

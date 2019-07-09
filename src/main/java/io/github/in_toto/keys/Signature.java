@@ -55,16 +55,8 @@ public final class Signature
 		return keyid;
 	}
 
-	public void setKeyid(String keyid) {
-		this.keyid = keyid;
-	}
-
 	public String getSig() {
 		return sig;
-	}
-
-	public void setSig(String sig) {
-		this.sig = sig;
 	}
 	
 	

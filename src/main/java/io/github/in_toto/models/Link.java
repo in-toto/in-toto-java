@@ -280,41 +280,6 @@ public final class Link implements Signable {
 		return this.type;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-
-	public void setType(SignableType type) {
-		this.type = type;
-	}
-
-
-	public void setMaterials(Set<Artifact> materials) {
-		this.materials = materials;
-	}
-
-
-	public void setProducts(Set<Artifact> products) {
-		this.products = products;
-	}
-
-
-	public void setByproducts(ByProducts byproducts) {
-		this.byproducts = byproducts;
-	}
-
-
-	public void setEnvironment(Map<String, String> environment) {
-		this.environment = environment;
-	}
-
-
-	public void setCommand(List<String> command) {
-        this.command = command;
-	}
-
-
 	@Override
 	public String toString() {
 		return "Link [name=" + name + ", type=" + type + ", materials=" + materials + ", products=" + products
