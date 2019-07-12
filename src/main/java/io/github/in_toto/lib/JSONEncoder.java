@@ -8,7 +8,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 
+import io.github.in_toto.models.Signable;
+
 import java.util.TreeSet;
+
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.util.encoders.Hex;
+
 import java.util.Map;
 
 /**
@@ -125,4 +131,14 @@ public interface JSONEncoder
 
         return canonicalize(gson.toJsonTree(this));
     }
+	
+	default public String getShortHash() {	
+		byte[] jsonBytes = this.JSONEncodeCanonical().getBytes();
+        // initialize digest
+        SHA256Digest digest =  new SHA256Digest();
+        byte[] result = new byte[digest.getDigestSize()];
+        digest.update(jsonBytes, 0, jsonBytes.length);
+        digest.doFinal(result, 0);
+        return Hex.toHexString(result).substring(0, 8);
+	}
 }
