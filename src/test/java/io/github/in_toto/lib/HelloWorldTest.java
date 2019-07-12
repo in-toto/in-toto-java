@@ -15,9 +15,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.RSAKey;
-import io.github.in_toto.models.FileLinkTransporter;
 import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Link.LinkBuilder;
+import io.github.in_toto.transporters.FileTransporter;
 import io.github.in_toto.models.Metablock;
 
 class HelloWorldTest {
@@ -59,7 +59,7 @@ class HelloWorldTest {
 		Metablock<Link> linkMetablock = new Metablock<Link>(link, null);
 		linkMetablock.sign(thiskey);
 		String linkFile = Files.createFile(temporaryFolder.resolve(linkMetablock.getFullName())).toString();
-        FileLinkTransporter transporter = new FileLinkTransporter(temporaryFolder.toString());
+        FileTransporter transporter = new FileTransporter(temporaryFolder.toString());
     	transporter.dump(linkMetablock);
 	}
 

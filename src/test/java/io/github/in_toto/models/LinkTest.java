@@ -2,6 +2,7 @@ package io.github.in_toto.models;
 
 import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Link.LinkBuilder;
+import io.github.in_toto.transporters.FileTransporter;
 import io.github.in_toto.keys.RSAKey;
 import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.keys.Key;
@@ -48,6 +49,9 @@ class LinkTest
     private LinkBuilder linkBuilder =  new LinkBuilder("test");
 	private Link link = linkBuilder.build();
     private Key key = RSAKey.read("src/test/resources/link_test/somekey.pem");
+    
+
+	private Type metablockType = new TypeToken<Metablock<Link>>() {}.getType();
     
     @TempDir
     Path temporaryFolder;
@@ -154,7 +158,7 @@ class LinkTest
         Metablock<Link> metablock = new Metablock<Link>(link, null);
         metablock.sign(key);
         String linkFile = Files.createFile(temporaryFolder.resolve(metablock.getFullName())).toString();
-        FileLinkTransporter transporter = new FileLinkTransporter(temporaryFolder.toString());
+        FileTransporter transporter = new FileTransporter(temporaryFolder.toString());
     	transporter.dump(metablock);
         assertTrue(Files.exists(Paths.get(linkFile)));
     }
@@ -180,11 +184,11 @@ class LinkTest
         
         String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).toString();
 
-        FileLinkTransporter transporter = new FileLinkTransporter(temporaryFolder.toString());
+        FileTransporter transporter = new FileTransporter(temporaryFolder.toString());
         
         transporter.dump(testMetablockLink);
 
-        Metablock<Link> newLinkMetablock = transporter.load(linkFile);
+        Metablock<Link> newLinkMetablock = transporter.load(linkFile, metablockType);
         
         newLinkMetablock.sign(key);
         
@@ -198,7 +202,7 @@ class LinkTest
         assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact2));
         assertTrue(newLinkMetablock.signed.getMaterials().contains(pathArtifact3));
         
-        Metablock<Link> metablockFromFile = transporter.load("src/test/resources/link_test/serialize/serialize.link");
+        Metablock<Link> metablockFromFile = transporter.load("src/test/resources/link_test/serialize/serialize.link", metablockType);
         metablockFromFile.sign(key);
         
         assertEquals(metablockFromFile.signed.getName(), testMetablockLink.signed.getName());
@@ -219,20 +223,20 @@ class LinkTest
     	Artifact testproduct = new Artifact("demo-project/foo.py", "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235");
 
 
-        FileLinkTransporter transporter = new FileLinkTransporter();
+        FileTransporter transporter = new FileTransporter();
 
-        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/clone.776a00e2.link");
+        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/clone.776a00e2.link", metablockType);
         assertTrue(testMetablockLink.signed.getName() != null);
         assertEquals(testMetablockLink.signed.getName(), "clone");
         assertTrue(testMetablockLink.signed.getProducts().contains(testproduct));
         
         String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).toString();
 
-        transporter = new FileLinkTransporter(temporaryFolder.toString());
+        transporter = new FileTransporter(temporaryFolder.toString());
         
         transporter.dump(testMetablockLink);
 
-        Metablock<Link> newLinkMetablock = transporter.load(linkFile);
+        Metablock<Link> newLinkMetablock = transporter.load(linkFile, metablockType);
 
         assertEquals(newLinkMetablock.signed.getName(), testMetablockLink.signed.getName());
         assertTrue(newLinkMetablock.signed.getProducts().contains(testproduct));
@@ -257,8 +261,8 @@ class LinkTest
     	
 
 
-        FileLinkTransporter transporter = new FileLinkTransporter();
-    	Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/byproducts.link");
+        FileTransporter transporter = new FileTransporter();
+    	Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/byproducts.link", metablockType);
     	
     	String linkString = testMetablockLink.getSigned().JSONEncodeCanonical();
         assertEquals(referenceCanonical, linkString);
