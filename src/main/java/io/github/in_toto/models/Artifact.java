@@ -305,7 +305,8 @@ public final class Artifact {
 			while (in.hasNext()) {
 				String filename = in.nextName();
 				in.beginObject();
-				HashAlgorithm algo = HashAlgorithm.valueOf(in.nextName());
+				// skip algo
+				HashAlgorithm.valueOf(in.nextName());
 				String hash = in.nextString();
 				in.endObject();
 				artifacts.add(new Artifact(filename, hash));

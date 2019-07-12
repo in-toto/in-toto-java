@@ -8,8 +8,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 
-import io.github.in_toto.models.Signable;
-
 import java.util.TreeSet;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;

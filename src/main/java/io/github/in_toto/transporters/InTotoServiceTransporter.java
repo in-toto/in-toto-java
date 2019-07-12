@@ -3,7 +3,6 @@ package io.github.in_toto.transporters;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
 import com.google.api.client.http.ByteArrayContent;
@@ -12,16 +11,15 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
-import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Metablock;
 import io.github.in_toto.models.Signable;
 import io.github.in_toto.transporters.Transporter;
 
-public class InTotoServiceLinkTransporter<S extends Signable> implements Transporter<S> {
+public class InTotoServiceTransporter<S extends Signable> implements Transporter<S> {
 	
 	private URL inTotoServiceUrl;
 	
-	public InTotoServiceLinkTransporter(String supplyChainId, String hostname, int port, Boolean secure) {
+	public InTotoServiceTransporter(String supplyChainId, String hostname, int port, Boolean secure) {
 		String protocol = "http";
 		if (secure != null && secure)
 			protocol = "https";
@@ -58,7 +56,7 @@ public class InTotoServiceLinkTransporter<S extends Signable> implements Transpo
 
 	@Override
 	public String toString() {
-		return "InTotoServiceLinkTransporter [inTotoServiceUrl=" + inTotoServiceUrl + "]";
+		return "InTotoServiceTransporter [inTotoServiceUrl=" + inTotoServiceUrl + "]";
 	}
 
 }
