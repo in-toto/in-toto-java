@@ -7,25 +7,20 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 
 public class SignableDeserializer implements JsonDeserializer<Signable> {
 
-	@Override
-	public Signable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-			throws JsonParseException {
-		JsonObject jsonObject = json.getAsJsonObject();
+    @Override
+    public Signable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+        JsonObject jsonObject = json.getAsJsonObject();
 
         JsonElement jsonType = jsonObject.get("_type");
         SignableType type = SignableType.valueOf(jsonType.getAsString());
-        switch (type) {
-        case link:
-        	Gson gson = new Gson();
-        	return gson.fromJson(json, Link.class);
-		default:
-			break;
+        if (type == SignableType.link) {
+            Gson gson = new Gson();
+            return gson.fromJson(json, Link.class);
         }
-		return null;
-	}
+        return null;
+    }
 
 }

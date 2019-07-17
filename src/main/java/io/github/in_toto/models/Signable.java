@@ -11,10 +11,10 @@ import io.github.in_toto.lib.JSONEncoder;
  */
 @JsonAdapter(SignableDeserializer.class)
 public interface Signable extends JSONEncoder {
-	
-	public String getName();
-	
-	public String getFullName(String shortKey);
+    
+    public String getName();
+    
+    public String getFullName(String shortKey);
 
-	public SignableType getType();
+    public SignableType getType();
 }

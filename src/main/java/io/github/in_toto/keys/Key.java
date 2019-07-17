@@ -1,9 +1,11 @@
 package io.github.in_toto.keys;
 
 import java.io.IOException;
-import java.io.FileNotFoundException;
 
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+
+import io.github.in_toto.exceptions.KeyException;
+
 import org.bouncycastle.crypto.Signer;
 
 /**
@@ -15,14 +17,17 @@ import org.bouncycastle.crypto.Signer;
  */
 public abstract class Key
 {
+    
+    public static final int SHORT_HASH_LENGTH = 8;
+    
     String keyid;
 
     public static Key read(String filename) {
-        throw new RuntimeException("Can't instantiate an abstract Key!");
+        throw new KeyException("Can't instantiate an abstract Key!");
     }
     public abstract AsymmetricKeyParameter getPrivate() throws IOException;
     public abstract AsymmetricKeyParameter getPublic() throws IOException;
     public abstract String computeKeyId();
-    public abstract void write(String filename) throws FileNotFoundException, IOException;
+    public abstract void write(String filename) throws IOException;
     public abstract Signer getSigner();
 }

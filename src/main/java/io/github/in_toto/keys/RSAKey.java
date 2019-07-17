@@ -6,12 +6,27 @@ import java.io.FileWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
-
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bouncycastle.util.encoders.Hex;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.google.gson.annotations.JsonAdapter;
+
+import io.github.in_toto.exceptions.KeyException;
 import io.github.in_toto.lib.JSONEncoder;
+import io.github.in_toto.keys.RSAKey.RSAKeySerializer;
 
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -32,36 +47,23 @@ import org.bouncycastle.crypto.engines.RSAEngine;
  * RSA implementation of an in-toto RSA key.
  *
  */
+@JsonAdapter(RSAKeySerializer.class)
 public class RSAKey
     extends Key
     implements JSONEncoder
 {
+    static final Logger logger = Logger.getLogger(RSAKey.class.getName());
 
     PEMKeyPair kpr;
-
-    /**
-     *
-     * Hardcoded method string. used to compute the keyid and to indicate
-     * which signing mechanism was used to compute this signature.
-     */
-    private final String scheme = "rsassa-pss-sha256";
-
-    /**
-     * Hardcoded hashing algorithms. used to compute the keyid, as well as to
-     * indicate which hash algorithms can be used to compute the keyid itself.
-     */
-    private final String[] keyid_hash_algorithms = {"sha256", "sha512"};
-
-    /**
-     * Hardcoded keytype. This field exists for backwards compatibility, as the scheme
-     * field is more descriptive.
-     */
-    private final String keytype = "rsa";
 
     /**
      * HashMap containing the public and (if available) private portions of the key.
      */
     private HashMap<String,String> keyval;
+    
+    private static final String PRIVATE_KEY = "private";
+    
+    private static final String PUBLIC_KEY = "public";
 
     /**
      * Default constructor for the RSAKey.
@@ -72,9 +74,9 @@ public class RSAKey
      */
     public RSAKey(PEMKeyPair kpr) {
         this.kpr = kpr;
-        this.keyval = new HashMap<String, String>();
-        this.keyval.put("private", getKeyval(true));
-        this.keyval.put("public", getKeyval(false));
+        this.keyval = new HashMap<>();
+        this.keyval.put(PRIVATE_KEY, getKeyval(true));
+        this.keyval.put(PUBLIC_KEY, getKeyval(false));
     }
 
     /**
@@ -94,7 +96,7 @@ public class RSAKey
         try {
             pemfile = new FileReader(filename);
         } catch (IOException e) {
-            throw new RuntimeException("Couldn't read key");
+            throw new KeyException("Couldn't read key");
         }
 
         return readPemBuffer(pemfile);
@@ -121,18 +123,18 @@ public class RSAKey
             } else if (pem instanceof SubjectPublicKeyInfo) {
                 kpr = new PEMKeyPair((SubjectPublicKeyInfo)pem, null);
             } else {
-                throw new RuntimeException("Couldn't parse PEM object: " +
+                throw new KeyException("Couldn't parse PEM object: " +
                         pem.toString());
             }
 
         } catch (IOException e) {
-        	
+            throw new KeyException(e.toString());
         } finally {
-        	try {
-				pemReader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+            try {
+                pemReader.close();
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, e.getMessage());
+            }
         }
         
         
@@ -145,10 +147,12 @@ public class RSAKey
      * @return an AsymmetricKeyParameter that can be used for signing.
      */
     public AsymmetricKeyParameter getPrivate() throws IOException{
-        if (this.kpr == null)
+        if (this.kpr == null) {
             return null;
-        if (this.kpr.getPrivateKeyInfo() == null)
+        }
+        if (this.kpr.getPrivateKeyInfo() == null) {
             return null;
+        }
         return PrivateKeyFactory.createKey(this.kpr.getPrivateKeyInfo());
     }
 
@@ -158,8 +162,9 @@ public class RSAKey
      * @return an AsymmetricKeyParameter that can be used for verification.
      */
     public AsymmetricKeyParameter getPublic() throws IOException {
-        if (this.kpr == null)
+        if (this.kpr == null) {
             return null;
+        }
         return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
     }
     
@@ -173,7 +178,7 @@ public class RSAKey
                 FileWriter out = new FileWriter(filename);
                 encodePem(out, false);
             } catch (IOException e) {
-                throw new RuntimeException(e.toString());
+                throw new KeyException(e.toString());
             }
     }
 
@@ -183,15 +188,16 @@ public class RSAKey
      * @return the keyid for this key (Sha256 is baked in, for the time being)
      */
     public String computeKeyId() {
-        if (this.kpr == null)
+        if (this.kpr == null) {
             return null;
+        }
 
-        byte[] JSONrepr = getJSONEncodeableFields();
+        byte[] jsonRepr = getJSONEncodeableFields();
 
         // initialize digest
         SHA256Digest digest =  new SHA256Digest();
         byte[] result = new byte[digest.getDigestSize()];
-        digest.update(JSONrepr, 0, JSONrepr.length);
+        digest.update(jsonRepr, 0, jsonRepr.length);
         digest.doFinal(result, 0);
         return Hex.toHexString(result);
     }
@@ -200,9 +206,9 @@ public class RSAKey
 
         // if we have a private portion, exclude it from the keyid computation
         String privateBackup = null;
-        if (this.keyval.containsKey("private")) {
-            privateBackup = this.keyval.get("private");
-            this.keyval.remove("private");
+        if (this.keyval.containsKey(PRIVATE_KEY)) {
+            privateBackup = this.keyval.get(PRIVATE_KEY);
+            this.keyval.remove(PRIVATE_KEY);
         }
 
         PEMKeyPair keyPairBackup = null;
@@ -211,15 +217,17 @@ public class RSAKey
             this.kpr = null;
         }
 
-        byte[] JSONrepr = this.JSONEncodeCanonical().getBytes();
+        byte[] jsonRepr = this.jsonEncodeCanonical().getBytes();
 
-        if (privateBackup != null)
-            this.keyval.put("private", privateBackup);
+        if (privateBackup != null) {
+            this.keyval.put(PRIVATE_KEY, privateBackup);
+        }
 
-        if (keyPairBackup != null)
+        if (keyPairBackup != null) {
             this.kpr = keyPairBackup;
+        }
 
-        return JSONrepr;
+        return jsonRepr;
     }
 
     private void encodePem(Writer out, boolean privateKey) {
@@ -228,31 +236,34 @@ public class RSAKey
         
         try {
             
-            if (privateKey && getPrivate() != null)
-            pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
-            else
-            pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
+            if (privateKey && getPrivate() != null) {
+                pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPrivateKeyInfo()));
+            } else {
+                pemWriter.writeObject(new MiscPEMGenerator(this.kpr.getPublicKeyInfo()));
+            }
             pemWriter.flush();
         } catch (IOException e) {
-            throw new RuntimeException(e.toString());
+            throw new KeyException(e.toString());
         } finally {
-        	try {
-				pemWriter.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+            try {
+                pemWriter.close();
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, e.getMessage());
+            }
         }
     }
     
     private String getKeyval(boolean privateKey) {
-        StringWriter out = new StringWriter();
+        // initialize with max possible size
+        StringWriter out = new StringWriter(4096);
         encodePem(out, privateKey);
         String result = out.toString();
 
         // We need to truncate any trailing '\n' as different implementations
         // may or may not add it as a consequence keyids.
-        if (result.charAt(result.length() -1) == '\n')
+        if (result.charAt(result.length() -1) == '\n') {
             result = result.substring(0, result.length() - 1);
+        }
 
         return result;
     }
@@ -268,9 +279,43 @@ public class RSAKey
         try {
             engine.init(false, getPrivate());
         } catch (IOException e) {
-            throw new RuntimeException(e.toString());
+            throw new KeyException(e.toString());
         }
         SHA256Digest digest = new SHA256Digest();
         return new PSSSigner(engine, digest, digest.getDigestSize());
+    }
+    
+    static class RSAKeySerializer implements JsonSerializer<RSAKey> {
+
+        /**
+         *
+         * Hardcoded method string. used to compute the keyid and to indicate
+         * which signing mechanism was used to compute this signature.
+         */
+        static final String SCHEME = "rsassa-pss-sha256";
+
+        /**
+         * Hardcoded hashing algorithms. used to compute the keyid, as well as to
+         * indicate which hash algorithms can be used to compute the keyid itself.
+         */
+        static final List<String> KEY_ID_HASH_ALGORITHMS = Collections.unmodifiableList(Arrays.asList("sha256", "sha512"));
+
+        /**
+         * Hardcoded keytype. This field exists for backwards compatibility, as the scheme
+         * field is more descriptive.
+         */
+        static final String KEY_TYPE = "rsa";
+
+        @Override
+        public JsonElement serialize(RSAKey src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.add("scheme", new JsonPrimitive(SCHEME));
+            jsonObject.add("keyid_hash_algorithms", context.serialize(KEY_ID_HASH_ALGORITHMS));
+            jsonObject.add("keytype", new JsonPrimitive(KEY_TYPE));
+            jsonObject.add("kpr", context.serialize(src.kpr));
+            jsonObject.add("keyval", context.serialize(src.keyval));            
+            return jsonObject;
+        }
+
     }
 }

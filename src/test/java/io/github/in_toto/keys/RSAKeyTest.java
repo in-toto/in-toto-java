@@ -57,7 +57,8 @@ class RSAKeyTest
 
         // load a privatekey pem and compare the keyid
         RSAKey testKey = RSAKey.read(private_key_path);
-        assertTrue(targetKeyID.equals(testKey.computeKeyId()));
+        String actual = testKey.computeKeyId();
+        assertTrue(targetKeyID.equals(actual));
 
         // load a public key pem and compare the keyid
         testKey = RSAKey.read(public_key_path);
@@ -91,6 +92,7 @@ class RSAKeyTest
         Path keyFile2 = Files.createFile(temporaryFolder.resolve("key2.pem"));
         thiskey2.write(keyFile2.toString());
         Key key2 = RSAKey.read(keyFile2.toString());
-        assertEquals(key2.computeKeyId(), "0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7");
+        String actualKeyId = key2.computeKeyId();
+        assertEquals("0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7", actualKeyId);
     }
 }

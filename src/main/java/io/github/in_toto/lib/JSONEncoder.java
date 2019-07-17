@@ -8,6 +8,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 
+import io.github.in_toto.keys.Key;
+
 import java.util.TreeSet;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -51,68 +53,77 @@ public interface JSONEncoder
      * @return A canonical json encoded string of the passed JsonElement.
      */
     static String canonicalize(JsonElement src) {
-        String result =  new String();
+        StringBuilder result = new StringBuilder();
         if (src instanceof JsonArray) {
-            // Canonicalize each element of the array
-            result += "[";
-            JsonArray array = (JsonArray) src;
-            for (int i = 0; i < array.size(); i++) {
-                result += canonicalize(array.get(i));
-
-                if (i < array.size() - 1) {
-                  result += ",";
-                }
-            }
-            result += "]";
-
+            result.append(canonicalizeJsonArray(src));
         } else if (src instanceof JsonObject) {
-            result += "{";
-
-            JsonObject obj = (JsonObject)src;
-            // Create an ordered list of the JsonObject's keys
-            TreeSet<String> keys = new TreeSet<>();
-            for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                keys.add(entry.getKey());
-            }
-
-            // Canonicalize json object
-            int i = 0;
-            for (String key : keys) {
-                // NOTE: It is okay to only call `canonicalizeString` (instead
-                // of `canonicalize` like in the reference implementation)
-                // because we know that the keys are always strings.
-                result += canonicalizeString(key);
-                result += ":";
-                result += canonicalize(obj.get(key));
-
-                if (i < keys.size() - 1) {
-                    result += ",";
-                }
-                i++;
-            }
-            result += "}";
-
+            result.append(canonicalizeJsonObject(src));
         } else if (src instanceof JsonNull) {
-            result += "null";
-
+            result.append("null");
         } else if (src instanceof JsonPrimitive) {
             JsonPrimitive primitive = (JsonPrimitive) src;
 
             if (primitive.isNumber()) {
-                result += String.format("%d", primitive.getAsInt());
+                result.append(String.format("%d", primitive.getAsInt()));
 
             } else if (primitive.isBoolean()) {
-                result += primitive.getAsString();
+                result.append(primitive.getAsString());
 
             } else if (primitive.isString()) {
                 String decodedPrimitive = new GsonBuilder()
                         .disableHtmlEscaping()
                         .create()
                         .fromJson(primitive, String.class);
-                result += canonicalizeString(decodedPrimitive);
+                result.append(canonicalizeString(decodedPrimitive));
             }
         }
-        return result;
+        return result.toString();
+    }
+    
+    static String canonicalizeJsonArray(JsonElement src) {
+        StringBuilder result = new StringBuilder();
+        // Canonicalize each element of the array
+        result.append("[");
+        JsonArray array = (JsonArray) src;
+        for (int i = 0; i < array.size(); i++) {
+            result.append(canonicalize(array.get(i)));
+
+            if (i < array.size() - 1) {
+                result.append(",");
+            }
+        }
+        result.append("]");
+        return result.toString();
+    }
+    
+    static String canonicalizeJsonObject(JsonElement src) {
+        StringBuilder result = new StringBuilder();
+        result.append("{");
+
+        JsonObject obj = (JsonObject)src;
+        // Create an ordered list of the JsonObject's keys
+        TreeSet<String> keys = new TreeSet<>();
+        for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+            keys.add(entry.getKey());
+        }
+
+        // Canonicalize json object
+        int i = 0;
+        for (String key : keys) {
+            // NOTE: It is okay to only call `canonicalizeString` (instead
+            // of `canonicalize` like in the reference implementation)
+            // because we know that the keys are always strings.
+            result.append(canonicalizeString(key));
+            result.append(":");
+            result.append(canonicalize(obj.get(key)));
+
+            if (i < keys.size() - 1) {
+                result.append(",");
+            }
+            i++;
+        }
+        result.append("}");
+        return result.toString();
     }
 
     /**
@@ -123,20 +134,20 @@ public interface JSONEncoder
      *
      * @return A canonical json encoded string of the calling object.
      */
-    default public String JSONEncodeCanonical() {
+    public default String jsonEncodeCanonical() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         Gson gson = gsonBuilder.disableHtmlEscaping().create();
 
         return canonicalize(gson.toJsonTree(this));
     }
-	
-	default public String getShortHash() {	
-		byte[] jsonBytes = this.JSONEncodeCanonical().getBytes();
+    
+    public default String getShortHash() {    
+        byte[] jsonBytes = this.jsonEncodeCanonical().getBytes();
         // initialize digest
         SHA256Digest digest =  new SHA256Digest();
         byte[] result = new byte[digest.getDigestSize()];
         digest.update(jsonBytes, 0, jsonBytes.length);
         digest.doFinal(result, 0);
-        return Hex.toHexString(result).substring(0, 8);
-	}
+        return Hex.toHexString(result).substring(0, Key.SHORT_HASH_LENGTH);
+    }
 }
