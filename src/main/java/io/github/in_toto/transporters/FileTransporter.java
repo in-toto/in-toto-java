@@ -15,8 +15,6 @@ import io.github.in_toto.models.Signable;
 public final class FileTransporter<S extends Signable> implements Transporter<S> {
     private String directoryPath;
     
-
-    
     public FileTransporter() {}
     
     public FileTransporter(String dir) {
@@ -26,7 +24,7 @@ public final class FileTransporter<S extends Signable> implements Transporter<S>
     @Override
     public void dump(Metablock<S> metablock) {
 
-        String jsonString = metablock.toJson();
+        String jsonString = metablock.jsonEncodeCanonical();
 
         try (FileWriter writer = new FileWriter(Paths.get(directoryPath, metablock.getFullName()).toString())) {
             writer.write(jsonString);

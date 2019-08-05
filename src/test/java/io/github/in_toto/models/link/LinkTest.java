@@ -1,9 +1,10 @@
-package io.github.in_toto.models;
+package io.github.in_toto.models.link;
 
 import io.github.in_toto.transporters.FileTransporter;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import io.github.in_toto.keys.RSAKey;
+import io.github.in_toto.models.Metablock;
 import io.github.in_toto.models.link.Artifact;
 import io.github.in_toto.models.link.ByProducts;
 import io.github.in_toto.models.link.Link;

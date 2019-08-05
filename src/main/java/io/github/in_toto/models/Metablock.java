@@ -9,9 +9,7 @@ import java.io.IOException;
 import io.github.in_toto.exceptions.KeyException;
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.Signature;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import io.github.in_toto.lib.JSONEncoder;
 
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.util.encoders.Hex;
@@ -24,7 +22,7 @@ import org.bouncycastle.crypto.CryptoException;
  * - A signed field, with the signable portion of a piece of metadata.
  * - A signatures field, a list of the signatures on this metadata.
  */
-public final class Metablock<S extends Signable> {
+public final class Metablock<S extends Signable> implements JSONEncoder {
     
     private S signed;
     private Set<Signature> signatures = new HashSet<>();
@@ -46,17 +44,6 @@ public final class Metablock<S extends Signable> {
         if (signatures != null) {
             this.signatures = signatures;
         }
-    }
-
-    /**
-     * Serialize the current metadata to a string
-     *
-     *
-     * @return a JSON string representation of the metadata instance
-     */
-    public String toJson() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(this);
     }
 
     /**

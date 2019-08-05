@@ -12,9 +12,11 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.bouncycastle.util.encoders.Hex;
+import org.json.JSONException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -22,6 +24,7 @@ import io.github.in_toto.exceptions.KeyException;
 import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.RSAKey;
+import io.github.in_toto.models.layout.Layout;
 import io.github.in_toto.models.link.Artifact;
 import io.github.in_toto.models.link.Link;
 import io.github.in_toto.models.link.Link.LinkBuilder;
@@ -32,8 +35,8 @@ import nl.jqno.equalsverifier.Warning;
 class MetablockTest {
     private LinkBuilder linkBuilder =  new LinkBuilder("test");
 	private Link link = linkBuilder.build();
-    private Key key1 = RSAKey.read("src/test/resources/metablock_test/somekey.pem");
-    private Key key2 = RSAKey.read("src/test/resources/metablock_test/someotherkey.pem");
+    private Key key1 = RSAKey.read("src/test/resources/io/github/in_toto/model/metablock_test/somekey.pem");
+    private Key key2 = RSAKey.read("src/test/resources/io/github/in_toto/model/metablock_test/someotherkey.pem");
 
     private Key key = key1;
     
@@ -65,7 +68,7 @@ class MetablockTest {
 
         FileTransporter<Link> transporter = new FileTransporter<>();
 
-        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/metablock_test/clone.776a00e2.link", metablockType);
+        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/io/github/in_toto/model/metablock_test/clone.776a00e2.link", metablockType);
         assertTrue(testMetablockLink.getSigned().getName() != null);
         assertEquals(testMetablockLink.getSigned().getName(), "clone");
         assertTrue(testMetablockLink.getSigned().getProducts().contains(testproduct));
@@ -102,12 +105,31 @@ class MetablockTest {
 
 
         FileTransporter<Link> transporter = new FileTransporter<>();
-        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/metablock_test/byproducts.link", metablockType);
+        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/io/github/in_toto/model/metablock_test/byproducts.link", metablockType);
         
         String linkString = testMetablockLink.getSigned().jsonEncodeCanonical();
         assertEquals(referenceCanonical, linkString);
         
         assertEquals(referenceCanonicalLinkHex, Hex.toHexString(testMetablockLink.getSigned().jsonEncodeCanonical().getBytes()));
+    }
+    
+    String canonicalizeString(String src) {
+        String pattern = "([\\\\\"])";
+        return String.format("\"%s\"", src.replaceAll(pattern, "\\\\$1"));
+    }
+    
+    @Test
+    @DisplayName("Validate layout metablock deserialization and serialization with byproducts")
+    public void testLayoutDeserializationSerializationWithByProducts() throws IOException, URISyntaxException, ValueError, JSONException
+    {
+        String jsonString = new String ( Files.readAllBytes( Paths.get("src/test/resources/io/github/in_toto/model/metablock_test/root.layout") ) );
+        Type layoutMetablockType = new TypeToken<Metablock<Layout>>() {}.getType();
+        
+        FileTransporter<Layout> transporter = new FileTransporter<>();
+        Metablock<Layout> testLayoutMetablock = transporter.load("src/test/resources/io/github/in_toto/model/metablock_test/root.layout", layoutMetablockType);
+        
+        String layoutMetablockString = testLayoutMetablock.jsonEncodeCanonical();
+        JSONAssert.assertEquals(jsonString, layoutMetablockString, false);
     }
     
     @Test
@@ -160,9 +182,9 @@ class MetablockTest {
     public void testLinkSerializationWithArtifactsFromObject() throws IOException, URISyntaxException, ValueError
     {
         LinkBuilder testLinkBuilder = new LinkBuilder("serialize");
-        testLinkBuilder.setBasePath("src/test/resources/metablock_test/serialize");
+        testLinkBuilder.setBasePath("src/test/resources/io/github/in_toto/model/metablock_test/serialize");
         
-        Set<Artifact> artifacts = Artifact.recordArtifacts(Arrays.asList("foo", "baz", "bar"), null, "src/test/resources/metablock_test/serialize");
+        Set<Artifact> artifacts = Artifact.recordArtifacts(Arrays.asList("foo", "baz", "bar"), null, "src/test/resources/io/github/in_toto/model/metablock_test/serialize");
         
         Artifact pathArtifact1 = artifacts.iterator().next();
         Artifact pathArtifact2 = artifacts.iterator().next();
@@ -194,7 +216,7 @@ class MetablockTest {
         assertTrue(newLinkMetablock.getSigned().getMaterials().contains(pathArtifact2));
         assertTrue(newLinkMetablock.getSigned().getMaterials().contains(pathArtifact3));
         
-        Metablock<Link> metablockFromFile = transporter.load("src/test/resources/metablock_test/serialize/serialize.link", metablockType);
+        Metablock<Link> metablockFromFile = transporter.load("src/test/resources/io/github/in_toto/model/metablock_test/serialize/serialize.link", metablockType);
         metablockFromFile.sign(key);
         
         assertEquals(metablockFromFile.getSigned().getName(), testMetablockLink.getSigned().getName());
@@ -222,8 +244,8 @@ class MetablockTest {
         assertEquals(testMetablockLink, testMetablockLink2);
         
         FileTransporter<Link> transporter = new FileTransporter<>();
-        testMetablockLink = transporter.load("src/test/resources/metablock_test/byproducts.link", metablockType);
-        testMetablockLink2 = transporter.load("src/test/resources/metablock_test/byproducts.link", metablockType);
+        testMetablockLink = transporter.load("src/test/resources/io/github/in_toto/model/metablock_test/byproducts.link", metablockType);
+        testMetablockLink2 = transporter.load("src/test/resources/io/github/in_toto/model/metablock_test/byproducts.link", metablockType);
         assertEquals(testMetablockLink.getSigned(), testMetablockLink2.getSigned());
         assertEquals(testMetablockLink.getSigned().hashCode(), testMetablockLink2.getSigned().hashCode());
     }   

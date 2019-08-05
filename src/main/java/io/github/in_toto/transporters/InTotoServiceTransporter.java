@@ -55,7 +55,7 @@ public final class InTotoServiceTransporter<S extends Signable> implements Trans
         try {
             HttpRequest request = transport.createRequestFactory().buildPostRequest(
                     new GenericUrl(inTotoServiceUri),
-                    ByteArrayContent.fromString("application/json", metablock.toJson())).setHeaders(InTotoServiceTransporter.headers);
+                    ByteArrayContent.fromString("application/json", metablock.jsonEncodeCanonical())).setHeaders(InTotoServiceTransporter.headers);
             request.execute();
         } catch (IOException e) {
             throw new TransporterException("couldn't serialize to in-toto service: " + e);

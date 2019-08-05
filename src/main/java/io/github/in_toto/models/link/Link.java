@@ -249,6 +249,7 @@ public final class Link implements Signable {
      *  @return a string containing this name or null if no signatures are
      *  present
      */
+    @Override
     public String getFullName(String keyId) {
         return this.getName() + "." + keyId + ".link";
     }

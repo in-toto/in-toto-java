@@ -5,14 +5,23 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
 import java.util.TreeSet;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Hex;
 
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * JSONEncoder interface
@@ -133,7 +142,10 @@ public interface JSONEncoder
      */
     public default String jsonEncodeCanonical() {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        Gson gson = gsonBuilder.disableHtmlEscaping().create();
+        Gson gson = gsonBuilder
+                .registerTypeAdapter(Date.class, new DateJsonAdapter())
+                .disableHtmlEscaping()
+                .create();
 
         return canonicalize(gson.toJsonTree(this));
     }
@@ -146,5 +158,22 @@ public interface JSONEncoder
         digest.update(jsonBytes, 0, jsonBytes.length);
         digest.doFinal(result, 0);
         return Hex.toHexString(result);
+    }
+    
+    static class DateJsonAdapter implements JsonSerializer<Date>, JsonDeserializer<Date> {
+
+        @Override
+        public Date deserialize(JsonElement json, Type typeOfT,
+             JsonDeserializationContext context) {
+          return context.deserialize(json, Date.class);
+        }
+
+        @Override
+        public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext 
+                   context) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+            return new JsonPrimitive(sdf.format(src));
+        }
     }
 }

@@ -1,11 +1,27 @@
 package io.github.in_toto.keys;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import io.github.in_toto.lib.JSONEncoder;
 
@@ -120,6 +136,63 @@ public class Key implements JSONEncoder, KeyInterface {
     @Override
     public String getPublicKey() {
         return null;
+    }
+    
+    public static class SetKeyJsonAdapter implements JsonSerializer<Set<Key>>, JsonDeserializer<Set<Key>> {
+
+        @Override
+        public Set<Key> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+            Set<Key> keySet = new HashSet<>();
+            JsonObject jsonObject = json.getAsJsonObject();
+            for (Entry<String, JsonElement> element:jsonObject.entrySet()) {
+                JsonObject keyObject = element.getValue().getAsJsonObject();
+                Key key = null;
+                if (keyObject.has("keytype")) {
+                    KeyType keyType = KeyType.valueOf(keyObject.get("keytype").getAsString());
+                    if (keyType == KeyType.rsa) {
+                        key = context.deserialize(keyObject, RSAKey.class);
+                    }
+                } else {
+                    key = context.deserialize(element.getValue(), Key.class);
+                }
+                keySet.add(key);                
+            }
+            return keySet;
+        }
+
+        @Override
+        public JsonElement serialize(Set<Key> src, Type typeOfSrc, JsonSerializationContext context) {
+            Iterator<Key> keyIt = src.iterator();
+            Map<String, Key> keyMap = new HashMap<>();
+            while (keyIt.hasNext()) {
+                Key key = keyIt.next();
+                keyMap.put(key.getKeyid(), key);
+            }
+            return context.serialize(keyMap);
+        }
+    }
+    
+    public static class SetPubKeyJsonAdapter implements JsonSerializer<Set<Key>>, JsonDeserializer<Set<Key>> {
+
+        @Override
+        public Set<Key> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+            Set<Key> keySet = new HashSet<>();
+            JsonArray jsonArray = json.getAsJsonArray();
+            for (JsonElement element:jsonArray) {
+                keySet.add(new Key(element.getAsString()));                
+            }
+            return keySet;
+        }
+
+        @Override
+        public JsonElement serialize(Set<Key> src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonArray jsonArray = new JsonArray();
+            Iterator<Key> keyIt = src.iterator();
+            while (keyIt.hasNext()) {
+                jsonArray.add(new JsonPrimitive(keyIt.next().keyid));
+            }
+            return jsonArray;
+        }
     }
     
 }

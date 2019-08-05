@@ -53,8 +53,8 @@ class TestJSONCanonical {
     }
     
     @Test
-    @DisplayName("Validate canonical")
-    public void testCanonicalJSON() throws IOException
+    @DisplayName("Validate canonical link metablock")
+    public void testCanonicalJSONLinkMetablock() throws IOException
     {
     	String referenceCanonical = "{\"_type\":\"link\",\"byproducts\":{},\"command\":[],\"environment\":{},"
     			+ "\"materials\":{\"src/test/resources/test_json_canonical/serialize/bar\":{\"sha256\":\"fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9\"},"

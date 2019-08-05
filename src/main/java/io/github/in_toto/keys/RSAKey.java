@@ -3,6 +3,7 @@ package io.github.in_toto.keys;
 import java.io.IOException;
 import java.io.FileReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
@@ -23,6 +24,7 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.MiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.util.encoders.Hex;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -84,7 +86,6 @@ public final class RSAKey extends Key implements KeyInterface {
         super();
         this.kpr = kpr;
         super.setKeyid(this.computeKeyId(jsonEncodeCanonical().getBytes()));
-        
     }
 
     /**
@@ -266,35 +267,48 @@ public final class RSAKey extends Key implements KeyInterface {
         private static final String KEYTYPE_LABEL = "keytype";
         private static final String KEYVAL_LABEL = "keyval";
         private static final String PUBLIC_KEY_LABEL = "public";
+        private static final String KEYID_LABEL = "keyid";
 
         @Override
         public RSAKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
-            RSAKey key = null; // nog te doen
             JsonObject jsonObject = json.getAsJsonObject();
-            String keyTypeStr = jsonObject.get(KEYTYPE_LABEL).getAsString();
-            if (keyTypeStr == null) {
-                return key;
+            JsonObject keyval = jsonObject.get(RSAKeyJsonAdapter.KEYVAL_LABEL).getAsJsonObject(); 
+            String publickKey = keyval.get(RSAKeyJsonAdapter.PUBLIC_KEY_LABEL).getAsString();
+            PEMParser pemParser = new PEMParser(new StringReader(publickKey));
+            RSAKey key = null;
+            try {
+                SubjectPublicKeyInfo pubKey = (SubjectPublicKeyInfo)pemParser.readObject();
+                PEMKeyPair kpr = new PEMKeyPair(pubKey, null);
+                key = new RSAKey(kpr);
+            } catch (IOException e) {
+                throw new KeyException(e.toString());
+            } finally {
+                try {
+                    pemParser.close();
+                } catch (IOException e) {
+                    logger.log(Level.SEVERE, e.getMessage());
+                }
             }
-            KeyType keyType = KeyType.valueOf(keyTypeStr);
-            if (keyType == KeyType.RSA) {
-                key = null;
-            }
-            // TODO rest van key in layout
             return key;
         }
 
         @Override
         public JsonElement serialize(RSAKey src, Type typeOfSrc, JsonSerializationContext context) {
-            JsonObject jsonObject = new JsonObject();            
-            jsonObject.add(SCHEME_LABEL, new JsonPrimitive(src.getScheme()));
-            jsonObject.add(HASH_ALGORITHM_LABEL, context.serialize(src.getHashAlgorithms()));
-            jsonObject.add(KEYTYPE_LABEL, new JsonPrimitive(src.getKeyType()));
+            JsonObject keyObject = new JsonObject();
+            src.getKeyid();
+            keyObject.add(SCHEME_LABEL, new JsonPrimitive(src.getScheme()));
+            keyObject.add(HASH_ALGORITHM_LABEL, context.serialize(src.getHashAlgorithms()));
+            keyObject.add(KEYTYPE_LABEL, new JsonPrimitive(src.getKeyType()));
 
-            Map<String,String> keyval = new HashMap<>();
-            keyval.put(PUBLIC_KEY_LABEL, src.getPublicKey());
-            jsonObject.add(KEYVAL_LABEL, context.serialize(keyval));
+            JsonObject keyval = new JsonObject();
+            keyval.add(PUBLIC_KEY_LABEL, new JsonPrimitive(src.getPublicKey()));
+            
+            keyObject.add(KEYVAL_LABEL, keyval);
+            if (src.getKeyid() != null) {
+                keyObject.add(KEYID_LABEL, new JsonPrimitive(src.getKeyid()));
+            }
 
-            return jsonObject;
+            return keyObject;
         }
          
     }
