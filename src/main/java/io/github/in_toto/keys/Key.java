@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 
-import io.github.in_toto.exceptions.KeyException;
-
 import org.bouncycastle.crypto.Signer;
 
 /**
@@ -22,9 +20,6 @@ public abstract class Key
     
     String keyid;
 
-    public static Key read(String filename) {
-        throw new KeyException("Can't instantiate an abstract Key!");
-    }
     public abstract AsymmetricKeyParameter getPrivate() throws IOException;
     public abstract AsymmetricKeyParameter getPublic() throws IOException;
     public abstract String computeKeyId();

@@ -500,5 +500,15 @@ class LinkTest
 
         assertTrue(material.contains(pathArtifact3));
     }
+    
+    @Test
+    @DisplayName("Test Link equals and hashcode.")
+    public void testEqualsAndHashCode() {
+        FileTransporter<Link> transporter = new FileTransporter<>();
+        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/byproducts.link", metablockType);
+        Metablock<Link> testMetablockLink2 = transporter.load("src/test/resources/link_test/byproducts.link", metablockType);
+        assertEquals(testMetablockLink.getSigned(), testMetablockLink2.getSigned());
+        assertEquals(testMetablockLink.getSigned().hashCode(), testMetablockLink2.getSigned().hashCode());
+    }
 
 }

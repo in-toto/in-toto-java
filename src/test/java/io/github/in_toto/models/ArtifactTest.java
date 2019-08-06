@@ -218,6 +218,15 @@ class ArtifactTest {
         assertTrue(fooLink.getMaterials().size() == 2);
     }
     
+    @Test
+    @DisplayName("Test Artifact equals and hashcode.")
+    public void testEqualsAndHashCode() {
+        Artifact a1 = new Artifact("foo", "bar");
+        Artifact a2 = new Artifact("foo", "bar");
+        assertEquals(a1, a2);
+        assertEquals(a1.hashCode(), a2.hashCode());
+    }
+    
 
     
 
