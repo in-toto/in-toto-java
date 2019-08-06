@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
 import com.google.api.client.http.ByteArrayContent;
@@ -13,6 +13,7 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.Json;
 import com.google.common.io.CharStreams;
@@ -26,9 +27,11 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
 
     static final Logger logger = Logger.getLogger(InTotoServiceTransporter.class.getName());
     
-    private URL inTotoServiceUrl;
+    private URI inTotoServiceUri;
     
     private HttpHeaders headers = new HttpHeaders();
+    
+    private HttpTransport transport = new NetHttpTransport();
     
     public InTotoServiceTransporter(String supplyChainId, String hostname, int port, Boolean secure) {
         String protocol = "http";
@@ -36,9 +39,9 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
             protocol = "https";
         }
         try {
-            this.inTotoServiceUrl = new URL(protocol, hostname, port, "/api/repository/metablock/"+supplyChainId);
-        } catch (MalformedURLException e) {
-            throw new TransporterException(e.getMessage());
+            this.inTotoServiceUri = new URI(protocol, null, hostname, port, "/api/repository/metablock/"+supplyChainId, null, null);
+        } catch (URISyntaxException e) {
+            throw new TransporterException("Couldn't create URI: " + e);
         }
         
         this.headers.setAccept(Json.MEDIA_TYPE);
@@ -47,8 +50,8 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
     @Override
     public void dump(Metablock<S> metablock) {
         try {
-            HttpRequest request = new NetHttpTransport().createRequestFactory().buildPostRequest(
-                    new GenericUrl(inTotoServiceUrl),
+            HttpRequest request = transport.createRequestFactory().buildPostRequest(
+                    new GenericUrl(inTotoServiceUri),
                     ByteArrayContent.fromString("application/json", metablock.toJson())).setHeaders(this.headers);
             request.execute();
             /*
@@ -56,17 +59,17 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
              * this gets the job done for a PoC
              */
         } catch (IOException e) {
-            throw new TransporterException("couldn't serialize to HTTP server: " + e);
+            throw new TransporterException("couldn't serialize to in-toto service: " + e);
         }
     }
 
     @Override
     public <K extends Signable> Metablock<K> load(String id, Type type) {
         Metablock<K> metablock = null;
-        String url = inTotoServiceUrl+"/"+id;
         try {
-            HttpRequest request = new NetHttpTransport().createRequestFactory().buildGetRequest(
-                    new GenericUrl(url)).setHeaders(this.headers);
+            URI uri = new URI(String.format("%s/%s", inTotoServiceUri.toString(), id));
+            HttpRequest request = transport.createRequestFactory().buildGetRequest(
+                    new GenericUrl(uri)).setHeaders(this.headers);
             HttpResponse response = request.execute();
             String json = null;
             try (final Reader reader = new InputStreamReader(response.getContent())) {
@@ -76,8 +79,8 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
             Gson gson = new Gson();
             metablock = gson.fromJson(json, type);
             
-        } catch (IOException e) {
-            throw new TransporterException("couldn't serialize to HTTP server: " + e);
+        } catch (IOException | URISyntaxException e) {
+            throw new TransporterException("Couldn't get Metablock from in-toto service: " + e);
         }
         
         return metablock;
@@ -86,15 +89,15 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
 
     @Override
     public String toString() {
-        return "InTotoServiceTransporter [inTotoServiceUrl=" + inTotoServiceUrl + "]";
+        return "InTotoServiceTransporter [inTotoServiceUrl=" + inTotoServiceUri + "]";
     }
 
-    public URL getInTotoServiceUrl() {
-        return inTotoServiceUrl;
+    public URI getInTotoServiceUri() {
+        return inTotoServiceUri;
     }
 
-    public void setInTotoServiceUrl(URL inTotoServiceUrl) {
-        this.inTotoServiceUrl = inTotoServiceUrl;
+    public void setInTotoServiceUri(URI inTotoServiceUri) {
+        this.inTotoServiceUri = inTotoServiceUri;
     }
 
     public HttpHeaders getHeaders() {
@@ -103,6 +106,54 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
 
     public void setHeaders(HttpHeaders headers) {
         this.headers = headers;
+    }
+
+    public HttpTransport getTransport() {
+        return transport;
+    }
+
+    public void setTransport(HttpTransport transport) {
+        this.transport = transport;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((headers == null) ? 0 : headers.hashCode());
+        result = prime * result + ((inTotoServiceUri == null) ? 0 : inTotoServiceUri.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        InTotoServiceTransporter other = (InTotoServiceTransporter) obj;
+        if (headers == null) {
+            if (other.headers != null) {
+                return false;
+            }
+        } else if (!headers.equals(other.headers)) {
+            return false;
+        }
+        if (inTotoServiceUri == null) {
+            if (other.inTotoServiceUri != null) {
+                return false;
+            }
+        } else if (!inTotoServiceUri.equals(other.inTotoServiceUri)) {
+            return false;
+        }
+        // HttpTransport doesn't implement equals
+        return (transport == null && other.transport == null)
+                || (transport != null && other.transport != null);
     }
 
 }

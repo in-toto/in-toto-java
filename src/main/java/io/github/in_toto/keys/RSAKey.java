@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 
 import org.bouncycastle.util.encoders.Hex;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -53,6 +52,7 @@ public class RSAKey
     implements JSONEncoder
 {
     static final Logger logger = Logger.getLogger(RSAKey.class.getName());
+    static final int INITIAL_BUFFER_SIZE = 4096;
 
     PEMKeyPair kpr;
 
@@ -255,7 +255,7 @@ public class RSAKey
     
     private String getKeyval(boolean privateKey) {
         // initialize with max possible size
-        StringWriter out = new StringWriter(4096);
+        StringWriter out = new StringWriter(INITIAL_BUFFER_SIZE);
         encodePem(out, privateKey);
         String result = out.toString();
 

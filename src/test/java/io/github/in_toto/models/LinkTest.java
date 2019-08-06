@@ -157,7 +157,7 @@ class LinkTest
         Metablock<Link> metablock = new Metablock<Link>(link, null);
         metablock.sign(key);
         String linkFile = Files.createFile(temporaryFolder.resolve(metablock.getFullName())).toString();
-        FileTransporter transporter = new FileTransporter(temporaryFolder.toString());
+        FileTransporter<Link> transporter = new FileTransporter<>(temporaryFolder.toString());
         transporter.dump(metablock);
         assertTrue(Files.exists(Paths.get(linkFile)));
     }
@@ -196,7 +196,7 @@ class LinkTest
         
         String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).toString();
 
-        FileTransporter transporter = new FileTransporter(temporaryFolder.toString());
+        FileTransporter<Link> transporter = new FileTransporter<>(temporaryFolder.toString());
         
         transporter.dump(testMetablockLink);
 
@@ -235,7 +235,7 @@ class LinkTest
         Artifact testproduct = new Artifact("demo-project/foo.py", "ebebf8778035e0e842a4f1aeb92a601be8ea8e621195f3b972316c60c9e12235");
 
 
-        FileTransporter transporter = new FileTransporter();
+        FileTransporter<Link> transporter = new FileTransporter<>();
 
         Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/clone.776a00e2.link", metablockType);
         assertTrue(testMetablockLink.signed.getName() != null);
@@ -244,7 +244,7 @@ class LinkTest
         
         String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).toString();
 
-        transporter = new FileTransporter(temporaryFolder.toString());
+        transporter = new FileTransporter<>(temporaryFolder.toString());
         
         transporter.dump(testMetablockLink);
 
@@ -273,7 +273,7 @@ class LinkTest
         
 
 
-        FileTransporter transporter = new FileTransporter();
+        FileTransporter<Link> transporter = new FileTransporter<>();
         Metablock<Link> testMetablockLink = transporter.load("src/test/resources/link_test/byproducts.link", metablockType);
         
         String linkString = testMetablockLink.getSigned().jsonEncodeCanonical();
