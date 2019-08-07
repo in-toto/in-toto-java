@@ -104,5 +104,19 @@
 				</executions>
 			</plugin>
 		</plugins>
-	</build>
+	</build>	
+    <distributionManagement>
+        <snapshotRepository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>in-toto</id>
+            <name>in-toto snapshots</name>
+            <url>${distman.snapshoturl}</url>
+        </snapshotRepository>
+        <repository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>in-toto</id>
+            <name>in-toto snapshots</name>
+            <url>${distman.releaseurl}</url>
+        </repository>
+    </distributionManagement>
 </project>

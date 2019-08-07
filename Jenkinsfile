@@ -18,7 +18,7 @@ pipeline {
         stage('Build') {
             steps {
 	            withDockerContainer(image: MAVEN_IMAGE, args: '-l io.rancher.container.network=true') {
-	                	mvn 'install'
+	                	mvn "install deploy"
 	            }
             }
         }
