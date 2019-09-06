@@ -8,6 +8,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -31,7 +32,7 @@ class RSAKeyTest
         // load a private key and make sure the key is private
         RSAKey testKey = RSAKey.read(private_key_path);
         try {
-            assertTrue(testKey.getPrivate().isPrivate());
+            assertTrue(testKey.getPrivateKeyParameter().isPrivate());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -40,7 +41,7 @@ class RSAKeyTest
         // private
         testKey = RSAKey.read(public_key_path);
         try {
-            assertTrue(testKey.getPrivate() == null);
+            assertTrue(testKey.getPrivateKeyParameter() == null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -57,42 +58,11 @@ class RSAKeyTest
 
         // load a privatekey pem and compare the keyid
         RSAKey testKey = RSAKey.read(private_key_path);
-        String actual = testKey.computeKeyId();
+        String actual = testKey.getKeyid();
         assertTrue(targetKeyID.equals(actual));
 
         // load a public key pem and compare the keyid
         testKey = RSAKey.read(public_key_path);
-        assertTrue(targetKeyID.equals(testKey.computeKeyId()));
-    }
-
-    /**
-     * test public key serialization
-     *
-     * Test methods to serialize a public key
-     * FIXME: will wait for junit-pioneer to add TempDirectory for this test
-     */
-     
-     
-    //@Rule public ExpectedException thrown = ExpectedException.none();
-     
-    @TempDir
-    Path temporaryFolder;
-
-    @Test
-    @DisplayName("Test RSAKey ComputeKeyID()")
-    public void testComputeKeyID() throws IOException {
-        
-        Key thiskey = RSAKey.read("src/test/resources/rsakey_test/someotherkey.pem");
-        Path keyFile = Files.createFile(temporaryFolder.resolve("key.pem"));
-        thiskey.write(keyFile.toString());
-        Key key = RSAKey.read(keyFile.toString());
-        assertEquals(key.computeKeyId(), thiskey.computeKeyId());
-        
-        Key thiskey2 = RSAKey.read("src/test/resources/rsakey_test/somekey.pem");
-        Path keyFile2 = Files.createFile(temporaryFolder.resolve("key2.pem"));
-        thiskey2.write(keyFile2.toString());
-        Key key2 = RSAKey.read(keyFile2.toString());
-        String actualKeyId = key2.computeKeyId();
-        assertEquals("0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7", actualKeyId);
+        assertTrue(targetKeyID.equals(testKey.getKeyid()));
     }
 }

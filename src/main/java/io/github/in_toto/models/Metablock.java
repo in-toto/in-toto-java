@@ -29,6 +29,8 @@ import org.bouncycastle.crypto.CryptoException;
  */
 public class Metablock<S extends Signable> {
     
+    private static final String UNSIGNED_STRING = "UNSIGNED";
+    
     S signed;
     Set<Signature> signatures = new HashSet<>();
 
@@ -93,22 +95,21 @@ public class Metablock<S extends Signable> {
     public void sign(Key privateKey) {
 
         String sig = null;
-        String keyid;
         byte[] payload;
         AsymmetricKeyParameter keyParameters;
 
         try {
             if (privateKey == null 
-                    || privateKey.getPrivate() == null 
-                    || ! privateKey.getPrivate().isPrivate()) {
+                    || privateKey.getPrivateKeyParameter() == null 
+                    || ! privateKey.getPrivateKeyParameter().isPrivate()) {
                 throw new KeyException("Can't sign with a null or public key!");
             }
-            keyParameters = privateKey.getPrivate();
+            keyParameters = privateKey.getPrivateKeyParameter();
         } catch (IOException e) {
             throw new KeyException("Can't sign with this key!: "+e.getMessage());
         }
 
-        keyid = privateKey.computeKeyId();
+        
         payload = this.signed.jsonEncodeCanonical().getBytes();
 
         Signer signer = privateKey.getSigner();
@@ -120,16 +121,17 @@ public class Metablock<S extends Signable> {
             throw new KeyException("Couldn't sign payload!: "+e.getMessage());
         }
         
-        Signature signature = new Signature(keyid, sig);
-        // first remove if available
-        // because oldSig.equals(newSig) because keyIdOld == keyIdNew
+        Signature signature = new Signature(privateKey, sig);
+        // first remove if signature available with same key
+        // because oldSig.equals(newSig) if keyOld == keyNew
+        // and behavior not defined for adding same object to set
         this.signatures.remove(signature);
         this.signatures.add(signature);
 
     }
     
     /**
-     * Get short key id.
+     * Get short signature id.
      * 
      * The short key are the first 8 characters of the key
      * 
@@ -137,16 +139,15 @@ public class Metablock<S extends Signable> {
      *  
      * @return String  
      */
-    public String getShortKeyId() {
+    public String getShortSignatureId() {
         if (this.signatures == null || this.signatures.isEmpty()) {
-            return "UNSIGNED";
+            return UNSIGNED_STRING;
         } else {  
             if (this.signatures.size() > 1) {
-                throw new KeyException("Short Key id is ambiguous because there is more than 1 key id available");
+                throw new KeyException("Signature id is ambiguous because there is more than 1 signer available");
             }
         }
-        String keyId = this.signatures.iterator().next().getKeyid();
-        return keyId.substring(0, Key.SHORT_HASH_LENGTH);
+        return this.signatures.iterator().next().getKey().getShortKeyId();
     }
     
     /**
@@ -161,7 +162,7 @@ public class Metablock<S extends Signable> {
      *  present
      */
     public String getFullName() {
-        return this.signed.getFullName(getShortKeyId());
+        return this.signed.getFullName(this.getShortSignatureId());
     }
 
     public Set<Signature> getSignatures() {

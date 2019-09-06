@@ -9,7 +9,6 @@ import io.github.in_toto.transporters.FileTransporter;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 

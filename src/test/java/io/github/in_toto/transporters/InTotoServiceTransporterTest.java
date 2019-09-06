@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import io.github.in_toto.exceptions.TransporterException;
+import io.github.in_toto.keys.Signature;
 import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Metablock;
 import io.github.in_toto.models.Link.LinkBuilder;
@@ -81,7 +83,9 @@ class InTotoServiceTransporterTest {
             }
         };
         InTotoServiceTransporter<Link> transport = new InTotoServiceTransporter<Link>("Supplychains/domain1/app1/petclinic", "mockhost", 1234, false);
-        String metablockId = metablock.getSigned().getName()+"/"+metablock.getShortKeyId()+"/"+metablock.getSigned().getShortHash();
+        String fullName = metablock.getFullName();
+        String[] nameParts = fullName.split(Pattern.quote("."));
+        String metablockId = metablock.getSigned().getName()+"/"+nameParts[0]+"/"+nameParts[1]+"/"+metablock.getSigned().getShortHash();
         transport.setTransport(transportMock);
         transport.dump(metablock);
         // and load again

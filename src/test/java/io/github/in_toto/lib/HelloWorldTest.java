@@ -2,8 +2,6 @@ package io.github.in_toto.lib;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -49,7 +47,7 @@ class HelloWorldTest {
 	void testHelloWorld() throws IOException {
 		Key thiskey = RSAKey.read("src/test/resources/lib_test/somekey.pem");
 
-		System.out.println("Loaded key ID: " + thiskey.computeKeyId());		
+		System.out.println("Loaded key ID: " + thiskey.getKeyid());		
 
 		LinkBuilder linkBuilder = new LinkBuilder("test");
 
@@ -59,7 +57,7 @@ class HelloWorldTest {
 		Metablock<Link> linkMetablock = new Metablock<Link>(link, null);
 		linkMetablock.sign(thiskey);
 		String linkFile = Files.createFile(temporaryFolder.resolve(linkMetablock.getFullName())).toString();
-        FileTransporter transporter = new FileTransporter(temporaryFolder.toString());
+        FileTransporter<Link> transporter = new FileTransporter<>(temporaryFolder.toString());
     	transporter.dump(linkMetablock);
 	}
 

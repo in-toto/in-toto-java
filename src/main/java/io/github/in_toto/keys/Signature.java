@@ -1,5 +1,17 @@
 package io.github.in_toto.keys;
 
+import java.lang.reflect.Type;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.google.gson.annotations.JsonAdapter;
+import io.github.in_toto.keys.Signature.SignatureJsonAdapter;
+
 /**
  * Public class representing an in-toto Signature. 
  *
@@ -7,42 +19,38 @@ package io.github.in_toto.keys;
  * signing algorithms will be based on.
  *
  */
+@JsonAdapter(SignatureJsonAdapter.class)
 public final class Signature 
 {
-    private String keyid;
+    private Key key;
     private String sig;
     
     public Signature() {}
 
-    public Signature(String keyid, String sig) {
-        this.keyid = keyid;
+    public Signature(Key key, String sig) {
+        this.key = key;
         this.sig = sig;
     }
 
-    @Override
-    public String toString() {
-        return "Signature [keyid=" + keyid + ", sig=" + sig + "]";
+    public Key getKey() {
+        return key;
     }
 
-    public String getKeyid() {
-        return keyid;
+    public void setKey(Key key) {
+        this.key = key;
     }
 
     public String getSig() {
         return sig;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((keyid == null) ? 0 : keyid.hashCode());
-        return result;
+    public void setSig(String sig) {
+        this.sig = sig;
     }
 
     /*
-     * every sig is different, so not part of equals if this.keyid == other.keyid =>
-     * signature is made with same key so equal
+     * signatureA == signatureB <==> signatureA.key == signatureB.key if signatures
+     * are made with same key they are equal
      */
     @Override
     public boolean equals(Object obj) {
@@ -56,17 +64,49 @@ public final class Signature
             return false;
         }
         Signature other = (Signature) obj;
-        if (keyid == null) {
-            if (other.keyid != null) {
+        if (key == null) {
+            if (other.key != null) {
                 return false;
             }
-        } else {
-            if (!keyid.equals(other.keyid)) {
-                return false;
-            }
+        } else if (!key.equals(other.key)) {
+            return false;
         }
         return true;
     }
-    
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        return result;
+    }
+
+    static class SignatureJsonAdapter implements JsonSerializer<Signature>, JsonDeserializer<Signature> {
+
+        @Override
+        public Signature deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+            JsonObject jsonObject = json.getAsJsonObject();
+            String keyid = jsonObject.get("keyid").getAsString();
+            Key key = new Key();
+            key.setKeyid(keyid);
+            String sig = jsonObject.get("sig").getAsString();
+            return new Signature(key, sig);
+        }
+
+        @Override
+        public JsonElement serialize(Signature src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonObject jsonObject = new JsonObject();            
+            jsonObject.add("keyid", new JsonPrimitive(src.getKey().getKeyid()));
+            jsonObject.add("sig", context.serialize(src.getSig()));
+            return jsonObject;
+        }
+         
+    }
+
+    @Override
+    public String toString() {
+        return "Signature [key=" + key + ", sig=" + sig + "]";
+    }
     
 }

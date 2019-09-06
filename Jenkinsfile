@@ -25,7 +25,7 @@ pipeline {
         stage('Sonar') {
             steps {
 	            withDockerContainer(image: MAVEN_IMAGE, args: '-l io.rancher.container.network=true') {
-                    	mvn 'sonar:sonar -Dsonar.host.url=' + SONAR_HOST_URL
+                    	mvn 'sonar:sonar -Dsonar.buildbreaker.skip=true -Dsonar.host.url=' + SONAR_HOST_URL
                 }
             }
         }

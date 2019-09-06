@@ -25,11 +25,20 @@ class SignatureTest {
     @AfterEach
     void tearDown() throws Exception {
     }
+    
+    private static final String private_key_path = "src/test/resources/signature_test/somekey.pem";
 
     @Test
     void testHashAndEquals() {
-        Signature sig1 = new Signature("foo", "bar");
-        Signature sig2 = new Signature("foo", "bar2");
+        final String targetKeyID = "0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7";
+
+        // load a privatekey pem and compare the keyid
+        RSAKey testKey = RSAKey.read(private_key_path);
+        String actual = testKey.getKeyid();
+        assertTrue(targetKeyID.equals(actual));
+        
+        Signature sig1 = new Signature(testKey, "bar");
+        Signature sig2 = new Signature(testKey, "bar2");
         
         assertEquals(sig1.hashCode(), sig2.hashCode());
         assertEquals(sig1, sig2);
