@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+
 class ByProductsTest {
 
     @BeforeAll
@@ -33,9 +36,9 @@ class ByProductsTest {
     void testConstructorEqualsAndHashCode() {
         ByProducts prods = new ByProducts();
         prods.setReturnValue(1);
-        prods.setStdout("foo");
-        prods.setStderr("bar");
-        ByProducts prods2 = new ByProducts("foo", "bar", 1);
+        prods.setStdout("one");
+        prods.setStderr("one");
+        ByProducts prods2 = new ByProducts("one", "one", 1);
         assertEquals(prods, prods2);
         assertEquals(prods.hashCode(), prods2.hashCode());
     }
@@ -47,6 +50,13 @@ class ByProductsTest {
         Gson gson = new Gson();
         String actualsJson = gson.toJson(prods);
         assertEquals(expectedJson, actualsJson);
+    }
+    
+    @Test
+    public void equalsContract() {
+        EqualsVerifier.forClass(ByProducts.class)
+            .suppress(Warning.NONFINAL_FIELDS)
+            .verify();
     }
     
 

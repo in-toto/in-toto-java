@@ -36,16 +36,8 @@ public final class Signature
         return key;
     }
 
-    public void setKey(Key key) {
-        this.key = key;
-    }
-
     public String getSig() {
         return sig;
-    }
-
-    public void setSig(String sig) {
-        this.sig = sig;
     }
 
     /*

@@ -3,6 +3,8 @@ package io.github.in_toto.transporters;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -25,18 +27,16 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import io.github.in_toto.exceptions.TransporterException;
-import io.github.in_toto.keys.Signature;
 import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Metablock;
 import io.github.in_toto.models.Link.LinkBuilder;
 import io.github.in_toto.transporters.InTotoServiceTransporter;
+import nl.jqno.equalsverifier.EqualsVerifier;
 
 class InTotoServiceTransporterTest {
     private Type metablockType = new TypeToken<Metablock<Link>>() {}.getType();
     
     Random rand = new Random();
-
-
 
     MockLowLevelHttpResponse mockResponse = new MockLowLevelHttpResponse();
     
@@ -63,7 +63,7 @@ class InTotoServiceTransporterTest {
     }
     
     @Test
-    public void testDumpLink() throws MalformedURLException {
+    public void testDumpLink() throws NoSuchFieldException, SecurityException, Exception {
         Metablock<Link> metablock = new Metablock<Link>(new LinkBuilder("linktest").build(), null);
         HttpTransport transportMock = new MockHttpTransport() {
             @Override
@@ -82,20 +82,23 @@ class InTotoServiceTransporterTest {
                 };
             }
         };
-        InTotoServiceTransporter<Link> transport = new InTotoServiceTransporter<Link>("Supplychains/domain1/app1/petclinic", "mockhost", 1234, false);
         String fullName = metablock.getFullName();
         String[] nameParts = fullName.split(Pattern.quote("."));
-        String metablockId = metablock.getSigned().getName()+"/"+nameParts[0]+"/"+nameParts[1]+"/"+metablock.getSigned().getShortHash();
-        transport.setTransport(transportMock);
+        String metablockId = metablock.getSigned().getName()+"/"+nameParts[0]+"/"+nameParts[1]+"/"+metablock.getSigned().getHash();
+        
+        setFinalStatic(InTotoServiceTransporter.class.getDeclaredField("transport"), transportMock);
+        
+
+        InTotoServiceTransporter<Link> transport = new InTotoServiceTransporter<Link>("Supplychains/domain1/app1/petclinic", "mockhost", 1234, false);
+        
         transport.dump(metablock);
         // and load again
         Metablock<Link> metablock2 = transport.load(metablockId, this.metablockType);
         assertEquals(metablock, metablock2);
     }
    
-    @Test //(expected = RuntimeException.class)
-    public void testDumpLinkExc() throws MalformedURLException {
-        InTotoServiceTransporter<Link> transport = new InTotoServiceTransporter<Link>("Supplychains/domain1/app1/chainOther", "mockhost", 1234, false);
+    @Test
+    public void testDumpLinkExc() throws NoSuchFieldException, SecurityException, Exception {
         HttpTransport transportMock = new MockHttpTransport() {
             @Override
             public LowLevelHttpRequest buildRequest(String method, String url) {
@@ -111,7 +114,9 @@ class InTotoServiceTransporterTest {
             }
         };
         Metablock<Link> metablock = new Metablock<Link>(new LinkBuilder("linktest"+rand.nextInt()).build(), null);
-        transport.setTransport(transportMock);
+        setFinalStatic(InTotoServiceTransporter.class.getDeclaredField("transport"), transportMock);
+
+        InTotoServiceTransporter<Link> transport = new InTotoServiceTransporter<Link>("Supplychains/domain1/app1/chainOther", "mockhost", 1234, false);
         Throwable exception = assertThrows(TransporterException.class, () -> {
             transport.dump(metablock);
           });
@@ -121,9 +126,8 @@ class InTotoServiceTransporterTest {
     }
     
     @Test
-    public void testLoadLink() throws MalformedURLException {
+    public void testLoadLink() throws NoSuchFieldException, SecurityException, Exception {
         Metablock<Link> metablock = new Metablock<Link>(new LinkBuilder("linktest").build(), null);
-        InTotoServiceTransporter<Link> transport = new InTotoServiceTransporter<Link>("Supplychains/domain1/app1/linktest", "mockhost", 1234, false);
         HttpTransport transportMock = new MockHttpTransport() {
             @Override
             public LowLevelHttpRequest buildRequest(String method, String url) {
@@ -141,10 +145,19 @@ class InTotoServiceTransporterTest {
                 };
             }
         };
-        transport.setTransport(transportMock);
+        setFinalStatic(InTotoServiceTransporter.class.getDeclaredField("transport"), transportMock);
+        InTotoServiceTransporter<Link> transport = new InTotoServiceTransporter<Link>("Supplychains/domain1/app1/linktest", "mockhost", 1234, false);
         
         Metablock<Link> metablock2 = transport.load("Supplychains/domain1/app1/chainOther", this.metablockType);
         assertEquals(metablock, metablock2);
+    }
+    
+    static void setFinalStatic(Field field, Object newValue) throws Exception {
+        field.setAccessible(true);        
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        field.set(null, newValue);
     }
     
     @Test
@@ -153,6 +166,12 @@ class InTotoServiceTransporterTest {
         InTotoServiceTransporter<Link> transport2 = new InTotoServiceTransporter<Link>("Supplychains/domain1/app1/linktest", "mockhost", 1234, false);
         assertEquals(transport, transport2);
         assertEquals(transport.hashCode(), transport2.hashCode());
+    }
+    
+    @Test
+    public void equalsContract() {
+        EqualsVerifier.forClass(InTotoServiceTransporter.class) 
+            .verify();
     }
 
 }

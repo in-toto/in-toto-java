@@ -21,6 +21,8 @@ import org.junit.jupiter.api.io.TempDir;
 import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.keys.RSAKey;
 import io.github.in_toto.models.Link.LinkBuilder;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 
 class ArtifactTest {
 
@@ -207,7 +209,7 @@ class ArtifactTest {
     }
     
     @Test
-    @DisplayName("Test record raverse dir and subdirs. Record three files.")
+    @DisplayName("Test record traverse dir and subdirs. Record three files.")
     public void testDotCheckFiles() {
         String aliceDir = testDir + "/owner_alice";
         // get materials
@@ -227,8 +229,18 @@ class ArtifactTest {
         assertEquals(a1.hashCode(), a2.hashCode());
     }
     
-
+    @Test
+    @DisplayName("Test toString.")
+    public void testToString() {
+        String expected = "Artifact [uri=foo, algorithm=sha256, hash=bar]";
+        Artifact a1 = new Artifact("foo", "bar");
+        assertEquals(expected, a1.toString());
+    }
     
-
-
+    @Test
+    public void equalsContract() {
+        EqualsVerifier.forClass(Artifact.class)
+            .suppress(Warning.NONFINAL_FIELDS)
+            .verify();
+    }
 }

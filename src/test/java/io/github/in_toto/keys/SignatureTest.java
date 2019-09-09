@@ -8,6 +8,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.github.in_toto.models.Metablock;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+
 class SignatureTest {
 
     @BeforeAll
@@ -42,6 +46,14 @@ class SignatureTest {
         
         assertEquals(sig1.hashCode(), sig2.hashCode());
         assertEquals(sig1, sig2);
+    }
+    
+    @Test
+    public void equalsContract() {
+        EqualsVerifier.forClass(Signature.class)
+            .withIgnoredFields("sig")
+            .suppress(Warning.NONFINAL_FIELDS)
+            .verify();
     }
 
 }

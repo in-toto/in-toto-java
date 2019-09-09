@@ -57,19 +57,6 @@ public final class Artifact {
     
     public Artifact() {}
 
-    /**
-     * Default constructor, uses a filename to collect and automatically hash the
-     * contents of the file.
-     *
-     * This constructor does *not* perform file locking, so use with care.
-     *
-     * @param filename The filename (relative or absolute) of the Artifact to record
-     *                 (i.e., hash).
-     */
-    public Artifact(String filename) {
-        this(filename, null);
-    }
-
     public Artifact(String filename, String hash) {
         this.uri = filename;
         this.hash = hash;
@@ -265,6 +252,7 @@ public final class Artifact {
 
     }
 
+    @SuppressWarnings("squid:S00115")
     public enum HashAlgorithm {
         sha256, sha512
     }

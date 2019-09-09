@@ -1,8 +1,9 @@
 package io.github.in_toto.models;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
-import java.lang.reflect.Type;
+
 import java.io.IOException;
 
 import io.github.in_toto.exceptions.KeyException;
@@ -11,10 +12,6 @@ import io.github.in_toto.keys.Signature;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.util.encoders.Hex;
@@ -27,12 +24,10 @@ import org.bouncycastle.crypto.CryptoException;
  * - A signed field, with the signable portion of a piece of metadata.
  * - A signatures field, a list of the signatures on this metadata.
  */
-public class Metablock<S extends Signable> {
+public final class Metablock<S extends Signable> {
     
-    private static final String UNSIGNED_STRING = "UNSIGNED";
-    
-    S signed;
-    Set<Signature> signatures = new HashSet<>();
+    private S signed;
+    private Set<Signature> signatures = new HashSet<>();
 
     public void setSignatures(Set<Signature> signatures) {
         this.signatures = signatures;
@@ -48,10 +43,9 @@ public class Metablock<S extends Signable> {
     public Metablock(S signed, Set<Signature> signatures) {
         this.signed = signed;
 
-        if (signatures == null) {
-            signatures = new HashSet<>();
+        if (signatures != null) {
+            this.signatures = signatures;
         }
-        this.signatures = signatures;
     }
 
     /**
@@ -61,29 +55,7 @@ public class Metablock<S extends Signable> {
      * @return a JSON string representation of the metadata instance
      */
     public String toJson() {
-        Gson gson = new GsonBuilder()
-                .serializeNulls()
-                /*
-                 * A custom implementation of the gson JsonSerializer to convert numeric values
-                 * to non-floating point numbers when serializing JSON.
-                 *
-                 * This is required to handle generic data, such as `byproducts` or
-                 * `environment`, where the type of the contained values is not declared. Gson
-                 * treats any numeric value, with generic type in the target data structure as
-                 * double. However, the in-toto reference implementation does not allow floating
-                 * point numbers in JSON-formatted metadata.
-                 *
-                 */
-                .registerTypeAdapter(Double.class, new JsonSerializer<Double>() {
-                    @Override
-                    public JsonElement serialize(Double src, Type typeOfSrc, JsonSerializationContext context) {
-                        if (src == src.longValue()) {
-                            return new JsonPrimitive(src.longValue());
-                        }
-
-                        return new JsonPrimitive(src);
-                    }
-                }).setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
 
@@ -122,12 +94,21 @@ public class Metablock<S extends Signable> {
         }
         
         Signature signature = new Signature(privateKey, sig);
-        // first remove if signature available with same key
-        // because oldSig.equals(newSig) if keyOld == keyNew
-        // and behavior not defined for adding same object to set
-        this.signatures.remove(signature);
-        this.signatures.add(signature);
+        this.addOrReplaceSignature(signature);
 
+    }
+    
+    private void addOrReplaceSignature(Signature signature) {
+        // first remove if signature available with same key
+        String sigKeyId = signature.getKey().getKeyid();
+        Iterator<Signature> it = this.signatures.iterator();
+        while ( it.hasNext()) {
+            Signature sig = it.next();
+            if (sig.getKey().getKeyid().equals(sigKeyId)) {
+                this.signatures.remove(sig);
+            }
+        }
+        this.signatures.add(signature);
     }
     
     /**
@@ -140,14 +121,10 @@ public class Metablock<S extends Signable> {
      * @return String  
      */
     public String getShortSignatureId() {
-        if (this.signatures == null || this.signatures.isEmpty()) {
-            return UNSIGNED_STRING;
-        } else {  
-            if (this.signatures.size() > 1) {
-                throw new KeyException("Signature id is ambiguous because there is more than 1 signer available");
-            }
+        if (this.signatures.size() > 1) {
+            throw new KeyException("Signature id is ambiguous because there is more than 1 signer available");
         }
-        return this.signatures.iterator().next().getKey().getShortKeyId();
+        return this.getSignatures().iterator().next().getKey().getShortKeyId();
     }
     
     /**
@@ -166,6 +143,11 @@ public class Metablock<S extends Signable> {
     }
 
     public Set<Signature> getSignatures() {
+        if (signatures.isEmpty()) {
+            Set<Signature> tempSet = new HashSet<>();
+            tempSet.add(new Signature(new Key(Key.UNSIGNED_STRING), null));
+            return tempSet;
+        }
         return signatures;
     }
 

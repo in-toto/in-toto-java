@@ -23,15 +23,20 @@ import io.github.in_toto.exceptions.TransporterException;
 import io.github.in_toto.models.Metablock;
 import io.github.in_toto.models.Signable;
 
-public class InTotoServiceTransporter<S extends Signable> implements Transporter<S> {
+public final class InTotoServiceTransporter<S extends Signable> implements Transporter<S> {
 
     static final Logger logger = Logger.getLogger(InTotoServiceTransporter.class.getName());
     
-    private URI inTotoServiceUri;
+    private final URI inTotoServiceUri;
     
-    private HttpHeaders headers = new HttpHeaders();
+    private static final HttpHeaders headers;
     
-    private HttpTransport transport = new NetHttpTransport();
+    private static final HttpTransport transport = new NetHttpTransport();
+    
+    static {
+        headers = new HttpHeaders();
+        headers.setAccept(Json.MEDIA_TYPE);
+    }
     
     public InTotoServiceTransporter(String supplyChainId, String hostname, int port, Boolean secure) {
         String protocol = "http";
@@ -43,8 +48,6 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
         } catch (URISyntaxException e) {
             throw new TransporterException("Couldn't create URI: " + e);
         }
-        
-        this.headers.setAccept(Json.MEDIA_TYPE);
     }
 
     @Override
@@ -52,12 +55,8 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
         try {
             HttpRequest request = transport.createRequestFactory().buildPostRequest(
                     new GenericUrl(inTotoServiceUri),
-                    ByteArrayContent.fromString("application/json", metablock.toJson())).setHeaders(this.headers);
+                    ByteArrayContent.fromString("application/json", metablock.toJson())).setHeaders(InTotoServiceTransporter.headers);
             request.execute();
-            /*
-             * FIXME: should handle error codes and other situations more appropriately, but
-             * this gets the job done for a PoC
-             */
         } catch (IOException e) {
             throw new TransporterException("couldn't serialize to in-toto service: " + e);
         }
@@ -69,7 +68,7 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
         try {
             URI uri = new URI(String.format("%s/%s", inTotoServiceUri.toString(), id));
             HttpRequest request = transport.createRequestFactory().buildGetRequest(
-                    new GenericUrl(uri)).setHeaders(this.headers);
+                    new GenericUrl(uri)).setHeaders(InTotoServiceTransporter.headers);
             HttpResponse response = request.execute();
             String json = null;
             try (final Reader reader = new InputStreamReader(response.getContent())) {
@@ -96,31 +95,18 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
         return inTotoServiceUri;
     }
 
-    public void setInTotoServiceUri(URI inTotoServiceUri) {
-        this.inTotoServiceUri = inTotoServiceUri;
-    }
-
     public HttpHeaders getHeaders() {
         return headers;
-    }
-
-    public void setHeaders(HttpHeaders headers) {
-        this.headers = headers;
     }
 
     public HttpTransport getTransport() {
         return transport;
     }
 
-    public void setTransport(HttpTransport transport) {
-        this.transport = transport;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((headers == null) ? 0 : headers.hashCode());
         result = prime * result + ((inTotoServiceUri == null) ? 0 : inTotoServiceUri.hashCode());
         return result;
     }
@@ -137,13 +123,6 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
             return false;
         }
         InTotoServiceTransporter other = (InTotoServiceTransporter) obj;
-        if (headers == null) {
-            if (other.headers != null) {
-                return false;
-            }
-        } else if (!headers.equals(other.headers)) {
-            return false;
-        }
         if (inTotoServiceUri == null) {
             if (other.inTotoServiceUri != null) {
                 return false;
@@ -151,9 +130,7 @@ public class InTotoServiceTransporter<S extends Signable> implements Transporter
         } else if (!inTotoServiceUri.equals(other.inTotoServiceUri)) {
             return false;
         }
-        // HttpTransport doesn't implement equals
-        return (transport == null && other.transport == null)
-                || (transport != null && other.transport != null);
+        return true;
     }
 
 }

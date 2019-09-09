@@ -2,7 +2,7 @@ package io.github.in_toto.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ByProducts {
+public final class ByProducts {
     
     private String stdout;
     private String stderr;
@@ -12,7 +12,6 @@ public class ByProducts {
     public ByProducts() {}
     
     public ByProducts(String stdout, String stderr, Integer returnValue) {
-        super();
         this.stdout = stdout;
         this.stderr = stderr;
         this.returnValue = returnValue;
@@ -74,8 +73,13 @@ public class ByProducts {
             if (other.returnValue != null) {
                 return false;
             }
-        } else if (!returnValue.equals(other.returnValue)) {
-            return false;
+        } else  {
+            if (other.returnValue == null) {
+                return false;
+            }
+            if (returnValue.intValue() != other.returnValue.intValue()) {
+                return false;
+            }
         }
         if (stderr == null) {
             if (other.stderr != null) {
@@ -93,6 +97,5 @@ public class ByProducts {
         }
         return true;
     }
-
 
 }
