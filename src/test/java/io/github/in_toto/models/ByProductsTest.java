@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+import io.github.in_toto.models.link.ByProducts;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

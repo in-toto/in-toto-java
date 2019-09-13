@@ -20,7 +20,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.keys.RSAKey;
-import io.github.in_toto.models.Link.LinkBuilder;
+import io.github.in_toto.models.link.Artifact;
+import io.github.in_toto.models.link.Link;
+import io.github.in_toto.models.link.Link.LinkBuilder;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

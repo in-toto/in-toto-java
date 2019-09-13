@@ -1,4 +1,4 @@
-package io.github.in_toto.models;
+package io.github.in_toto.models.link;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,9 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 
 import io.github.in_toto.exceptions.ValueError;
-import io.github.in_toto.models.Artifact.ArtifactSetJsonAdapter;
+import io.github.in_toto.models.Signable;
+import io.github.in_toto.models.SignableType;
+import io.github.in_toto.models.link.Artifact.ArtifactSetJsonAdapter;
 
 /**
  * Implementation of the in-toto Link metadata type.
@@ -52,7 +54,7 @@ public final class Link implements Signable {
      * @param byproducts A HashMap containing the byproduct triplet
      * stdin/stdout/retval.
      *
-     * @see io.github.in_toto.models.Artifact
+     * @see io.github.in_toto.models.link.Artifact
      */
     public Link(String name, Set<Artifact> materials,
             Set<Artifact> products,

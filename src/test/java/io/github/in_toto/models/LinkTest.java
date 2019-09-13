@@ -1,11 +1,13 @@
 package io.github.in_toto.models;
 
-import io.github.in_toto.models.Link;
-import io.github.in_toto.models.Link.LinkBuilder;
 import io.github.in_toto.transporters.FileTransporter;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import io.github.in_toto.keys.RSAKey;
+import io.github.in_toto.models.link.Artifact;
+import io.github.in_toto.models.link.ByProducts;
+import io.github.in_toto.models.link.Link;
+import io.github.in_toto.models.link.Link.LinkBuilder;
 import io.github.in_toto.exceptions.KeyException;
 import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.keys.Key;

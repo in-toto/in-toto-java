@@ -8,6 +8,8 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import io.github.in_toto.models.link.Link;
+
 public class SignableDeserializer implements JsonDeserializer<Signable> {
 
     @Override

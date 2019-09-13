@@ -13,10 +13,10 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.RSAKey;
-import io.github.in_toto.models.Link;
-import io.github.in_toto.models.Link.LinkBuilder;
 import io.github.in_toto.transporters.FileTransporter;
 import io.github.in_toto.models.Metablock;
+import io.github.in_toto.models.link.Link;
+import io.github.in_toto.models.link.Link.LinkBuilder;
 
 class HelloWorldTest {
     

@@ -2,9 +2,9 @@ package io.github.in_toto.lib;
 
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.RSAKey;
-import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Metablock;
-import io.github.in_toto.models.Link.LinkBuilder;
+import io.github.in_toto.models.link.Link;
+import io.github.in_toto.models.link.Link.LinkBuilder;
 import io.github.in_toto.transporters.FileTransporter;
 
 import java.io.*;

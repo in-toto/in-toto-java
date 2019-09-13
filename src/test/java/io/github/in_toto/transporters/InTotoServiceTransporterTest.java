@@ -27,9 +27,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import io.github.in_toto.exceptions.TransporterException;
-import io.github.in_toto.models.Link;
 import io.github.in_toto.models.Metablock;
-import io.github.in_toto.models.Link.LinkBuilder;
+import io.github.in_toto.models.link.Link;
+import io.github.in_toto.models.link.Link.LinkBuilder;
 import io.github.in_toto.transporters.InTotoServiceTransporter;
 import nl.jqno.equalsverifier.EqualsVerifier;
 

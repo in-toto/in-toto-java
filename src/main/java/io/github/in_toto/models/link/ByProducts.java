@@ -1,4 +1,4 @@
-package io.github.in_toto.models;
+package io.github.in_toto.models.link;
 
 import com.google.gson.annotations.SerializedName;
 

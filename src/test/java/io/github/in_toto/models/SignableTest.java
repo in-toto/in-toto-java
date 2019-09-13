@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import io.github.in_toto.models.link.Link;
+
 class SignableTest {
 
     @Test
