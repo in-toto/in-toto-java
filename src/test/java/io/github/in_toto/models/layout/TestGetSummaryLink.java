@@ -1,4 +1,6 @@
-package io.github.in_toto.models.layout.rule;
+package io.github.in_toto.models.layout;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -6,10 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
-
-class ComplexRuleTest {
+class TestGetSummaryLink {
 
     @BeforeAll
     static void setUpBeforeClass() throws Exception {
@@ -28,13 +27,8 @@ class ComplexRuleTest {
     }
 
     @Test
-    public void equalsContract() {
-        EqualsVerifier.forClass(ComplexRule.class)
-            .suppress(Warning.NONFINAL_FIELDS)
-            .withRedefinedSuperclass()
-            .verify();
+    void test() {
+     // TODO
     }
-    
-    
 
 }

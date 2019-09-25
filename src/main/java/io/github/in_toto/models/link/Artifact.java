@@ -43,22 +43,20 @@ public final class Artifact {
     /**
      * A uri representing the location of the Artifact
      */
-    private String uri;
+    private final String uri;
 
     /**
      * Hash algorithm sha256 or sha512
      */
-    private HashAlgorithm algorithm = HashAlgorithm.sha256;
+    private final HashAlgorithm algorithm = HashAlgorithm.sha256;
 
     /**
      * The hash of this artifact.
      */
-    private String hash;
-    
-    public Artifact() {}
+    private final String hash;
 
     public Artifact(String filename, String hash) {
-        this.uri = filename;
+        this.uri = normalizePath(filename);
         this.hash = hash;
     }
 
@@ -72,6 +70,13 @@ public final class Artifact {
 
     public String getHash() {
         return hash;
+    }
+
+    public static String normalizePath(String path) {
+        if (path == null) {
+            return null;
+        }
+        return path.replace("\\\\", "/").replace("\\", "/");
     }
 
     /**
@@ -179,7 +184,9 @@ public final class Artifact {
             if (this.basePath != null) {
                 path = Paths.get(this.basePath, file);
             }
-            if (path.toFile().exists()) {
+            if (!path.toFile().exists()) {
+                logger.warning(String.format("path: [%s] does not exist, skipping..", path.toString()));
+            } else {
                 if (Files.isRegularFile(path)) {
                     // normalize path separator and create Artifact
                     Artifact artifact = new Artifact(file.replace("\\", "/"),

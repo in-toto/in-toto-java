@@ -1,18 +1,23 @@
 package io.github.in_toto.models;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import java.io.IOException;
 
 import io.github.in_toto.exceptions.KeyException;
+import io.github.in_toto.exceptions.SignatureVerificationError;
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.Signature;
 import io.github.in_toto.lib.JSONEncoder;
 
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.util.encoders.Hex;
+
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.CryptoException;
 
@@ -24,14 +29,8 @@ import org.bouncycastle.crypto.CryptoException;
  */
 public final class Metablock<S extends Signable> implements JSONEncoder {
     
-    private S signed;
-    private Set<Signature> signatures = new HashSet<>();
-
-    public void setSignatures(Set<Signature> signatures) {
-        this.signatures = signatures;
-    }
-    
-    public Metablock() {}
+    private final S signed;
+    private Set<Signature> signatures;
 
     /**
      * Base constructor.
@@ -42,7 +41,7 @@ public final class Metablock<S extends Signable> implements JSONEncoder {
         this.signed = signed;
 
         if (signatures != null) {
-            this.signatures = signatures;
+            this.signatures = new HashSet<>(signatures);
         }
     }
 
@@ -87,15 +86,75 @@ public final class Metablock<S extends Signable> implements JSONEncoder {
     
     private void addOrReplaceSignature(Signature signature) {
         // first remove if signature available with same key
-        String sigKeyId = signature.getKey().getKeyid();
-        Iterator<Signature> it = this.signatures.iterator();
-        while ( it.hasNext()) {
+        Iterator<Signature> it = this.getSignatures().iterator();
+        while (it.hasNext()) {
             Signature sig = it.next();
-            if (sig.getKey().getKeyid().equals(sigKeyId)) {
+            if (sig.equals(Signature.DUMMY_SIGNATURE) || sig.equals(signature)) {
                 this.signatures.remove(sig);
             }
         }
         this.signatures.add(signature);
+    }
+    
+    public void verifySignatures(List<Key> keys) throws SignatureVerificationError {
+
+        Map<String, Key> keyMap = new HashMap<>();
+        for (Key key:keys) {
+            keyMap.put(key.getKeyid(), key);
+        }
+        
+        Iterator<Signature> sigs = this.signatures.iterator();
+        while (sigs.hasNext()) {
+            Signature sig = sigs.next();
+            Key key = keyMap.get(sig.getKey().getKeyid());
+            if (key == null) {
+                throw new SignatureVerificationError(String.format("No public key for verification of signature with keyid [%s]", sig.getKey().getKeyid()));
+            }
+            sig.setKey(key);
+        }
+        verifySignatures();
+    }
+    
+    public void verifySignatures() throws SignatureVerificationError {
+        if (this.signatures ==  null || this.signatures.isEmpty()) {
+            throw new SignatureVerificationError("No signatures for verification");
+        }
+        for (Signature signature:this.signatures) {
+            verifySignature(signature);
+        }
+    }
+    
+    private void verifySignature(Signature signature) throws SignatureVerificationError {
+        
+        Key key = signature.getKey();
+        
+        AsymmetricKeyParameter keyParameters;
+
+        try {
+            if (key == null 
+                    || key.getPublicKeyParameter() == null) {
+                throw new SignatureVerificationError("Can't verify without public key!");
+            }
+            keyParameters = key.getPublicKeyParameter();
+        } catch (IOException e) {
+            throw new SignatureVerificationError("Can't verify with this key!: "+e.getMessage());
+        }
+
+        
+        byte[] payload = this.signed.jsonEncodeCanonical().getBytes();
+
+        Signer signer = key.getSigner();
+        signer.init(false, keyParameters);
+        signer.update(payload, 0, payload.length);
+        
+        try {
+        if (!signer.verifySignature(Hex.decode(signature.getSig()))) {
+            throw new SignatureVerificationError(String.format("Error in signature verification: keyid [%s]", signature.getKey().getKeyid()));
+        }
+        } catch (IllegalStateException e){
+            throw new SignatureVerificationError(String.format("Error in signature verification: keyid [%s] message: [%s]", signature.getKey().getKeyid(), e.getMessage()));            
+        }
+        
     }
     
     /**
@@ -108,7 +167,7 @@ public final class Metablock<S extends Signable> implements JSONEncoder {
      * @return String  
      */
     public String getShortSignatureId() {
-        if (this.signatures.size() > 1) {
+        if (this.getSignatures().size() > 1) {
             throw new KeyException("Signature id is ambiguous because there is more than 1 signer available");
         }
         return this.getSignatures().iterator().next().getKey().getShortKeyId();
@@ -130,10 +189,9 @@ public final class Metablock<S extends Signable> implements JSONEncoder {
     }
 
     public Set<Signature> getSignatures() {
-        if (signatures.isEmpty()) {
-            Set<Signature> tempSet = new HashSet<>();
-            tempSet.add(new Signature(new Key(Key.UNSIGNED_STRING), null));
-            return tempSet;
+        if (signatures == null) {
+            this.signatures = new HashSet<>();
+            this.signatures.add(Signature.DUMMY_SIGNATURE);
         }
         return signatures;
     }
@@ -184,6 +242,8 @@ public final class Metablock<S extends Signable> implements JSONEncoder {
         }
         return true;
     }
+    
+
 
 
 

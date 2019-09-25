@@ -8,7 +8,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.util.encoders.Hex;
@@ -21,6 +23,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import com.google.gson.reflect.TypeToken;
 
 import io.github.in_toto.exceptions.KeyException;
+import io.github.in_toto.exceptions.SignatureVerificationError;
 import io.github.in_toto.exceptions.ValueError;
 import io.github.in_toto.keys.Key;
 import io.github.in_toto.keys.RSAKey;
@@ -73,7 +76,7 @@ class MetablockTest {
         assertEquals(testMetablockLink.getSigned().getName(), "clone");
         assertTrue(testMetablockLink.getSigned().getProducts().contains(testproduct));
         
-        String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).toString();
+        String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).getFileName().toString();
 
         transporter = new FileTransporter<>(temporaryFolder.toString());
         
@@ -119,8 +122,23 @@ class MetablockTest {
     }
     
     @Test
+    @DisplayName("Validate link metablock deserialization and serialization")
+    public void testLinkDeserializationSerialization() throws IOException, URISyntaxException, ValueError, JSONException
+    {
+        
+        String jsonString = new String ( Files.readAllBytes( Paths.get("src/test/resources/io/github/in_toto/model/metablock_test/byproducts.link") ) );
+
+        FileTransporter<Link> transporter = new FileTransporter<>();
+        Metablock<Link> testMetablockLink = transporter.load("src/test/resources/io/github/in_toto/model/metablock_test/byproducts.link", metablockType);
+        
+        String linkString = testMetablockLink.jsonEncodeCanonical();
+        
+        JSONAssert.assertEquals(jsonString, linkString, true);
+    }
+    
+    @Test
     @DisplayName("Validate layout metablock deserialization and serialization with byproducts")
-    public void testLayoutDeserializationSerializationWithByProducts() throws IOException, URISyntaxException, ValueError, JSONException
+    public void testLayoutDeserializationSerialization() throws IOException, URISyntaxException, ValueError, JSONException
     {
         String jsonString = new String ( Files.readAllBytes( Paths.get("src/test/resources/io/github/in_toto/model/metablock_test/root.layout") ) );
         Type layoutMetablockType = new TypeToken<Metablock<Layout>>() {}.getType();
@@ -129,7 +147,7 @@ class MetablockTest {
         Metablock<Layout> testLayoutMetablock = transporter.load("src/test/resources/io/github/in_toto/model/metablock_test/root.layout", layoutMetablockType);
         
         String layoutMetablockString = testLayoutMetablock.jsonEncodeCanonical();
-        JSONAssert.assertEquals(jsonString, layoutMetablockString, false);
+        JSONAssert.assertEquals(jsonString, layoutMetablockString, true);
     }
     
     @Test
@@ -145,11 +163,11 @@ class MetablockTest {
     @DisplayName("Test not signable with Key.")
     public void testNotSignable() {
         Metablock<Link> testMetablockLink = new Metablock<Link>(link, null);
-        Throwable exception = assertThrows(KeyException.class, () -> {
+        Throwable exception = assertThrows(UnsupportedOperationException.class, () -> {
             testMetablockLink.sign(new Key("foo"));
           });
         
-        assertEquals("Can't sign with a null or public key!", exception.getMessage());
+        assertEquals("Not implemented", exception.getMessage());
     }
     
     @Test
@@ -162,6 +180,46 @@ class MetablockTest {
         FileTransporter<Link> transporter = new FileTransporter<>(temporaryFolder.toString());
         transporter.dump(metablock);
         assertTrue(Files.exists(Paths.get(linkFile)));
+    }
+    
+    @Test
+    @DisplayName("Validate Link sign")
+    public void testLinkSign() throws URISyntaxException, IOException, SignatureVerificationError
+    {
+        Metablock<Link> metablock = new Metablock<Link>(link, null);
+        metablock.sign(key);
+
+        List<Key> keys = new ArrayList<Key>();
+        keys.add(key);
+        
+        metablock.verifySignatures();
+        
+        // empty key list
+        Throwable exception = assertThrows(SignatureVerificationError.class, () -> {
+            metablock.verifySignatures(new ArrayList<Key>());
+          });
+        
+        assertEquals("No public key for verification of signature with keyid [0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7]", exception.getMessage());
+
+        List<Key> keys2 = new ArrayList<Key>();
+        
+        // wrong key
+        keys2.add(key2);
+        exception = assertThrows(SignatureVerificationError.class, () -> {
+            metablock.verifySignatures(keys2);
+        });
+        
+        assertEquals("No public key for verification of signature with keyid [0b70eafb5d4d7c0f36a21442fcf066903d09cf5050ad0c8443b18f1f232c7dd7]", exception.getMessage());
+        
+        // missing key
+        metablock.sign(key2);
+        exception = assertThrows(SignatureVerificationError.class, () -> {
+            metablock.verifySignatures(keys);
+        });
+        
+        assertEquals("No public key for verification of signature with keyid [776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5]", exception.getMessage());
+        
+        
     }
     
     @Test
@@ -196,7 +254,7 @@ class MetablockTest {
         Metablock<Link> testMetablockLink = new Metablock<Link>(testLinkBuilder.build(), null);
         testMetablockLink.sign(key);
         
-        String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).toString();
+        String linkFile = Files.createFile(temporaryFolder.resolve(testMetablockLink.getFullName())).getFileName().toString();
 
         FileTransporter<Link> transporter = new FileTransporter<>(temporaryFolder.toString());
         
@@ -215,6 +273,8 @@ class MetablockTest {
         assertTrue(newLinkMetablock.getSigned().getMaterials().contains(pathArtifact1));
         assertTrue(newLinkMetablock.getSigned().getMaterials().contains(pathArtifact2));
         assertTrue(newLinkMetablock.getSigned().getMaterials().contains(pathArtifact3));
+        
+        transporter = new FileTransporter<>();
         
         Metablock<Link> metablockFromFile = transporter.load("src/test/resources/io/github/in_toto/model/metablock_test/serialize/serialize.link", metablockType);
         metablockFromFile.sign(key);

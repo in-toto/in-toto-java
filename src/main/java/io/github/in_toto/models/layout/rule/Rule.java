@@ -1,7 +1,7 @@
 package io.github.in_toto.models.layout.rule;
 
 import java.lang.reflect.Type;
-import java.util.List;
+import java.util.Set;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -11,45 +11,31 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.JsonAdapter;
 
-import io.github.in_toto.exceptions.FormatError;
+import io.github.in_toto.exceptions.RuleVerificationError;
 import io.github.in_toto.models.layout.rule.Rule.RuleJsonAdapter;
+import io.github.in_toto.models.link.Artifact;
 
 @JsonAdapter(RuleJsonAdapter.class)
-public class Rule {
-    
-    private final RuleType type;
+public abstract class Rule implements RuleVerifier {
     private final String pattern;
     
-    public Rule(RuleType type, String pattern) {
-        super();
-        this.type = type;
+    public Rule(String pattern) {
         this.pattern = pattern;
     }
 
-    /**
-     * Convenience method to parse the passed rule string into a list of rules.
-     * 
-     * @param ruleString An artifact rule string, whose list representation is
-     *                   parseable by in_toto.rulelib.unpack_rule
-     * 
-     * @throws FormatError If the passed rule_string is not a string. If the parsed
-     *                     rule_string cannot be unpacked using rulelib.
-     */
-    public static List<Rule> getRulesFromString(String ruleString) throws FormatError {
-        return null;
-    }
-
-    public RuleType getType() {
-        return type;
-    }
-
+    @Override
     public String getPattern() {
         return pattern;
+    }
+    
+    @Override
+    public Set<Artifact> verify(Set<Artifact> artifacts, Set<Artifact> materials, Set<Artifact> products)  throws RuleVerificationError {
+        return filterArtifacts(artifacts);
     }
 
     @Override
     public String toString() {
-        return "Rule [type=" + type + ", pattern=" + pattern + "]";
+        return "Rule [pattern=" + pattern + "]";
     }
 
     @Override
@@ -57,7 +43,6 @@ public class Rule {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((pattern == null) ? 0 : pattern.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
 
@@ -69,13 +54,10 @@ public class Rule {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof Rule)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         Rule other = (Rule) obj;
-        if (!other.canEqual(this)) {
-            return false;
-        }
         if (pattern == null) {
             if (other.pattern != null) {
                 return false;
@@ -83,14 +65,7 @@ public class Rule {
         } else if (!pattern.equals(other.pattern)) {
             return false;
         }
-        if (type != other.type) {
-            return false;
-        }
         return true;
-    }
-    
-    public boolean canEqual(Object other) {
-        return (other instanceof Rule);
     }
     
     public static class RuleJsonAdapter implements JsonSerializer<Rule>, JsonDeserializer<Rule> {
@@ -98,17 +73,24 @@ public class Rule {
         @Override
         public Rule deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
             JsonArray jsonArray = json.getAsJsonArray(); 
-            RuleType ruleType = RuleType.valueOf(jsonArray.get(0).getAsString());
-            if (ruleType == RuleType.MATCH) {
-                return context.deserialize(json, ComplexRule.class);
+            RuleType ruleType = RuleType.valueOf(jsonArray.get(0).getAsString());            
+            String pattern = jsonArray.get(1).getAsString();
+            switch (ruleType) {
+            case ALLOW: return new AllowRule(pattern);
+            case CREATE: return new CreateRule(pattern);
+            case DELETE: return new DeleteRule(pattern);
+            case DISALLOW: return new DisAllowRule(pattern);
+            case MATCH: return context.deserialize(json, MatchRule.class);
+            case MODIFY: return new ModifyRule(pattern);
+            case REQUIRE: return new RequireRule(pattern);
+            default: return null;
             }
-            return new Rule(ruleType, jsonArray.get(1).getAsString());
         }
 
         @Override
         public JsonElement serialize(Rule src, Type typeOfSrc, JsonSerializationContext context) {
-            if (src instanceof ComplexRule) {
-                return context.serialize((ComplexRule)src);
+            if (src instanceof MatchRule) {
+                return context.serialize((MatchRule)src);
             }
             JsonArray jsonArray = new JsonArray();
             jsonArray.add(src.getType().name());

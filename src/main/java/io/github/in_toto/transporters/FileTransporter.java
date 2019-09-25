@@ -15,7 +15,9 @@ import io.github.in_toto.models.Signable;
 public final class FileTransporter<S extends Signable> implements Transporter<S> {
     private String directoryPath;
     
-    public FileTransporter() {}
+    public FileTransporter() {
+        this("");
+    }
     
     public FileTransporter(String dir) {
         this.directoryPath = dir;
@@ -38,7 +40,7 @@ public final class FileTransporter<S extends Signable> implements Transporter<S>
     public <K extends Signable> Metablock<K> load(String uri, Type type) {
         String jsonString = null;
         try {
-            jsonString = new String ( Files.readAllBytes( Paths.get(uri) ) );
+            jsonString = new String ( Files.readAllBytes( Paths.get(directoryPath, uri) ) );
         }
         catch (IOException e) {
             throw new TransporterException("Couldn't read file: " + e.toString());

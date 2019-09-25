@@ -1,6 +1,7 @@
 package io.github.in_toto.models.link;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,26 +21,22 @@ import io.github.in_toto.models.link.Artifact.ArtifactSetJsonAdapter;
  *
  */
 public final class Link implements Signable {
-    private String name;
+    private final String name;
     @SerializedName("_type")
-    private SignableType type = SignableType.link;
+    private final SignableType type = SignableType.link;
     @JsonAdapter(ArtifactSetJsonAdapter.class)
-    private Set<Artifact> materials = new HashSet<>();
+    private final Set<Artifact> materials;
     @JsonAdapter(ArtifactSetJsonAdapter.class)
-    private Set<Artifact> products = new HashSet<>();
+    private final Set<Artifact> products;
     // NOTE: Caution when dealing with numeric values!
     // Since gson does not know the type of the target, it will
     // store any numeric value as `Double`, e.g.:
     // {"byproducts": {"return-value": 1}}
     // is parsed as
     // {"byproducts": {"return-value": 1.0}}
-    private ByProducts byproducts = new ByProducts();
-    private Map<String, String> environment = new HashMap<>();
-    private List<String> command = new ArrayList<>();
-    
-    
-    public Link() {}
-
+    private final ByProducts byproducts;
+    private final Map<String, String> environment;
+    private final List<String> command;
 
     /**
      * Constuctor method used to populate the signable payload
@@ -62,31 +59,33 @@ public final class Link implements Signable {
             ByProducts byproducts) {
         this.name = name;
         if (materials != null) {
-            HashSet<Artifact> tempArtifacts = new HashSet<>();
-            tempArtifacts.addAll(materials);
-            this.materials = tempArtifacts;
+            this.materials = Collections.unmodifiableSet(new HashSet<>(materials)); 
+        } else {
+            this.materials = Collections.unmodifiableSet(new HashSet<>());
         }
 
         if (products != null) {
-            HashSet<Artifact> tempArtifacts = new HashSet<>();
-            tempArtifacts.addAll(products);
-            this.products = tempArtifacts;
+            this.products = Collections.unmodifiableSet(new HashSet<>(products)); 
+        } else {
+            this.products = Collections.unmodifiableSet(new HashSet<>());
         }
-
+        
         if (command != null) {
-            ArrayList<String> tempCommands = new ArrayList<>();
-            tempCommands.addAll(command);
-            this.command = tempCommands;
+            this.command = Collections.unmodifiableList(new ArrayList<>(command)); 
+        } else {
+            this.command = Collections.unmodifiableList(new ArrayList<>());
         }
-
+        
         if (environment != null) {
-            HashMap<String, String> tempEnv = new HashMap<>();
-            tempEnv.putAll(environment);
-            this.environment = tempEnv;
+            this.environment = Collections.unmodifiableMap(new HashMap<>(environment)); 
+        } else {
+            this.environment = Collections.unmodifiableMap(new HashMap<>());
         }
 
         if (byproducts != null) {
             this.byproducts = byproducts;
+        } else {
+            this.byproducts = new ByProducts();
         }
     }
     

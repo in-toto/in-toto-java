@@ -22,6 +22,7 @@ public interface KeyInterface {
     public String getKeyType();
     public Signer getSigner();
     public AsymmetricKeyParameter getPrivateKeyParameter() throws IOException;
+    public AsymmetricKeyParameter getPublicKeyParameter() throws IOException;
     public String getPrivateKey();
     public String getPublicKey();
     

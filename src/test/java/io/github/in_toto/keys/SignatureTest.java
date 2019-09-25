@@ -2,6 +2,9 @@ package io.github.in_toto.keys;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -46,6 +49,17 @@ class SignatureTest {
         
         assertEquals(sig1.hashCode(), sig2.hashCode());
         assertEquals(sig1, sig2);
+        
+        Set<Signature> signatures = new HashSet<>();
+
+        RSAKey alice = RSAKey.read("src/test/resources/demo_files/alice");
+        signatures.add(sig1);
+        signatures.add(sig2);
+
+        signatures.add(new Signature(alice, "bar3"));
+        
+        assertTrue(signatures.contains(new Signature(testKey, null)));
+        assertTrue(signatures.contains(new Signature(alice, null)));
     }
     
     @Test

@@ -1,17 +1,12 @@
 package io.github.in_toto.models.link;
 
-import io.github.in_toto.transporters.FileTransporter;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
-import io.github.in_toto.keys.RSAKey;
 import io.github.in_toto.models.Metablock;
 import io.github.in_toto.models.link.Artifact;
 import io.github.in_toto.models.link.ByProducts;
 import io.github.in_toto.models.link.Link;
 import io.github.in_toto.models.link.Link.LinkBuilder;
-import io.github.in_toto.exceptions.KeyException;
 import io.github.in_toto.exceptions.ValueError;
-import io.github.in_toto.keys.Key;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,28 +14,20 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.bouncycastle.util.encoders.Hex;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 /**
  * Link-specific tests
@@ -382,7 +369,6 @@ class LinkTest
     @Test
     public void equalsContract() {
         EqualsVerifier.forClass(Link.class)
-            .suppress(Warning.NONFINAL_FIELDS)
             .verify();
     }
 

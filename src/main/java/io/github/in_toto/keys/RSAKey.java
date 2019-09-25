@@ -9,9 +9,7 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +22,6 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.MiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.util.encoders.Hex;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -43,6 +40,7 @@ import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.signers.PSSSigner;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 
 /**
  * RSA implementation of an in-toto RSA key.
@@ -51,7 +49,7 @@ import org.bouncycastle.crypto.util.PrivateKeyFactory;
 @JsonAdapter(RSAKeyJsonAdapter.class)
 @Immutable
 public final class RSAKey extends Key implements KeyInterface {
-    static final Logger logger = Logger.getLogger(RSAKey.class.getName());
+    private static final Logger logger = Logger.getLogger(RSAKey.class.getName());
     static final int INITIAL_BUFFER_SIZE = 4096;
 
     /**
@@ -192,6 +190,14 @@ public final class RSAKey extends Key implements KeyInterface {
         }
         return PrivateKeyFactory.createKey(this.kpr.getPrivateKeyInfo());
     }
+    
+    @Override
+    public AsymmetricKeyParameter getPublicKeyParameter() throws IOException {
+        if (this.kpr.getPublicKeyInfo() == null) {
+            return null;
+        }
+        return PublicKeyFactory.createKey(this.kpr.getPublicKeyInfo());
+    }
 
     @Override
     public String getScheme() {
@@ -228,36 +234,6 @@ public final class RSAKey extends Key implements KeyInterface {
     @Override
     public String getPublicKey() {
         return getKeyval(kpr, false);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((kpr == null) ? 0 : kpr.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        RSAKey other = (RSAKey) obj;
-        if (kpr == null) {
-            if (other.kpr != null) {
-                return false;
-            }
-        } else if (!kpr.equals(other.kpr)) {
-            return false;
-        }
-        return true;
     }
     
     static class RSAKeyJsonAdapter implements JsonSerializer<RSAKey>, JsonDeserializer<RSAKey> {

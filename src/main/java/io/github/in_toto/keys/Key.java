@@ -2,7 +2,6 @@ package io.github.in_toto.keys;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,9 +33,9 @@ import io.github.in_toto.lib.JSONEncoder;
  */
 public class Key implements JSONEncoder, KeyInterface {
     
-    public static final int SHORT_HASH_LENGTH = 8;
+    public static final int SHORT_HASH_LENGTH = 8;    
     
-    public static final String UNSIGNED_STRING = "UNSIGNED";
+    private static final String NOT_IMPLEMENTED = "Not implemented";
     
     private String keyid;
     
@@ -70,21 +69,21 @@ public class Key implements JSONEncoder, KeyInterface {
     }
     
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((keyid == null) ? 0 : keyid.hashCode());
         return result;
     }
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Key)) {
             return false;
         }
         Key other = (Key) obj;
@@ -105,37 +104,42 @@ public class Key implements JSONEncoder, KeyInterface {
 
     @Override
     public String getScheme() {
-        return null;
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public List<String> getHashAlgorithms() {
-        return new ArrayList<>();
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public String getKeyType() {
-        return null;
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public Signer getSigner() {
-        return null;
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public AsymmetricKeyParameter getPrivateKeyParameter() throws IOException {
-        return null;
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
+    }
+    
+    @Override
+    public AsymmetricKeyParameter getPublicKeyParameter() throws IOException {
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public String getPrivateKey() {
-        return null;
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public String getPublicKey() {
-        return null;
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
     
     public static class SetKeyJsonAdapter implements JsonSerializer<Set<Key>>, JsonDeserializer<Set<Key>> {

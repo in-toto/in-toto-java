@@ -22,6 +22,9 @@ import io.github.in_toto.keys.Signature.SignatureJsonAdapter;
 @JsonAdapter(SignatureJsonAdapter.class)
 public final class Signature 
 {
+    private static final String UNSIGNED_STRING = "UNSIGNED";
+    
+    public static final Signature DUMMY_SIGNATURE = new Signature(new Key(UNSIGNED_STRING), null);
     private Key key;
     private String sig;
     
@@ -38,6 +41,14 @@ public final class Signature
 
     public String getSig() {
         return sig;
+    }
+
+    public void setKey(Key key) {
+        this.key = key;
+    }
+
+    public void setSig(String sig) {
+        this.sig = sig;
     }
 
     /*
@@ -82,7 +93,10 @@ public final class Signature
             String keyid = jsonObject.get("keyid").getAsString();
             Key key = new Key();
             key.setKeyid(keyid);
-            String sig = jsonObject.get("sig").getAsString();
+            String sig = null;
+            if (jsonObject.has("sig")) {
+                sig = jsonObject.get("sig").getAsString();
+            }
             return new Signature(key, sig);
         }
 

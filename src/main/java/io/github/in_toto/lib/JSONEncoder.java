@@ -18,10 +18,8 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * JSONEncoder interface
@@ -143,10 +141,10 @@ public interface JSONEncoder
     public default String jsonEncodeCanonical() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         Gson gson = gsonBuilder
-                .registerTypeAdapter(Date.class, new DateJsonAdapter())
+                .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeJsonAdapter())
                 .disableHtmlEscaping()
                 .create();
-
+        
         return canonicalize(gson.toJsonTree(this));
     }
     
@@ -160,20 +158,18 @@ public interface JSONEncoder
         return Hex.toHexString(result);
     }
     
-    static class DateJsonAdapter implements JsonSerializer<Date>, JsonDeserializer<Date> {
+    static class ZonedDateTimeJsonAdapter implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime> {
 
         @Override
-        public Date deserialize(JsonElement json, Type typeOfT,
+        public ZonedDateTime deserialize(JsonElement json, Type typeOfT,
              JsonDeserializationContext context) {
-          return context.deserialize(json, Date.class);
+          return ZonedDateTime.parse(json.getAsString(), InTotoDateTimeFormatter.DATE_TIME_FORMATTER);
         }
 
         @Override
-        public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext 
+        public JsonElement serialize(ZonedDateTime src, Type typeOfSrc, JsonSerializationContext 
                    context) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-            return new JsonPrimitive(sdf.format(src));
+            return new JsonPrimitive(InTotoDateTimeFormatter.DATE_TIME_FORMATTER.format(src));
         }
     }
 }

@@ -1,7 +1,5 @@
 package io.github.in_toto.models.layout.rule;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,6 +28,7 @@ class RuleTest {
 
     @Test
     public void equalsContract() {
-        EqualsVerifier.forClass(Rule.class).withRedefinedSubclass(ComplexRule.class).verify();
+        EqualsVerifier.forClass(Rule.class).usingGetClass()
+        .verify();
     }
 }

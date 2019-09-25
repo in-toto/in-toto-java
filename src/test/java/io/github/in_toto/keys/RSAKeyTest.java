@@ -87,13 +87,5 @@ class RSAKeyTest
             RSAKey testKey2 = RSAKey.read(unknown_key_path);
           });
         assertEquals("Couldn't read key", exception.getMessage());
-        
-    }
-    
-    @Test
-    public void equalsContract() {
-        EqualsVerifier.forClass(RSAKey.class)
-            .withRedefinedSuperclass()
-            .verify();
     }
 }

@@ -24,7 +24,6 @@ import io.github.in_toto.models.link.Artifact;
 import io.github.in_toto.models.link.Link;
 import io.github.in_toto.models.link.Link.LinkBuilder;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
 
 class ArtifactTest {
 
@@ -242,7 +241,6 @@ class ArtifactTest {
     @Test
     public void equalsContract() {
         EqualsVerifier.forClass(Artifact.class)
-            .suppress(Warning.NONFINAL_FIELDS)
             .verify();
     }
 }

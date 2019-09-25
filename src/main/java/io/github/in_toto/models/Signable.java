@@ -1,7 +1,5 @@
 package io.github.in_toto.models;
 
-import com.google.gson.annotations.JsonAdapter;
-
 import io.github.in_toto.lib.JSONEncoder;
 
 /**
@@ -9,7 +7,6 @@ import io.github.in_toto.lib.JSONEncoder;
  * to prepare for signing
  *
  */
-@JsonAdapter(SignableDeserializer.class)
 public interface Signable extends JSONEncoder {
     
     public String getName();
