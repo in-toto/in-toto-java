@@ -1,0 +1,155 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "required": [
+    "signatures",
+    "signed"
+  ],
+  "properties": {
+    "signatures": {
+      "$id": "#/properties/signatures",
+      "type": "array",
+      "items": {
+        "$id": "#/properties/signatures/items",
+        "type": "object",
+        "required": [
+          "keyid",
+          "sig"
+        ],
+        "properties": {
+          "keyid": {
+            "$id": "#/properties/signatures/items/properties/keyid",
+            "type": "string",
+            "default": "",
+            "pattern": "^(.*)$"
+          },
+          "sig": {
+            "$id": "#/properties/signatures/items/properties/sig",
+            "type": "string",
+            "default": "",
+            "pattern": "^(.*)$"
+          }
+        }
+      }
+    },
+    "signed": {
+      "$id": "#/properties/signed",
+      "type": "object",
+      "required": [
+        "_type",
+        "byproducts",
+        "command",
+        "environment",
+        "materials",
+        "name",
+        "products"
+      ],
+      "properties": {
+        "_type": {
+          "$id": "#/properties/signed/properties/_type",
+          "type": "string",
+          "default": "",
+          "pattern": "^(.*)$"
+        },
+        "byproducts": {
+          "$id": "#/properties/signed/properties/byproducts",
+          "type": "object",
+          "required": [
+            "return-value",
+            "stderr",
+            "stdout"
+          ],
+          "properties": {
+            "return-value": {
+              "$id": "#/properties/signed/properties/byproducts/properties/return-value",
+              "type": "integer",
+              "default": 0
+            },
+            "stderr": {
+              "$id": "#/properties/signed/properties/byproducts/properties/stderr",
+              "type": "string",
+              "default": "",
+              "pattern": "^(.*)$"
+            },
+            "stdout": {
+              "$id": "#/properties/signed/properties/byproducts/properties/stdout",
+              "type": "string",
+              "default": "",
+              "pattern": "^(.*)$"
+            }
+          }
+        },
+        "command": {
+          "$id": "#/properties/signed/properties/command",
+          "type": "array",
+          "items": {
+            "$id": "#/properties/signed/properties/command/items",
+            "type": "string",
+            "default": "",
+            "pattern": "^(.*)$"
+          }
+        },
+        "environment": {
+          "$id": "#/properties/signed/properties/environment",
+          "type": "object"
+        },
+        "materials": {
+          "$id": "#/properties/signed/properties/materials",
+          "type": "object",
+          "required": [
+            "demo-project/foo.py"
+          ],
+          "properties": {
+            "demo-project/foo.py": {
+              "$id": "#/properties/signed/properties/materials/properties/demo-project/foo.py",
+              "type": "object",
+              "required": [
+                "sha256"
+              ],
+              "properties": {
+                "sha256": {
+                  "$id": "#/properties/signed/properties/materials/properties/demo-project/foo.py/properties/sha256",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                }
+              }
+            }
+          }
+        },
+        "name": {
+          "$id": "#/properties/signed/properties/name",
+          "type": "string",
+          "default": "",
+          "pattern": "^(.*)$"
+        },
+        "products": {
+          "$id": "#/properties/signed/properties/products",
+          "type": "object",
+          "required": [
+            "demo-project.tar.gz"
+          ],
+          "properties": {
+            "demo-project.tar.gz": {
+              "$id": "#/properties/signed/properties/products/properties/demo-project.tar.gz",
+              "type": "object",
+              "required": [
+                "sha256"
+              ],
+              "properties": {
+                "sha256": {
+                  "$id": "#/properties/signed/properties/products/properties/demo-project.tar.gz/properties/sha256",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

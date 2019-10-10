@@ -1,0 +1,347 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "required": [
+    "signatures",
+    "signed"
+  ],
+  "properties": {
+    "signatures": {
+      "$id": "#/properties/signatures",
+      "type": "array",
+      "items": {
+        "$id": "#/properties/signatures/items",
+        "type": "object",
+        "required": [
+          "keyid",
+          "sig"
+        ],
+        "properties": {
+          "keyid": {
+            "$id": "#/properties/signatures/items/properties/keyid",
+            "type": "string",
+            "default": "",
+            "pattern": "^(.*)$"
+          },
+          "sig": {
+            "$id": "#/properties/signatures/items/properties/sig",
+            "type": "string",
+            "default": "",
+            "pattern": "^(.*)$"
+          }
+        }
+      }
+    },
+    "signed": {
+      "$id": "#/properties/signed",
+      "type": "object",
+      "required": [
+        "_type",
+        "expires",
+        "inspect",
+        "keys",
+        "readme",
+        "steps"
+      ],
+      "properties": {
+        "_type": {
+          "$id": "#/properties/signed/properties/_type",
+          "type": "string",
+          "default": "",
+          "pattern": "^(.*)$"
+        },
+        "expires": {
+          "$id": "#/properties/signed/properties/expires",
+          "type": "string",
+          "default": "",
+          "pattern": "^(.*)$"
+        },
+        "inspect": {
+          "$id": "#/properties/signed/properties/inspect",
+          "type": "array",
+          "items": {
+            "$id": "#/properties/signed/properties/inspect/items",
+            "type": "object",
+            "required": [
+              "_type",
+              "expected_materials",
+              "expected_products",
+              "name",
+              "run"
+            ],
+            "properties": {
+              "_type": {
+                "$id": "#/properties/signed/properties/inspect/items/properties/_type",
+                "type": "string",
+                "default": "",
+                "pattern": "^(.*)$"
+              },
+              "expected_materials": {
+                "$id": "#/properties/signed/properties/inspect/items/properties/expected_materials",
+                "type": "array",
+                "items": {
+                  "$id": "#/properties/signed/properties/inspect/items/properties/expected_materials/items",
+                  "type": "array",
+                  "items": {
+                    "$id": "#/properties/signed/properties/inspect/items/properties/expected_materials/items/items",
+                    "type": "string",
+                    "default": "",
+                    "pattern": "^(.*)$"
+                  }
+                }
+              },
+              "expected_products": {
+                "$id": "#/properties/signed/properties/inspect/items/properties/expected_products",
+                "type": "array",
+                "items": {
+                  "$id": "#/properties/signed/properties/inspect/items/properties/expected_products/items",
+                  "type": "array",
+                  "items": {
+                    "$id": "#/properties/signed/properties/inspect/items/properties/expected_products/items/items",
+                    "type": "string",
+                    "default": "",
+                    "pattern": "^(.*)$"
+                  }
+                }
+              },
+              "name": {
+                "$id": "#/properties/signed/properties/inspect/items/properties/name",
+                "type": "string",
+                "default": "",
+                "pattern": "^(.*)$"
+              },
+              "run": {
+                "$id": "#/properties/signed/properties/inspect/items/properties/run",
+                "type": "array",
+                "items": {
+                  "$id": "#/properties/signed/properties/inspect/items/properties/run/items",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                }
+              }
+            }
+          }
+        },
+        "keys": {
+          "$id": "#/properties/signed/properties/keys",
+          "type": "object",
+          "required": [
+            "2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498",
+            "776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5"
+          ],
+          "properties": {
+            "2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498": {
+              "$id": "#/properties/signed/properties/keys/properties/2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498",
+              "type": "object",
+              "required": [
+                "keyid",
+                "keyid_hash_algorithms",
+                "keytype",
+                "keyval",
+                "scheme"
+              ],
+              "properties": {
+                "keyid": {
+                  "$id": "#/properties/signed/properties/keys/properties/2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498/properties/keyid",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                },
+                "keyid_hash_algorithms": {
+                  "$id": "#/properties/signed/properties/keys/properties/2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498/properties/keyid_hash_algorithms",
+                  "type": "array",
+                  "items": {
+                    "$id": "#/properties/signed/properties/keys/properties/2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498/properties/keyid_hash_algorithms/items",
+                    "type": "string",
+                    "default": "",
+                    "pattern": "^(.*)$"
+                  }
+                },
+                "keytype": {
+                  "$id": "#/properties/signed/properties/keys/properties/2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498/properties/keytype",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                },
+                "keyval": {
+                  "$id": "#/properties/signed/properties/keys/properties/2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498/properties/keyval",
+                  "type": "object",
+                  "required": [
+                    "private",
+                    "public"
+                  ],
+                  "properties": {
+                    "private": {
+                      "$id": "#/properties/signed/properties/keys/properties/2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498/properties/keyval/properties/private",
+                      "type": "string",
+                      "default": "",
+                      "pattern": "^(.*)$"
+                    },
+                    "public": {
+                      "$id": "#/properties/signed/properties/keys/properties/2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498/properties/keyval/properties/public",
+                      "type": "string",
+                      "default": "",
+                      "pattern": "^(.*)$"
+                    }
+                  }
+                },
+                "scheme": {
+                  "$id": "#/properties/signed/properties/keys/properties/2f89b9272acfc8f4a0a0f094d789fdb0ba798b0fe41f2f5f417c12f0085ff498/properties/scheme",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                }
+              }
+            },
+            "776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5": {
+              "$id": "#/properties/signed/properties/keys/properties/776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5",
+              "type": "object",
+              "required": [
+                "keyid",
+                "keyid_hash_algorithms",
+                "keytype",
+                "keyval",
+                "scheme"
+              ],
+              "properties": {
+                "keyid": {
+                  "$id": "#/properties/signed/properties/keys/properties/776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5/properties/keyid",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                },
+                "keyid_hash_algorithms": {
+                  "$id": "#/properties/signed/properties/keys/properties/776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5/properties/keyid_hash_algorithms",
+                  "type": "array",
+                  "items": {
+                    "$id": "#/properties/signed/properties/keys/properties/776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5/properties/keyid_hash_algorithms/items",
+                    "type": "string",
+                    "default": "",
+                    "pattern": "^(.*)$"
+                  }
+                },
+                "keytype": {
+                  "$id": "#/properties/signed/properties/keys/properties/776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5/properties/keytype",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                },
+                "keyval": {
+                  "$id": "#/properties/signed/properties/keys/properties/776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5/properties/keyval",
+                  "type": "object",
+                  "required": [
+                    "private",
+                    "public"
+                  ],
+                  "properties": {
+                    "private": {
+                      "$id": "#/properties/signed/properties/keys/properties/776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5/properties/keyval/properties/private",
+                      "type": "string",
+                      "default": "",
+                      "pattern": "^(.*)$"
+                    },
+                    "public": {
+                      "$id": "#/properties/signed/properties/keys/properties/776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5/properties/keyval/properties/public",
+                      "type": "string",
+                      "default": "",
+                      "pattern": "^(.*)$"
+                    }
+                  }
+                },
+                "scheme": {
+                  "$id": "#/properties/signed/properties/keys/properties/776a00e29f3559e0141b3b096f696abc6cfb0c657ab40f441132b345b08453f5/properties/scheme",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                }
+              }
+            }
+          }
+        },
+        "readme": {
+          "$id": "#/properties/signed/properties/readme",
+          "type": "string",
+          "default": "",
+          "pattern": "^(.*)$"
+        },
+        "steps": {
+          "$id": "#/properties/signed/properties/steps",
+          "type": "array",
+          "items": {
+            "$id": "#/properties/signed/properties/steps/items",
+            "type": "object",
+            "required": [
+              "_type",
+              "expected_command",
+              "expected_materials",
+              "expected_products",
+              "name",
+              "pubkeys",
+              "threshold"
+            ],
+            "properties": {
+              "_type": {
+                "$id": "#/properties/signed/properties/steps/items/properties/_type",
+                "type": "string",
+                "default": "",
+                "pattern": "^(.*)$"
+              },
+              "expected_command": {
+                "$id": "#/properties/signed/properties/steps/items/properties/expected_command",
+                "type": "array",
+                "items": {
+                  "$id": "#/properties/signed/properties/steps/items/properties/expected_command/items",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                }
+              },
+              "expected_materials": {
+                "$id": "#/properties/signed/properties/steps/items/properties/expected_materials",
+                "type": "array"
+              },
+              "expected_products": {
+                "$id": "#/properties/signed/properties/steps/items/properties/expected_products",
+                "type": "array",
+                "items": {
+                  "$id": "#/properties/signed/properties/steps/items/properties/expected_products/items",
+                  "type": "array",
+                  "items": {
+                    "$id": "#/properties/signed/properties/steps/items/properties/expected_products/items/items",
+                    "type": "string",
+                    "default": "",
+                    "pattern": "^(.*)$"
+                  }
+                }
+              },
+              "name": {
+                "$id": "#/properties/signed/properties/steps/items/properties/name",
+                "type": "string",
+                "default": "",
+                "pattern": "^(.*)$"
+              },
+              "pubkeys": {
+                "$id": "#/properties/signed/properties/steps/items/properties/pubkeys",
+                "type": "array",
+                "items": {
+                  "$id": "#/properties/signed/properties/steps/items/properties/pubkeys/items",
+                  "type": "string",
+                  "default": "",
+                  "pattern": "^(.*)$"
+                }
+              },
+              "threshold": {
+                "$id": "#/properties/signed/properties/steps/items/properties/threshold",
+                "type": "integer",
+                "default": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
