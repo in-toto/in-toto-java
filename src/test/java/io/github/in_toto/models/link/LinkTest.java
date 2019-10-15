@@ -170,12 +170,12 @@ class LinkTest
         Link testLink = testLinkBuilder.build();
 
         Set<Artifact> product = testLink.getProducts();
-        assertEquals(product.size(), 1);
+        assertEquals(1, product.size());
 
         assertTrue(product.contains(pathArtifact3));
 
         Set<Artifact> material = testLink.getMaterials();
-        assertEquals(material.size(), 1);
+        assertEquals(1, material.size());
 
         assertTrue(material.contains(pathArtifact3));
     }
@@ -199,12 +199,12 @@ class LinkTest
         Link testLink = testLinkBuilder.build();
 
         Set<Artifact> product = testLink.getProducts();
-        assertEquals(product.size(), 1);
+        assertEquals(1, product.size());
 
         assertTrue(product.contains(pathArtifact2));
 
         Set<Artifact> material = testLink.getMaterials();
-        assertEquals(material.size(), 1);
+        assertEquals(1, material.size());
 
         assertTrue(material.contains(pathArtifact2));
     }
@@ -222,6 +222,8 @@ class LinkTest
         String pattern = "**";
 
         testLinkBuilder.setExcludePatterns(pattern);
+        
+        testLinkBuilder.setBasePath(temporaryFolder.toString());
 
         testLinkBuilder.addProduct(Arrays.asList(path1, path2, path3));
         testLinkBuilder.addMaterial(Arrays.asList(path1, path2, path3));
@@ -229,11 +231,11 @@ class LinkTest
         Link testLink = testLinkBuilder.build();
 
         Set<Artifact> product = testLink.getProducts();
-        assertEquals(product.size(), 0);
+        assertEquals(0, product.size());
         assertFalse(product.iterator().hasNext());
 
         Set<Artifact> material = testLink.getMaterials();
-        assertEquals(material.size(), 0);
+        assertEquals(0, material.size());
         assertFalse(material.iterator().hasNext());
     }
 
@@ -243,15 +245,20 @@ class LinkTest
     {
         LinkBuilder testLinkBuilder = new LinkBuilder("sometestname");
 
-        String path1 = Files.createFile(temporaryFolder.resolve("foo")).toString();
-        String path2 = Files.createFile(temporaryFolder.resolve("bar")).toString();
-        String path3 = Files.createFile(temporaryFolder.resolve("baz")).toString();
+        String path1 = "foo";
+        Files.createFile(temporaryFolder.resolve(path1)).toString();
+        String path2 = "bar";
+        Files.createFile(temporaryFolder.resolve(path2)).toString();
+        String path3 = "baz";
+        Files.createFile(temporaryFolder.resolve(path3)).toString();
         
-        Artifact pathArtifact1 = Artifact.recordArtifacts(Arrays.asList(path1), null, null).iterator().next();
+        Artifact pathArtifact1 = Artifact.recordArtifacts(Arrays.asList(path1), null, temporaryFolder.toString()).iterator().next();
 
         String pattern = "**a**";
 
         testLinkBuilder.setExcludePatterns(pattern);
+        
+        testLinkBuilder.setBasePath(temporaryFolder.toString());
 
         testLinkBuilder.addProduct(Arrays.asList(path1, path2, path3));
         testLinkBuilder.addMaterial(Arrays.asList(path1, path2, path3));
@@ -259,12 +266,12 @@ class LinkTest
         Link testLink = testLinkBuilder.build();
 
         Set<Artifact> product = testLink.getProducts();
-        assertEquals(product.size(), 1);
+        assertEquals(1, product.size());
 
         assertTrue(product.contains(pathArtifact1));
 
         Set<Artifact> material = testLink.getMaterials();
-        assertEquals(material.size(), 1);
+        assertEquals(1, material.size());
 
         assertTrue(material.contains(pathArtifact1));
     }
@@ -291,12 +298,12 @@ class LinkTest
         Link testLink = testLinkBuilder.build();
 
         Set<Artifact> product = testLink.getProducts();
-        assertEquals(product.size(), 1);
+        assertEquals(1, product.size());
         
         assertTrue(product.contains(pathArtifact1));
 
         Set<Artifact> material = testLink.getProducts();
-        assertEquals(material.size(), 1);
+        assertEquals(1, material.size());
 
         assertTrue(material.contains(pathArtifact1));
     }
@@ -323,12 +330,12 @@ class LinkTest
         Link testLink = testLinkBuilder.build();
 
         Set<Artifact> product = testLink.getProducts();
-        assertEquals(product.size(), 1);
+        assertEquals(1, product.size());
 
         assertTrue(product.contains(pathArtifact3));
 
         Set<Artifact> material = testLink.getMaterials();
-        assertEquals(material.size(), 1);
+        assertEquals(1, material.size());
 
         assertTrue(material.contains(pathArtifact3));
     }
@@ -356,12 +363,12 @@ class LinkTest
         Link testLink = testLinkBuilder.build();
 
         Set<Artifact> product = testLink.getProducts();
-        assertEquals(product.size(), 1);
+        assertEquals(1, product.size());
 
         assertTrue(product.contains(pathArtifact3));
 
         Set<Artifact> material = testLink.getMaterials();
-        assertEquals(material.size(), 1);
+        assertEquals(1, material.size());
 
         assertTrue(material.contains(pathArtifact3));
     }
