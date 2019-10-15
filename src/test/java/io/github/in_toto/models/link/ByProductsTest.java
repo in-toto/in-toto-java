@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 
 import io.github.in_toto.models.link.ByProducts;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 
 class ByProductsTest {
     
@@ -23,7 +24,7 @@ class ByProductsTest {
     @Test
     public void equalsContract() {
         EqualsVerifier.forClass(ByProducts.class)
-            .verify();
+        .suppress(Warning.NONFINAL_FIELDS).verify();
     }
     
 

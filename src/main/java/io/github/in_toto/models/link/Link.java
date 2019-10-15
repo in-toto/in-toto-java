@@ -21,23 +21,24 @@ import io.github.in_toto.models.link.Artifact.ArtifactSetJsonAdapter;
  *
  */
 public final class Link implements Signable {
-    private final String name;
+    private String name;
     @SerializedName("_type")
-    private final SignableType type = SignableType.link;
+    private SignableType type = SignableType.link;
     @JsonAdapter(ArtifactSetJsonAdapter.class)
-    private final Set<Artifact> materials;
+    private Set<Artifact> materials;
     @JsonAdapter(ArtifactSetJsonAdapter.class)
-    private final Set<Artifact> products;
+    private Set<Artifact> products;
     // NOTE: Caution when dealing with numeric values!
     // Since gson does not know the type of the target, it will
     // store any numeric value as `Double`, e.g.:
     // {"byproducts": {"return-value": 1}}
     // is parsed as
     // {"byproducts": {"return-value": 1.0}}
-    private final ByProducts byproducts;
-    private final Map<String, String> environment;
-    private final List<String> command;
+    private ByProducts byproducts;
+    private Map<String, String> environment;
+    private List<String> command;
 
+    private Link() {}
     /**
      * Constuctor method used to populate the signable payload
      *

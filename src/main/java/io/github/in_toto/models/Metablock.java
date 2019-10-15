@@ -29,8 +29,10 @@ import org.bouncycastle.crypto.CryptoException;
  */
 public final class Metablock<S extends Signable> implements JSONEncoder {
     
-    private final S signed;
+    private S signed;
     private Set<Signature> signatures;
+    
+    private Metablock() {};
 
     /**
      * Base constructor.

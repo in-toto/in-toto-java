@@ -22,7 +22,7 @@ import io.github.in_toto.keys.Signature.SignatureJsonAdapter;
 @JsonAdapter(SignatureJsonAdapter.class)
 public final class Signature 
 {
-    private static final String UNSIGNED_STRING = "UNSIGNED";
+    public static final String UNSIGNED_STRING = "UNSIGNED";
     
     public static final Signature DUMMY_SIGNATURE = new Signature(new Key(UNSIGNED_STRING), null);
     private Key key;

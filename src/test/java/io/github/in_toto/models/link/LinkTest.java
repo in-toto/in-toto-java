@@ -1,6 +1,7 @@
 package io.github.in_toto.models.link;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import io.github.in_toto.models.Metablock;
 import io.github.in_toto.models.link.Artifact;
 import io.github.in_toto.models.link.ByProducts;
@@ -369,6 +370,7 @@ class LinkTest
     @Test
     public void equalsContract() {
         EqualsVerifier.forClass(Link.class)
+            .suppress(Warning.NONFINAL_FIELDS)
             .verify();
     }
 

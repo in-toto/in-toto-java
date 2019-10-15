@@ -4,14 +4,12 @@ import com.google.gson.annotations.SerializedName;
 
 public final class ByProducts {
     
-    private final String stdout;
-    private final String stderr;
+    private String stdout;
+    private String stderr;
     @SerializedName("return-value")
-    private final Integer returnValue;
+    private Integer returnValue;
     
-    public ByProducts() {
-        this(null, null, null);
-    }
+    public ByProducts() {}
     
     public ByProducts(String stdout, String stderr, Integer returnValue) {
         this.stdout = stdout;

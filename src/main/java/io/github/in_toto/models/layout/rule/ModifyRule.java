@@ -13,7 +13,7 @@ public final class ModifyRule extends Rule implements RuleVerifier {
         super(pattern);
     }
     
-    //@Override
+    @Override
     public Set<Artifact> verify(Set<Artifact> artifacts, Set<Artifact> materials, Set<Artifact> products) {
         Set<Artifact> consumed = new HashSet<>();
         // Filter queued artifacts using the rule pattern

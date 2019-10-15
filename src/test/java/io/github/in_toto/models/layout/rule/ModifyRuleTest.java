@@ -37,7 +37,7 @@ class ModifyRuleTest {
     @Test
     public void equalsContract() {
         EqualsVerifier.forClass(ModifyRule.class)
-        .withRedefinedSuperclass()
+            .withRedefinedSuperclass()
             .verify();
     }
     

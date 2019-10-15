@@ -43,17 +43,19 @@ public final class Artifact {
     /**
      * A uri representing the location of the Artifact
      */
-    private final String uri;
+    private String uri;
 
     /**
      * Hash algorithm sha256 or sha512
      */
-    private final HashAlgorithm algorithm = HashAlgorithm.sha256;
+    private HashAlgorithm algorithm = HashAlgorithm.sha256;
 
     /**
      * The hash of this artifact.
      */
-    private final String hash;
+    private String hash;
+    
+    private Artifact() {}
 
     public Artifact(String filename, String hash) {
         this.uri = normalizePath(filename);
