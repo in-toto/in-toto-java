@@ -107,11 +107,11 @@ public final class Link implements Signable {
      */
     public static final class LinkBuilder {
         private final String name;
-        private HashSet<Artifact> materials = new HashSet<>();
-        private HashSet<Artifact> products = new HashSet<>();
-        private ByProducts byproducts = new ByProducts();
-        private Map<String, String> environment = new HashMap<>();
-        private List<String> command = new ArrayList<>();
+        private Set<Artifact> materials;
+        private Set<Artifact> products;
+        private ByProducts byproducts;
+        private Map<String, String> environment;
+        private List<String> command;
         private String excludePatterns;
         private String basePath;
         private Boolean followSymlinkDirs;
@@ -134,6 +134,12 @@ public final class Link implements Signable {
          * @throws ValueError 
          */
         public LinkBuilder addMaterial(List<String> filePaths) {
+            if (filePaths == null) {
+                throw new ValueError("Path can't be null");
+            }
+            if (this.materials == null) {
+                this.materials = new HashSet<>();
+            }
             this.materials.addAll(Artifact.recordArtifacts(filePaths, 
                     this.excludePatterns, this.basePath, this.followSymlinkDirs, this.normalizeLineEndings));
             return this;
@@ -148,6 +154,12 @@ public final class Link implements Signable {
          * @throws ValueError 
          */
         public LinkBuilder addProduct(List<String> filePaths) {
+            if (filePaths == null) {
+                throw new ValueError("Path can't be null");
+            }
+            if (this.products == null) {
+                this.products = new HashSet<>();
+            }
             this.products.addAll(Artifact.recordArtifacts(filePaths, 
                     this.excludePatterns, this.basePath, this.followSymlinkDirs, this.normalizeLineEndings));
             return this;
@@ -169,7 +181,7 @@ public final class Link implements Signable {
          * @return
          */
         public LinkBuilder setCommand(List<String> command) {
-            this.command = command;
+            this.command = new ArrayList<>(command);
             return this;
         }
 
@@ -217,11 +229,11 @@ public final class Link implements Signable {
             return name;
         }
 
-        private HashSet<Artifact> getMaterials() {
+        private Set<Artifact> getMaterials() {
             return materials;
         }
 
-        private HashSet<Artifact> getProducts() {
+        private Set<Artifact> getProducts() {
             return products;
         }
 
