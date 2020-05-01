@@ -139,4 +139,12 @@ abstract class Metablock<S extends Signable>
     public String getCanonicalJSON(boolean serializeNulls) {
         return this.signed.JSONEncodeCanonical(serializeNulls);
     }
+
+    public S getSigned() {
+        return this.signed;
+    }
+
+    public ArrayList<Signature> getSignatures() {
+        return this.signatures;
+    }
 }
