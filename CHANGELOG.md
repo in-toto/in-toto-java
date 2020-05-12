@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.3
+
+- Improve javadoc documentation
+- Provide getters/setters for signing/signature information
+- Improve dependency handling and release tooling.
+
 ## Version 0.2
 
 - Fix canonicalization routine to improve interoperability with reference impl.
