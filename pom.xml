@@ -3,12 +3,13 @@
   <groupId>io.github.in-toto</groupId>
   <artifactId>in-toto</artifactId>
   <packaging>jar</packaging>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
   <name>in-toto</name>
   <url>https://maven.apache.org</url>
   <scm>        
       <connection>scm:git:https://github.com/in-toto/in-toto-java</connection>
       <developerConnection>scm:git:ssh://git@github.com/in-toto/in-toto-java</developerConnection>
+    <tag>v0.3</tag>
   </scm>
   <dependencies>
     <!-- junit : unit test framework  -->
