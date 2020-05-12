@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.in-toto</groupId>
   <artifactId>in-toto</artifactId>
@@ -9,7 +8,8 @@
   <url>https://maven.apache.org</url>
   <scm>        
       <connection>scm:git:https://github.com/in-toto/in-toto-java</connection>
-      <developerConnection>scm:git:git@github.com:/in-toto/in-toto.java</developerConnection>
+      <developerConnection>scm:git:git@github.com\:/in-toto/in-toto.java</developerConnection>
+    <tag>v0.3</tag>
   </scm>
   <dependencies>
     <!-- junit : unit test framework  -->
