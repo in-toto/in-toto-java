@@ -8,8 +8,7 @@
   <url>https://maven.apache.org</url>
   <scm>        
       <connection>scm:git:https://github.com/in-toto/in-toto-java</connection>
-      <developerConnection>scm:git:git@github.com\:/in-toto/in-toto.java</developerConnection>
-    <tag>v0.3</tag>
+      <developerConnection>scm:git:ssh://github.com/in-toto/in-toto-java</developerConnection>
   </scm>
   <dependencies>
     <!-- junit : unit test framework  -->
