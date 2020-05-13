@@ -182,7 +182,8 @@ public class Link extends Metablock<LinkSignable>
      * Convenience method to indicate this link to track an artifact as
      * material
      *
-     * @param filepath the path of the material to track
+     * @param filePath the path of the material to track
+     * @param pattern The exclude pattern
      */
     public void addMaterial(String filePath, String pattern) {
 
@@ -206,7 +207,8 @@ public class Link extends Metablock<LinkSignable>
      * Convenience method to indicate this link to track an artifact as
      * product
      *
-     * @param filepath the path of the product to track
+     * @param filePath the path of the product to track
+     * @param pattern the exclude pattern
      */
     public void addProduct(String filePath, String pattern) {
 
