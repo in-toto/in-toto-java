@@ -3,7 +3,7 @@
   <groupId>io.github.in-toto</groupId>
   <artifactId>in-toto</artifactId>
   <packaging>jar</packaging>
-  <version>0.3</version>
+  <version>0.3.1</version>
   <name>in-toto</name>
   <url>https://maven.apache.org</url>
   <description>A framework to secure software supply chains.</description>
@@ -32,7 +32,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.7.0-RC1</version>
+      <version>5.7.0</version>
       <scope>test</scope>
     </dependency>
     <!-- bcpkix: pem/openssl key serialization de-serialization -->
@@ -57,28 +57,28 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.7.0-RC1</version>
+      <version>5.7.0</version>
      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
-      <version>5.7.0-RC1</version>
+      <version>5.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-launcher</artifactId>
-      <version>1.7.0-RC1</version>
+      <version>1.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-runner</artifactId>
-      <version>1.7.0-RC1</version>
+      <version>1.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-migrationsupport</artifactId>
-      <version>5.7.0-RC1</version>
+      <version>5.7.0</version>
     </dependency>
     <!--
     <dependency>
@@ -107,7 +107,7 @@
           <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.0-RC1</version>
+            <version>5.7.0</version>
           </dependency>
         </dependencies>
       </plugin>
