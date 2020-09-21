@@ -3,11 +3,11 @@
   <groupId>io.github.in-toto</groupId>
   <artifactId>in-toto</artifactId>
   <packaging>jar</packaging>
-  <version>0.3</version>
+  <version>0.3.1</version>
   <name>in-toto</name>
   <url>https://maven.apache.org</url>
   <description>A framework to secure software supply chains.</description>
-  <scm>        
+  <scm>
       <connection>scm:git:https://github.com/in-toto/in-toto-java</connection>
       <developerConnection>scm:git:ssh://git@github.com/in-toto/in-toto-java</developerConnection>
       <url>http://github.com/in-toto/in-toto-java/</url>
@@ -32,53 +32,53 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.2.0</version>
+      <version>5.7.0</version>
       <scope>test</scope>
     </dependency>
     <!-- bcpkix: pem/openssl key serialization de-serialization -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
-      <version>1.59</version>
+      <version>1.66</version>
     </dependency>
     <!-- bcprov: bouncycastle crypto provider -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
-      <version>1.59</version>
+      <version>1.66</version>
     </dependency>
     <!-- gson: object to json converter -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.8.5</version>
+      <version>2.8.6</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.2.0</version>
+      <version>5.7.0</version>
      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
-      <version>5.1.0-M1</version>
+      <version>5.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-launcher</artifactId>
-      <version>1.0.0</version>
+      <version>1.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-runner</artifactId>
-      <version>1.0.0</version>
+      <version>1.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-migrationsupport</artifactId>
-      <version>5.0.0</version>
+      <version>5.7.0</version>
     </dependency>
     <!--
     <dependency>
@@ -107,7 +107,7 @@
           <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.2.0</version>
+            <version>5.7.0</version>
           </dependency>
         </dependencies>
       </plugin>
