@@ -18,7 +18,7 @@ your mvn project edit the pom.xml file to add:
 <dependency>
   <groupId>io.github.in-toto</groupId>
   <artifactId>in-toto</artifactId>
-  <version>0.0.2</version>
+  <version>0.3.3</version>
 </dependency>
     ...
 ```

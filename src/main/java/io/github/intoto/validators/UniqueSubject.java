@@ -16,6 +16,7 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+/** This interface creates the annotation used to validate Subject uniqueness. */
 @Documented
 @Constraint(validatedBy = {UniqueSubjectValidator.class})
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})

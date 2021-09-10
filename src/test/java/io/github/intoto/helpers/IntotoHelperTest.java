@@ -247,7 +247,7 @@ public class IntotoHelperTest {
   }
 
   @Test
-  @DisplayName("Testing Subjects uniqueness")
+  @DisplayName("Testing Subject uniqueness")
   public void validateAndTransformToJson_shouldThrowException_whenSubjectNamesAreNotUnique()
       throws JsonProcessingException, InvalidModelException {
     Subject subject = new Subject();
