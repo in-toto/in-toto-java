@@ -1,16 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+>
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.in-toto</groupId>
   <artifactId>in-toto</artifactId>
   <packaging>jar</packaging>
-  <version>0.3.1</version>
+  <version>0.3.2</version>
   <name>in-toto</name>
   <url>https://maven.apache.org</url>
   <description>A framework to secure software supply chains.</description>
   <scm>
-      <connection>scm:git:https://github.com/in-toto/in-toto-java</connection>
-      <developerConnection>scm:git:ssh://git@github.com/in-toto/in-toto-java</developerConnection>
-      <url>http://github.com/in-toto/in-toto-java/</url>
+    <connection>scm:git:https://github.com/in-toto/in-toto-java</connection>
+    <developerConnection>scm:git:ssh://git@github.com/in-toto/in-toto-java
+    </developerConnection>
+    <url>https://github.com/in-toto/in-toto-java/</url>
     <tag>HEAD</tag>
   </scm>
   <developers>
@@ -19,6 +21,11 @@
       <email>santiago@nyu.edu</email>
       <organization>New York University</organization>
       <organizationUrl>https://ssl.engineering.nyu.edu</organizationUrl>
+    </developer>
+    <developer>
+      <name>Sergio Felix</name>
+      <email>sfelix@google.com</email>
+      <organization>Google</organization>
     </developer>
   </developers>
   <licenses>
@@ -47,6 +54,12 @@
       <artifactId>bcprov-jdk15on</artifactId>
       <version>1.67</version>
     </dependency>
+    <!-- Jackson Dependencies -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.12.3</version>
+    </dependency>
     <!-- gson: object to json converter -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -58,7 +71,7 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>5.7.0</version>
-     <scope>test</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.vintage</groupId>
@@ -80,24 +93,33 @@
       <artifactId>junit-jupiter-migrationsupport</artifactId>
       <version>5.7.0</version>
     </dependency>
-    <!--
+    <!-- For validations-->
     <dependency>
-      <groupId>org.junit-pioneer</groupId>
-      <artifactId>junit-pioneer</artifactId>
-      <version>0.1.2</version>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>2.0.1.Final</version>
     </dependency>
-    -->
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>6.0.12.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.el</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+
   </dependencies>
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.compilerArgument>-Xlint:unchecked</maven.compiler.compilerArgument>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
   </properties>
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.21.0</version>
+        <version>2.22.2</version>
         <dependencies>
           <dependency>
             <groupId>org.junit.platform</groupId>
