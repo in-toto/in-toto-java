@@ -20,6 +20,7 @@ import org.bouncycastle.util.encoders.Hex;
  * <p>- A signed field, with the signable portion of a piece of metadata. - A signatures field, a
  * list of the signatures on this metadata.
  */
+@Deprecated
 abstract class Metablock<S extends Signable> {
   S signed;
   ArrayList<Signature> signatures;

@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /** Implementation of the in-toto Link metadata type. */
+@Deprecated
 public class Link extends Metablock<LinkSignable> {
   /** default exclude pattern used to filter out redundant artifacts */
   transient String defaultExcludePattern = "**.{git,link}**";

@@ -13,6 +13,7 @@ import org.bouncycastle.util.encoders.Hex;
  * <p>Used by the Link metdata type on the .add method. Can be also used to pre-populate the Link's
  * artifact fields before instantiating a link.
  */
+@Deprecated
 public class Artifact {
 
   /** A URI representing the location of the Artifact */

@@ -8,6 +8,7 @@ import io.github.legacy.models.Artifact.ArtifactHash;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+@Deprecated
 class LinkSignable extends Signable {
 
   HashMap<String, ArtifactHash> materials;
