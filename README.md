@@ -7,7 +7,7 @@ its current limitations.
 
 # Usage
 
-## installation
+## Installation
 
 This library is intended to be used with maven build system, although you can
 probably easily move it to any other if you're familiar with those. To add it to
