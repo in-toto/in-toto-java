@@ -36,7 +36,7 @@ public class Statement {
    * Additional parameters of the Predicate. Unset is treated the same as set-but-empty. MAY be
    * omitted if predicateType fully describes the predicate.
    */
-  private Predicate predicate;
+  private @Valid Predicate predicate;
 
   public StatementType get_type() {
     return _type;
