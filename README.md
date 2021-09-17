@@ -59,6 +59,23 @@ it into its JSON representation as follows:
 If the statement passed to the method is malformed the library will throw
 an `InvalidModelException` that will contain a message with the errors.
 
+If you, however wish to create a DSSE based In-toto envelope, The library
+features a convenience method:
+
+```java
+IntotoEnvelope intotoEnvelope=IntotoHelper.produceIntotoEnvelope(statement,signer);
+```
+
+This method will accept a `io.github.intoto.models.Statement` and an
+implementation of the ` io.github.dsse.models.Signer` interface.
+
+### Implementing a Signer and a Verifier
+
+The Signer and Verifier are used to abstract away the sign and verify mechanism
+from this library. This allows the user to implement their own Signer/Verifier.
+An example of such an implementation is available in
+the `io.github.dsse.helpers package`.
+
 ## Using the legacy Link library
 
 The library exposes a series of objects and convenience methods to create, sign,

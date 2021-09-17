@@ -8,7 +8,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 
 public class SimpleECDSASigner implements Signer {
-  private PrivateKey privateKey;
+  private final PrivateKey privateKey;
 
   public SimpleECDSASigner(PrivateKey privateKey) {
     this.privateKey = privateKey;
