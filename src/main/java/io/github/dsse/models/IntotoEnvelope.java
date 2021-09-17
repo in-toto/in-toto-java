@@ -36,6 +36,7 @@ public class IntotoEnvelope {
   @NotBlank(message = "payload cannot be null or empty")
   private String payload;
 
+  /** A list of DSSE signatures. See: {@link Signature} */
   @NotEmpty(message = "signatures cannot be null or empty")
   private List<Signature> signatures;
 
