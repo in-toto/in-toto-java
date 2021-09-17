@@ -27,8 +27,8 @@ With it, you should be able to use the library inside your project.
 
 ## Using the new library
 
-The library exposes a new set of models used for in-toto attestations 0.1.0. If
-you wish to use the deprecated legacy Link library, please skip to the next
+The library exposes a new set of models used for in-toto 0.1.0, DSSE 1.0.0 and .
+If you wish to use the deprecated legacy Link library, please skip to the next
 section.
 
 The new library allows you to instantiate a Statement and populate it as
