@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import javax.validation.constraints.NotBlank;
 
+/**
+ * Implementation of a DSSE signature as described in:
+ * https://github.com/secure-systems-lab/dsse/blob/c0d39aae3b9063a67cc20ae8ec3e1ea289821ebf/envelope.proto#L26
+ */
 public class Signature {
 
   /**

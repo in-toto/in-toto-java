@@ -36,11 +36,13 @@ public class IntotoHelper {
    * @param signer the Signer that will be used to sign the payloads.
    * @param prettyPrint if true it will pretty print the final Envelope JSON representation
    * @return a JSON representation for the envelope.
-   * @throws InvalidModelException
-   * @throws JsonProcessingException
-   * @throws NoSuchAlgorithmException
-   * @throws SignatureException
-   * @throws InvalidKeyException
+   * @throws InvalidModelException thrown when the given statement is not valid
+   * @throws JsonProcessingException thrown when there are issues generating the JSON string
+   * @throws NoSuchAlgorithmException thrown when there are issues encrypting the payloads in the
+   *     Envelope
+   * @throws SignatureException thrown when there are issues with the given key in the Signer
+   * @throws InvalidKeyException thrown when there are issues matching the key with the given
+   *     algorithm
    */
   public static String produceIntotoEnvelopeAsJson(
       Statement statement, Signer signer, boolean prettyPrint)
@@ -75,12 +77,14 @@ public class IntotoHelper {
    *
    * @param statement the Statement to add to the envelope
    * @param signer the Signer that will be used to sign the payloads.
-   * @return
-   * @throws InvalidModelException
-   * @throws JsonProcessingException
-   * @throws NoSuchAlgorithmException
-   * @throws SignatureException
-   * @throws InvalidKeyException
+   * @return will return a {@link IntotoEnvelope} instead of the JSON representation.
+   * @throws InvalidModelException thrown when the given statement is not valid
+   * @throws JsonProcessingException thrown when there are issues generating the JSON string
+   * @throws NoSuchAlgorithmException thrown when there are issues encrypting the payloads in the *
+   *     Envelope
+   * @throws SignatureException thrown when there are issues with the given key in the Signer
+   * @throws InvalidKeyException thrown when there are issues matching the key with the given *
+   *     algorithm
    */
   public static IntotoEnvelope produceIntotoEnvelope(Statement statement, Signer signer)
       throws InvalidModelException, JsonProcessingException, NoSuchAlgorithmException,
@@ -117,7 +121,7 @@ public class IntotoHelper {
    *<pre/>
    * @param payloadType the type of payload. Fixed for in-toto Envelopes
    * @param payload the base64 encoded Statement in JSON
-   * @return Strin
+   * @return will return a Pre Authentication Encoding String.
    */
   public static String createPreAuthenticationEncoding(String payloadType, String payload) {
     return String.format(
