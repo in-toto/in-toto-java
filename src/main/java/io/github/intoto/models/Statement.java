@@ -4,6 +4,7 @@ import io.github.intoto.validators.UniqueSubject;
 import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -29,8 +30,8 @@ public class Statement {
   private List<@Valid Subject> subject;
 
   /** URI identifying the type of the Predicate. */
-  @NotNull(message = "predicateType may not be null")
-  private PredicateType predicateType;
+  @NotBlank(message = "predicateType may not be null")
+  private String predicateType;
 
   /**
    * Additional parameters of the Predicate. Unset is treated the same as set-but-empty. MAY be
@@ -54,12 +55,8 @@ public class Statement {
     this.subject = subject;
   }
 
-  public PredicateType getPredicateType() {
+  public String getPredicateType() {
     return predicateType;
-  }
-
-  public void setPredicateType(PredicateType predicateType) {
-    this.predicateType = predicateType;
   }
 
   public Predicate getPredicate() {
@@ -68,6 +65,7 @@ public class Statement {
 
   public void setPredicate(Predicate predicate) {
     this.predicate = predicate;
+    this.predicateType = predicate.getPredicateType();
   }
 
   @Override

@@ -31,7 +31,7 @@ public class Recipe {
    *
    * <p>Omit this field (or use null) if the recipe does’t come from a material.
    */
-  private int definedInMaterial;
+  private Integer definedInMaterial;
 
   /**
    * String identifying the entry point into the build. This is often a path to a configuration file

@@ -88,4 +88,9 @@ public class Provenance extends Predicate {
   public int hashCode() {
     return Objects.hash(builder, recipe, metadata, materials);
   }
+
+  @Override
+  public String getPredicateType() {
+    return "https://slsa.dev/provenance/v0.1";
+  }
 }

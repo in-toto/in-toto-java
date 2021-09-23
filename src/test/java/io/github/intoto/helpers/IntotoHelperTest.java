@@ -12,15 +12,14 @@ import io.github.intoto.exceptions.InvalidModelException;
 import io.github.intoto.implementations.FakeSigner;
 import io.github.intoto.models.DigestSetAlgorithmType;
 import io.github.intoto.models.Predicate;
-import io.github.intoto.models.PredicateType;
 import io.github.intoto.models.Statement;
 import io.github.intoto.models.StatementType;
 import io.github.intoto.models.Subject;
+import io.github.intoto.utilities.IntotoStubFactory;
 import io.github.slsa.models.Builder;
 import io.github.slsa.models.Material;
 import io.github.slsa.models.Provenance;
 import io.github.slsa.models.Recipe;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -42,41 +41,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class IntotoHelperTest {
-
-  @Test
-  @DisplayName("Can transform basic Statement to JSON")
-  public void
-      validateAndTransformToJson_shouldTransformStatementToJsonString_whenStatementIsCorrect()
-          throws IOException, InvalidModelException {
-    Subject subject = new Subject();
-    subject.setName("curl-7.72.0.tar.bz2");
-    subject.setDigest(
-        Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
-            "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
-    Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
-    statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
-    statement.setPredicate(predicate);
-
-    String jsonStatement = IntotoHelper.validateAndTransformToJson(statement, true);
-    assertNotNull(jsonStatement);
-    final String SIMPLE_JSON_STATEMENT =
-        "{\n"
-            + "  \"_type\" : \"https://in-toto.io/Statement/v0.1\",\n"
-            + "  \"subject\" : [ {\n"
-            + "    \"name\" : \"curl-7.72.0.tar.bz2\",\n"
-            + "    \"digest\" : {\n"
-            + "      \"SHA256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
-            + "    }\n"
-            + "  } ],\n"
-            + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.1\",\n"
-            + "  \"predicate\" : { }\n"
-            + "}";
-    assertEquals(SIMPLE_JSON_STATEMENT, jsonStatement);
-  }
 
   @Test
   @DisplayName("Can transform a Statement with provenance to JSON")
@@ -112,7 +76,6 @@ public class IntotoHelperTest {
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(provenancePredicate);
 
     String jsonStatement = IntotoHelper.validateAndTransformToJson(statement, true);
@@ -143,11 +106,91 @@ public class IntotoHelperTest {
             + "      \"digest\" : {\n"
             + "        \"sha256\" : \"1234...\"\n"
             + "      }\n"
-            + "    } ]\n"
+            + "    } ],\n"
+            + "    \"predicateType\" : \"https://slsa.dev/provenance/v0.1\"\n"
             + "  }\n"
             + "}";
 
     assertEquals(JSON_STATEMENT, jsonStatement);
+  }
+
+  @Test
+  @DisplayName("Can transform a Statement with provenance to JSON including Metadata")
+  public void validateAndTransformToJson_shouldTransformStatementToJsonString_WithMetadata()
+      throws JsonProcessingException, InvalidModelException {
+    // ** The subject  **
+    Subject subject = new Subject();
+    subject.setName("curl-7.72.0.tar.bz2");
+    subject.setDigest(
+        Map.of(
+            DigestSetAlgorithmType.SHA256.toString(),
+            "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
+    // ** The predicate  **
+    // Prepare the Builder
+    Builder builder = new Builder();
+    builder.setId("mailto:person@example.com");
+    // Prepare the Recipe
+    Recipe recipe = new Recipe();
+    recipe.setType("https://example.com/Makefile");
+    recipe.setEntryPoint("src:foo");
+    recipe.setDefinedInMaterial(0);
+    // Prepare the Materials
+    Material material = new Material();
+    material.setUri("https://example.com/example-1.2.3.tar.gz");
+    material.setDigest(Map.of("sha256", "1234..."));
+
+    // Putting the Provenance together
+    Provenance provenancePredicate = IntotoStubFactory.createProvenancePredicateWithMetadata();
+    // ** Putting the Statement together **
+    Statement statement = new Statement();
+    statement.set_type(StatementType.STATEMENT_V_0_1);
+    statement.setSubject(List.of(subject));
+    statement.setPredicate(provenancePredicate);
+
+    String jsonStatement = IntotoHelper.validateAndTransformToJson(statement, true);
+    System.out.println(jsonStatement);
+    assertNotNull(jsonStatement);
+    String EXPECTED_JSON_STATEMENT =
+        "{\n"
+            + "  \"_type\" : \"https://in-toto.io/Statement/v0.1\",\n"
+            + "  \"subject\" : [ {\n"
+            + "    \"name\" : \"curl-7.72.0.tar.bz2\",\n"
+            + "    \"digest\" : {\n"
+            + "      \"SHA256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
+            + "    }\n"
+            + "  } ],\n"
+            + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.1\",\n"
+            + "  \"predicate\" : {\n"
+            + "    \"builder\" : {\n"
+            + "      \"id\" : \"mailto:person@example.com\"\n"
+            + "    },\n"
+            + "    \"recipe\" : {\n"
+            + "      \"type\" : \"https://example.com/Makefile\",\n"
+            + "      \"definedInMaterial\" : 0,\n"
+            + "      \"entryPoint\" : \"src:foo\"\n"
+            + "    },\n"
+            + "    \"metadata\" : {\n"
+            + "      \"buildInvocationId\" : \"SomeBuildId\",\n"
+            + "      \"buildStartedOn\" : \"1986-12-18T15:20:30+08:00\",\n"
+            + "      \"buildFinishedOn\" : \"1986-12-18T16:20:30+08:00\",\n"
+            + "      \"completeness\" : {\n"
+            + "        \"arguments\" : true,\n"
+            + "        \"environment\" : false,\n"
+            + "        \"materials\" : true\n"
+            + "      },\n"
+            + "      \"reproducible\" : false\n"
+            + "    },\n"
+            + "    \"materials\" : [ {\n"
+            + "      \"uri\" : \"https://example.com/example-1.2.3.tar.gz\",\n"
+            + "      \"digest\" : {\n"
+            + "        \"sha256\" : \"1234...\"\n"
+            + "      }\n"
+            + "    } ],\n"
+            + "    \"predicateType\" : \"https://slsa.dev/provenance/v0.1\"\n"
+            + "  }\n"
+            + "}";
+
+    assertEquals(EXPECTED_JSON_STATEMENT, jsonStatement);
   }
 
   @Test
@@ -160,11 +203,10 @@ public class IntotoHelperTest {
             DigestSetAlgorithmType.SHA256.toString(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
 
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
+    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
 
     Statement statement = new Statement();
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -186,10 +228,9 @@ public class IntotoHelperTest {
         Map.of(
             DigestSetAlgorithmType.SHA256.toString(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
+    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -211,11 +252,10 @@ public class IntotoHelperTest {
         Map.of(
             DigestSetAlgorithmType.SHA256.toString(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
+    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(Collections.emptyList());
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -236,11 +276,10 @@ public class IntotoHelperTest {
         Map.of(
             DigestSetAlgorithmType.SHA256.toString(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
+    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -262,11 +301,10 @@ public class IntotoHelperTest {
         Map.of(
             DigestSetAlgorithmType.SHA256.toString(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
+    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -284,11 +322,10 @@ public class IntotoHelperTest {
   public void validateAndTransformToJson_shouldThrowException_whenSubjectDigstIsEmpty() {
     Subject subject = new Subject();
     subject.setName("curl-7.72.0.tar.bz2");
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
+    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -309,11 +346,10 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of("", "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
+    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -333,11 +369,10 @@ public class IntotoHelperTest {
     Subject subject = new Subject();
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(Map.of(DigestSetAlgorithmType.SHA256.toString(), ""));
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
+    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -373,11 +408,10 @@ public class IntotoHelperTest {
         Map.of(
             DigestSetAlgorithmType.SHA256.toString(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
-    Predicate predicate = new Predicate(); // Let's pretend this is an SLSA predicate
+    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject, subject2, subject3));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -419,7 +453,6 @@ public class IntotoHelperTest {
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(provenancePredicate);
 
     InvalidModelException thrown =
@@ -464,7 +497,6 @@ public class IntotoHelperTest {
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(provenancePredicate);
 
     InvalidModelException thrown =
@@ -484,6 +516,16 @@ public class IntotoHelperTest {
         IntotoHelper.createPreAuthenticationEncoding(
             "http://example.com/HelloWorld", "hello world");
     assertEquals("DSSEv1 29 http://example.com/HelloWorld 11 hello world", paeString);
+  }
+
+  @Test
+  @DisplayName("Test createPreAuthenticationEncoding with UTF 8 characters")
+  public void createPreAuthenticationEncoding_shouldCorrectlyEncode_withUtfCharacters() {
+    String paeString =
+        IntotoHelper.createPreAuthenticationEncoding(
+            "http://example.com/HelloWorld", "Entwickeln Sie mit Vergnügen");
+    assertEquals(
+        "DSSEv1 29 http://example.com/HelloWorld 28 Entwickeln Sie mit Vergnügen", paeString);
   }
 
   @Test
@@ -521,7 +563,6 @@ public class IntotoHelperTest {
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(provenancePredicate);
     String intotoEnvelope =
         IntotoHelper.produceIntotoEnvelopeAsJson(statement, new FakeSigner(), true);
@@ -530,9 +571,9 @@ public class IntotoHelperTest {
     final String EXPECTED_JSON_ENVELOPE =
         "{\n"
             + "  \"payloadType\" : \"application/vnd.in-toto+json\",\n"
-            + "  \"payload\" : \"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7IlNIQTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjEiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwicmVjaXBlIjp7InR5cGUiOiJodHRwczovL2V4YW1wbGUuY29tL01ha2VmaWxlIiwiZGVmaW5lZEluTWF0ZXJpYWwiOjAsImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn0sIm1ldGFkYXRhIjpudWxsLCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV19fQ==\",\n"
+            + "  \"payload\" : \"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7IlNIQTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjEiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwicmVjaXBlIjp7InR5cGUiOiJodHRwczovL2V4YW1wbGUuY29tL01ha2VmaWxlIiwiZGVmaW5lZEluTWF0ZXJpYWwiOjAsImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn0sIm1ldGFkYXRhIjpudWxsLCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV0sInByZWRpY2F0ZVR5cGUiOiJodHRwczovL3Nsc2EuZGV2L3Byb3ZlbmFuY2UvdjAuMSJ9fQ==\",\n"
             + "  \"signatures\" : [ {\n"
-            + "    \"sig\" : \"RFNTRXYxIDI4IGFwcGxpY2F0aW9uL3ZuZC5pbi10b3RvK2pzb24gNjU2IGV5SmZkSGx3WlNJNkltaDBkSEJ6T2k4dmFXNHRkRzkwYnk1cGJ5OVRkR0YwWlcxbGJuUXZkakF1TVNJc0luTjFZbXBsWTNRaU9sdDdJbTVoYldVaU9pSmpkWEpzTFRjdU56SXVNQzUwWVhJdVlub3lJaXdpWkdsblpYTjBJanA3SWxOSVFUSTFOaUk2SW1RMFpEVTRPVGxoTXpnMk9HWmlZalpoWlRFNE5UWmpNMlUxTldFek1tTmxNelU1TVROa1pUTTVOVFprTVRrM00yTmhZMk5rTXpkaVpEQXhOelJtWVRJaWZYMWRMQ0p3Y21Wa2FXTmhkR1ZVZVhCbElqb2lhSFIwY0hNNkx5OXpiSE5oTG1SbGRpOXdjbTkyWlc1aGJtTmxMM1l3TGpFaUxDSndjbVZrYVdOaGRHVWlPbnNpWW5WcGJHUmxjaUk2ZXlKcFpDSTZJbTFoYVd4MGJ6cHdaWEp6YjI1QVpYaGhiWEJzWlM1amIyMGlmU3dpY21WamFYQmxJanA3SW5SNWNHVWlPaUpvZEhSd2N6b3ZMMlY0WVcxd2JHVXVZMjl0TDAxaGEyVm1hV3hsSWl3aVpHVm1hVzVsWkVsdVRXRjBaWEpwWVd3aU9qQXNJbVZ1ZEhKNVVHOXBiblFpT2lKemNtTTZabTl2SW4wc0ltMWxkR0ZrWVhSaElqcHVkV3hzTENKdFlYUmxjbWxoYkhNaU9sdDdJblZ5YVNJNkltaDBkSEJ6T2k4dlpYaGhiWEJzWlM1amIyMHZaWGhoYlhCc1pTMHhMakl1TXk1MFlYSXVaM29pTENKa2FXZGxjM1FpT25zaWMyaGhNalUySWpvaU1USXpOQzR1TGlKOWZWMTlmUT09\",\n"
+            + "    \"sig\" : \"RFNTRXYxIDI4IGFwcGxpY2F0aW9uL3ZuZC5pbi10b3RvK2pzb24gNzI0IGV5SmZkSGx3WlNJNkltaDBkSEJ6T2k4dmFXNHRkRzkwYnk1cGJ5OVRkR0YwWlcxbGJuUXZkakF1TVNJc0luTjFZbXBsWTNRaU9sdDdJbTVoYldVaU9pSmpkWEpzTFRjdU56SXVNQzUwWVhJdVlub3lJaXdpWkdsblpYTjBJanA3SWxOSVFUSTFOaUk2SW1RMFpEVTRPVGxoTXpnMk9HWmlZalpoWlRFNE5UWmpNMlUxTldFek1tTmxNelU1TVROa1pUTTVOVFprTVRrM00yTmhZMk5rTXpkaVpEQXhOelJtWVRJaWZYMWRMQ0p3Y21Wa2FXTmhkR1ZVZVhCbElqb2lhSFIwY0hNNkx5OXpiSE5oTG1SbGRpOXdjbTkyWlc1aGJtTmxMM1l3TGpFaUxDSndjbVZrYVdOaGRHVWlPbnNpWW5WcGJHUmxjaUk2ZXlKcFpDSTZJbTFoYVd4MGJ6cHdaWEp6YjI1QVpYaGhiWEJzWlM1amIyMGlmU3dpY21WamFYQmxJanA3SW5SNWNHVWlPaUpvZEhSd2N6b3ZMMlY0WVcxd2JHVXVZMjl0TDAxaGEyVm1hV3hsSWl3aVpHVm1hVzVsWkVsdVRXRjBaWEpwWVd3aU9qQXNJbVZ1ZEhKNVVHOXBiblFpT2lKemNtTTZabTl2SW4wc0ltMWxkR0ZrWVhSaElqcHVkV3hzTENKdFlYUmxjbWxoYkhNaU9sdDdJblZ5YVNJNkltaDBkSEJ6T2k4dlpYaGhiWEJzWlM1amIyMHZaWGhoYlhCc1pTMHhMakl1TXk1MFlYSXVaM29pTENKa2FXZGxjM1FpT25zaWMyaGhNalUySWpvaU1USXpOQzR1TGlKOWZWMHNJbkJ5WldScFkyRjBaVlI1Y0dVaU9pSm9kSFJ3Y3pvdkwzTnNjMkV1WkdWMkwzQnliM1psYm1GdVkyVXZkakF1TVNKOWZRPT0=\",\n"
             + "    \"keyid\" : \"Fake-Signer-Key-ID\"\n"
             + "  } ]\n"
             + "}";
@@ -573,7 +614,6 @@ public class IntotoHelperTest {
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
     statement.setPredicate(provenancePredicate);
 
     // Generate a key pair
@@ -585,13 +625,13 @@ public class IntotoHelperTest {
     PrivateKey privateKey = pair.getPrivate();
     PublicKey publicKey = pair.getPublic();
 
-    SimpleECDSASigner signer = new SimpleECDSASigner(privateKey);
+    SimpleECDSASigner signer = new SimpleECDSASigner(privateKey, "MyKey");
 
     IntotoEnvelope intotoEnvelope = IntotoHelper.produceIntotoEnvelope(statement, signer);
     System.out.println(intotoEnvelope);
     assertNotNull(intotoEnvelope);
 
-    final String DSSE_PAYLOAD =
+    final String EXPECTED_DSSE_PAYLOAD =
         "DSSEv1 28 application/vnd.in-toto+json 656 eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7IlNIQTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjEiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwicmVjaXBlIjp7InR5cGUiOiJodHRwczovL2V4YW1wbGUuY29tL01ha2VmaWxlIiwiZGVmaW5lZEluTWF0ZXJpYWwiOjAsImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn0sIm1ldGFkYXRhIjpudWxsLCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV19fQ==";
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();
@@ -606,7 +646,7 @@ public class IntotoHelperTest {
                         .get(0)
                         .getSig()
                         .getBytes(StandardCharsets.UTF_8)),
-            DSSE_PAYLOAD);
+            EXPECTED_DSSE_PAYLOAD);
     Assertions.assertTrue(result);
   }
 }

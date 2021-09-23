@@ -40,7 +40,7 @@ public class SimpleECDSATest {
     PrivateKey privateKey = pair.getPrivate();
     PublicKey publicKey = pair.getPublic();
 
-    SimpleECDSASigner signer = new SimpleECDSASigner(privateKey);
+    SimpleECDSASigner signer = new SimpleECDSASigner(privateKey, "MyKey");
     byte[] encryptedMessage = signer.sign(message);
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();
@@ -60,7 +60,7 @@ public class SimpleECDSATest {
     PrivateKey privateKey = pair.getPrivate();
     PublicKey publicKey = pair.getPublic();
 
-    SimpleECDSASigner signer = new SimpleECDSASigner(privateKey);
+    SimpleECDSASigner signer = new SimpleECDSASigner(privateKey, "MyKey");
     byte[] encryptedMessage = signer.sign(message);
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();

@@ -9,18 +9,7 @@ import javax.validation.constraints.NotEmpty;
  * Implementation of the a DSSE Envelope. The Envelope is the outermost layer of the attestation,
  * handling authentication and serialization. The format and protocol are defined in DSSE and
  * adopted by in-toto in ITE-5. It is a JSON object with the following fields: payloadType string,
- * required
- *
- * <p>Identifier for the encoding of the payload. Always application/vnd.in-toto+json, which
- * indicates that it is a JSON object with a _type field indicating its schema.
- *
- * <p>payload string, required
- *
- * <p>Base64-encoded JSON Statement.
- *
- * <p>signatures array of objects, required
- *
- * <p>One or more signatures over payloadType and payload, as defined in DSSE.
+ * required.
  *
  * <p>Defined in https://github.com/secure-systems-lab/dsse/blob/master/envelope.md
  */

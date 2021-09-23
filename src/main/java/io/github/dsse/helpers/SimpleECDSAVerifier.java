@@ -10,6 +10,7 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
+/** Example implementation of a {@link Verifier} */
 public class SimpleECDSAVerifier implements Verifier {
 
   private PublicKey publicKey;
@@ -18,7 +19,7 @@ public class SimpleECDSAVerifier implements Verifier {
   public boolean verify(byte[] publicKeyByteArray, byte[] encryptedMessage, String message)
       throws NoSuchAlgorithmException, SignatureException, InvalidKeySpecException,
           InvalidKeyException {
-    Signature signature = Signature.getInstance("SHA1withECDSA");
+    Signature signature = Signature.getInstance("SHA256withECDSA");
     // Create the public key from the byte array
     PublicKey publicKey =
         KeyFactory.getInstance("ECDSA").generatePublic(new X509EncodedKeySpec(publicKeyByteArray));

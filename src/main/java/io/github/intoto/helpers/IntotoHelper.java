@@ -3,6 +3,7 @@ package io.github.intoto.helpers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.github.dsse.models.IntotoEnvelope;
 import io.github.dsse.models.Signature;
 import io.github.dsse.models.Signer;
@@ -25,7 +26,8 @@ import javax.validation.Validator;
  */
 public class IntotoHelper {
 
-  private static final ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
+
   private static final Validator validator =
       Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -48,23 +50,7 @@ public class IntotoHelper {
       Statement statement, Signer signer, boolean prettyPrint)
       throws InvalidModelException, JsonProcessingException, NoSuchAlgorithmException,
           SignatureException, InvalidKeyException {
-    // Get the Base64 encoded Statement to use as the payload
-    String jsonStatement = validateAndTransformToJson(statement, false);
-    String base64EncodedStatement = Base64.getEncoder().encodeToString(jsonStatement.getBytes());
-
-    IntotoEnvelope envelope = new IntotoEnvelope();
-    // Create the signed payload with the DSSEv1 format and sign it!
-    byte[] signedDsseV1Payload =
-        signer.sign(
-            createPreAuthenticationEncoding(envelope.getPayloadType(), base64EncodedStatement));
-
-    Signature signature = new Signature();
-    signature.setKeyId(signer.getKeyId());
-    // The sig contains the base64 encoded version of the signedDsseV1Payload
-    signature.setSig(Base64.getEncoder().encodeToString(signedDsseV1Payload));
-    // Let's complete the envelope
-    envelope.setPayload(base64EncodedStatement);
-    envelope.setSignatures(List.of(signature));
+    IntotoEnvelope envelope = produceIntotoEnvelope(statement, signer);
     if (prettyPrint) {
       return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(envelope);
     }

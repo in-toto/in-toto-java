@@ -6,4 +6,10 @@ package io.github.intoto.models;
  *
  * <p>Most users should migrate to a more specific attestation type, such as Provenance.
  */
-public class Predicate {}
+public abstract class Predicate {
+
+  /**
+   * Method that should return a String that contains an URI identifying the type of the Predicate.
+   */
+  public abstract String getPredicateType();
+}

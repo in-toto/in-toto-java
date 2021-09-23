@@ -1,5 +1,4 @@
-in-toto java
-============
+# in-toto java
 
 This repository contains an in-toto compliant library in Java. This document
 describes the repository layout, the usage purpose of this library as well as
@@ -15,11 +14,11 @@ your mvn project edit the pom.xml file to add:
 
 ```xml
     ...
-<dependency>
-  <groupId>io.github.in-toto</groupId>
-  <artifactId>in-toto</artifactId>
-  <version>0.3.3</version>
-</dependency>
+    <dependency>
+    <groupId>io.github.in-toto</groupId>
+    <artifactId>in-toto</artifactId>
+    <version>0.3.3</version>
+    </dependency>
     ...
 ```
 
@@ -36,24 +35,24 @@ follows:
 
 ```java
 Subject subject=new Subject();
-    subject.setName("curl-7.72.0.tar.bz2");
-    subject.setDigest(
-    Map.of(
-    DigestSetAlgorithmType.SHA256.toString(),
-    "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
-    Predicate predicate=new Predicate(); // Let's pretend this is an SLSA predicate
-    Statement statement=new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
-    statement.setSubject(List.of(subject));
-    statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
-    statement.setPredicate(predicate);
+subject.setName("curl-7.72.0.tar.bz2");
+subject.setDigest(
+Map.of(
+DigestSetAlgorithmType.SHA256.toString(),
+"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"))
+Predicate predicate=createPredicate();
+Statement statement=new Statement();
+statement.set_type(StatementType.STATEMENT_V_0_1);
+statement.setSubject(List.of(subject));
+statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
+statement.setPredicate(predicate);
 ```
 
 Finally, you can use the built-in `IntotoHelper` class to validate and transform
 it into its JSON representation as follows:
 
 ```java
-    String jsonStatement=IntotoHelper.validateAndTransformToJson(statement);
+String jsonStatement=IntotoHelper.validateAndTransformToJson(statement);
 ```
 
 If the statement passed to the method is malformed the library will throw
@@ -66,15 +65,31 @@ features a convenience method:
 IntotoEnvelope intotoEnvelope=IntotoHelper.produceIntotoEnvelope(statement,signer);
 ```
 
-This method will accept a `io.github.intoto.models.Statement` and an
-implementation of the ` io.github.dsse.models.Signer` interface.
+This method accepts a `io.github.intoto.models.Statement` and an implementation
+of the ` io.github.dsse.models.Signer` interface.
 
 ### Implementing a Signer and a Verifier
 
 The Signer and Verifier are used to abstract away the sign and verify mechanism
 from this library. This allows the user to implement their own Signer/Verifier.
 An example of such an implementation is available in
-the `io.github.dsse.helpers package`.
+the [io.github.dsse.helpers](/src/main/java/io/github/dsse/helpers) package.
+
+### Creating a new Predicate
+
+Users that wish to extend the Predicate in the library will see that the
+Predicate contains an abstract method:
+
+```java
+String getPredicateType();
+```
+
+When extending the base Predicate type to create your own, make sure that this
+method returns a String that contains a URI identifying the type of the
+Predicate.
+
+The library will use the Predicate type and automatically fill in the
+Statement's predicateType field with its value.
 
 ## Using the legacy Link library
 
@@ -86,7 +101,7 @@ Metadata classes are located in the `io.github.legacy.models.*` package. You
 can, for example create a link as follows:
 
 ```java
-    Link link=new Link(null,null,"test",null,null);
+    Link link = new Link(null,null,"test",null,null);
 ```
 
 This will create a link object that you can operate with.
@@ -104,13 +119,12 @@ supported hashes.
 Finally, you can sign and dump a link by calling sign and dump respectively.
 
 ```java
-
-...
-    Key thiskey=RSAKey.read("src/test/resources/somekey.pem");
+    ...
+    Key thiskey = RSAKey.read("src/test/resources/somekey.pem");
     System.out.println("Loaded key: "+thiskey.computeKeyId());
 
     ...
-    Link link=new Link(null,null,"test",null,null,null);
+    Link link = new Link(null,null,"test",null,null,null);
     link.addMaterialt("alice");
 
     link.sign(thiskey);

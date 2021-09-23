@@ -7,17 +7,20 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 
+/** Example implementation of a {@link Signer} */
 public class SimpleECDSASigner implements Signer {
   private final PrivateKey privateKey;
+  private final String keyId;
 
-  public SimpleECDSASigner(PrivateKey privateKey) {
+  public SimpleECDSASigner(PrivateKey privateKey, String keyId) {
     this.privateKey = privateKey;
+    this.keyId = keyId;
   }
 
   @Override
   public byte[] sign(String payload)
       throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-    Signature signature = Signature.getInstance("SHA1withECDSA");
+    Signature signature = Signature.getInstance("SHA256withECDSA");
     signature.initSign(privateKey);
     signature.update(payload.getBytes());
     return signature.sign();
@@ -25,6 +28,6 @@ public class SimpleECDSASigner implements Signer {
 
   @Override
   public String getKeyId() {
-    return null;
+    return this.keyId;
   }
 }
