@@ -1,5 +1,6 @@
 package io.github.dsse.helpers;
 
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -41,7 +42,7 @@ public class SimpleECDSATest {
     PublicKey publicKey = pair.getPublic();
 
     SimpleECDSASigner signer = new SimpleECDSASigner(privateKey, "MyKey");
-    byte[] encryptedMessage = signer.sign(message);
+    byte[] encryptedMessage = signer.sign(message.getBytes(StandardCharsets.UTF_8));
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();
     boolean result = verifier.verify(publicKey.getEncoded(), encryptedMessage, message);
@@ -61,7 +62,7 @@ public class SimpleECDSATest {
     PublicKey publicKey = pair.getPublic();
 
     SimpleECDSASigner signer = new SimpleECDSASigner(privateKey, "MyKey");
-    byte[] encryptedMessage = signer.sign(message);
+    byte[] encryptedMessage = signer.sign(message.getBytes(StandardCharsets.UTF_8));
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();
     boolean result = verifier.verify(publicKey.getEncoded(), encryptedMessage, message);

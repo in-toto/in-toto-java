@@ -1,5 +1,6 @@
 package io.github.intoto.helpers;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,22 +21,26 @@ import io.github.slsa.models.Builder;
 import io.github.slsa.models.Material;
 import io.github.slsa.models.Provenance;
 import io.github.slsa.models.Recipe;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.security.SignatureException;
-import java.security.spec.ECGenParameterSpec;
-import java.util.Base64;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +57,7 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
     // Prepare the Builder
@@ -87,7 +92,7 @@ public class IntotoHelperTest {
             + "  \"subject\" : [ {\n"
             + "    \"name\" : \"curl-7.72.0.tar.bz2\",\n"
             + "    \"digest\" : {\n"
-            + "      \"SHA256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
+            + "      \"sha256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
             + "    }\n"
             + "  } ],\n"
             + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.1\",\n"
@@ -100,14 +105,12 @@ public class IntotoHelperTest {
             + "      \"definedInMaterial\" : 0,\n"
             + "      \"entryPoint\" : \"src:foo\"\n"
             + "    },\n"
-            + "    \"metadata\" : null,\n"
             + "    \"materials\" : [ {\n"
             + "      \"uri\" : \"https://example.com/example-1.2.3.tar.gz\",\n"
             + "      \"digest\" : {\n"
             + "        \"sha256\" : \"1234...\"\n"
             + "      }\n"
-            + "    } ],\n"
-            + "    \"predicateType\" : \"https://slsa.dev/provenance/v0.1\"\n"
+            + "    } ]\n"
             + "  }\n"
             + "}";
 
@@ -123,7 +126,7 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
     // Prepare the Builder
@@ -156,7 +159,7 @@ public class IntotoHelperTest {
             + "  \"subject\" : [ {\n"
             + "    \"name\" : \"curl-7.72.0.tar.bz2\",\n"
             + "    \"digest\" : {\n"
-            + "      \"SHA256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
+            + "      \"sha256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
             + "    }\n"
             + "  } ],\n"
             + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.1\",\n"
@@ -185,8 +188,7 @@ public class IntotoHelperTest {
             + "      \"digest\" : {\n"
             + "        \"sha256\" : \"1234...\"\n"
             + "      }\n"
-            + "    } ],\n"
-            + "    \"predicateType\" : \"https://slsa.dev/provenance/v0.1\"\n"
+            + "    } ]\n"
             + "  }\n"
             + "}";
 
@@ -200,7 +202,7 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
 
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
@@ -226,7 +228,7 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
@@ -250,7 +252,7 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
@@ -274,7 +276,7 @@ public class IntotoHelperTest {
     Subject subject = new Subject();
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
@@ -299,7 +301,7 @@ public class IntotoHelperTest {
     subject.setName("");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
@@ -368,7 +370,7 @@ public class IntotoHelperTest {
       validateAndTransformToJson_shouldThrowException_whenSubjectDigestContainsEmptyValueStrings() {
     Subject subject = new Subject();
     subject.setName("curl-7.72.0.tar.bz2");
-    subject.setDigest(Map.of(DigestSetAlgorithmType.SHA256.toString(), ""));
+    subject.setDigest(Map.of(DigestSetAlgorithmType.SHA256.getValue(), ""));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
@@ -392,21 +394,21 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
 
     Subject subject2 = new Subject();
     subject2.setName("curl-7.72.0.tar.bz2");
     subject2.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
 
     Subject subject3 = new Subject();
     subject3.setName("curl-7.72.0.tar.bz2");
     subject3.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
@@ -433,7 +435,7 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
     // Prepare the Recipe
@@ -474,7 +476,7 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
     // Prepare the Builder
@@ -512,26 +514,46 @@ public class IntotoHelperTest {
   @Test
   @DisplayName("Test createPreAuthenticationEncoding")
   public void createPreAuthenticationEncoding_shouldCorrectlyEncode_whenSimpleValues() {
-    String paeString =
+    String helloWordString = "hello world";
+    byte[] paeString =
         IntotoHelper.createPreAuthenticationEncoding(
-            "http://example.com/HelloWorld", "hello world");
-    assertEquals("DSSEv1 29 http://example.com/HelloWorld 11 hello world", paeString);
+            "http://example.com/HelloWorld", helloWordString.getBytes(StandardCharsets.UTF_8));
+
+    System.out.println("paeString: " + new String(paeString, StandardCharsets.UTF_8));
+
+    assertArrayEquals(
+        new byte[] {
+          68, 83, 83, 69, 118, 49, 32, 50, 57, 32, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
+          109, 112, 108, 101, 46, 99, 111, 109, 47, 72, 101, 108, 108, 111, 87, 111, 114, 108, 100,
+          32, 49, 49, 32, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100
+        },
+        paeString);
   }
 
   @Test
   @DisplayName("Test createPreAuthenticationEncoding with UTF 8 characters")
   public void createPreAuthenticationEncoding_shouldCorrectlyEncode_withUtfCharacters() {
-    String paeString =
+    String utf8String = "Entwickeln Sie mit Vergnügen";
+    byte[] paeString =
         IntotoHelper.createPreAuthenticationEncoding(
-            "http://example.com/HelloWorld", "Entwickeln Sie mit Vergnügen");
-    assertEquals(
-        "DSSEv1 29 http://example.com/HelloWorld 28 Entwickeln Sie mit Vergnügen", paeString);
+            "http://example.com/HelloWorld", utf8String.getBytes(StandardCharsets.UTF_8));
+
+    System.out.println("paeString: " + new String(paeString, StandardCharsets.UTF_8));
+
+    assertArrayEquals(
+        new byte[] {
+          68, 83, 83, 69, 118, 49, 32, 50, 57, 32, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
+          109, 112, 108, 101, 46, 99, 111, 109, 47, 72, 101, 108, 108, 111, 87, 111, 114, 108, 100,
+          32, 50, 57, 32, 69, 110, 116, 119, 105, 99, 107, 101, 108, 110, 32, 83, 105, 101, 32, 109,
+          105, 116, 32, 86, 101, 114, 103, 110, -61, -68, 103, 101, 110
+        },
+        paeString);
   }
 
   @Test
   @DisplayName("Test creating envelope from Statement")
   public void
-      createPreAuthenticationEncoding_shouldCorrectlyCreateAnEnvelope_whenCompleteStatementIsPassed()
+      produceIntotoEnvelopeAsJson_shouldCorrectlyCreateAnEnvelope_whenCompleteStatementIsPassed()
           throws InvalidModelException, JsonProcessingException, NoSuchAlgorithmException,
               SignatureException, InvalidKeyException {
     // ** The subject  **
@@ -539,7 +561,7 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
     // Prepare the Builder
@@ -571,9 +593,9 @@ public class IntotoHelperTest {
     final String EXPECTED_JSON_ENVELOPE =
         "{\n"
             + "  \"payloadType\" : \"application/vnd.in-toto+json\",\n"
-            + "  \"payload\" : \"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7IlNIQTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjEiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwicmVjaXBlIjp7InR5cGUiOiJodHRwczovL2V4YW1wbGUuY29tL01ha2VmaWxlIiwiZGVmaW5lZEluTWF0ZXJpYWwiOjAsImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn0sIm1ldGFkYXRhIjpudWxsLCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV0sInByZWRpY2F0ZVR5cGUiOiJodHRwczovL3Nsc2EuZGV2L3Byb3ZlbmFuY2UvdjAuMSJ9fQ==\",\n"
+            + "  \"payload\" : \"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7InNoYTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjEiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwicmVjaXBlIjp7InR5cGUiOiJodHRwczovL2V4YW1wbGUuY29tL01ha2VmaWxlIiwiZGVmaW5lZEluTWF0ZXJpYWwiOjAsImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn0sIm1hdGVyaWFscyI6W3sidXJpIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9leGFtcGxlLTEuMi4zLnRhci5neiIsImRpZ2VzdCI6eyJzaGEyNTYiOiIxMjM0Li4uIn19XX19\",\n"
             + "  \"signatures\" : [ {\n"
-            + "    \"sig\" : \"RFNTRXYxIDI4IGFwcGxpY2F0aW9uL3ZuZC5pbi10b3RvK2pzb24gNzI0IGV5SmZkSGx3WlNJNkltaDBkSEJ6T2k4dmFXNHRkRzkwYnk1cGJ5OVRkR0YwWlcxbGJuUXZkakF1TVNJc0luTjFZbXBsWTNRaU9sdDdJbTVoYldVaU9pSmpkWEpzTFRjdU56SXVNQzUwWVhJdVlub3lJaXdpWkdsblpYTjBJanA3SWxOSVFUSTFOaUk2SW1RMFpEVTRPVGxoTXpnMk9HWmlZalpoWlRFNE5UWmpNMlUxTldFek1tTmxNelU1TVROa1pUTTVOVFprTVRrM00yTmhZMk5rTXpkaVpEQXhOelJtWVRJaWZYMWRMQ0p3Y21Wa2FXTmhkR1ZVZVhCbElqb2lhSFIwY0hNNkx5OXpiSE5oTG1SbGRpOXdjbTkyWlc1aGJtTmxMM1l3TGpFaUxDSndjbVZrYVdOaGRHVWlPbnNpWW5WcGJHUmxjaUk2ZXlKcFpDSTZJbTFoYVd4MGJ6cHdaWEp6YjI1QVpYaGhiWEJzWlM1amIyMGlmU3dpY21WamFYQmxJanA3SW5SNWNHVWlPaUpvZEhSd2N6b3ZMMlY0WVcxd2JHVXVZMjl0TDAxaGEyVm1hV3hsSWl3aVpHVm1hVzVsWkVsdVRXRjBaWEpwWVd3aU9qQXNJbVZ1ZEhKNVVHOXBiblFpT2lKemNtTTZabTl2SW4wc0ltMWxkR0ZrWVhSaElqcHVkV3hzTENKdFlYUmxjbWxoYkhNaU9sdDdJblZ5YVNJNkltaDBkSEJ6T2k4dlpYaGhiWEJzWlM1amIyMHZaWGhoYlhCc1pTMHhMakl1TXk1MFlYSXVaM29pTENKa2FXZGxjM1FpT25zaWMyaGhNalUySWpvaU1USXpOQzR1TGlKOWZWMHNJbkJ5WldScFkyRjBaVlI1Y0dVaU9pSm9kSFJ3Y3pvdkwzTnNjMkV1WkdWMkwzQnliM1psYm1GdVkyVXZkakF1TVNKOWZRPT0=\",\n"
+            + "    \"sig\" : \"RFNTRXYxIDI4IGFwcGxpY2F0aW9uL3ZuZC5pbi10b3RvK2pzb24gNDc0IHsiX3R5cGUiOiJodHRwczovL2luLXRvdG8uaW8vU3RhdGVtZW50L3YwLjEiLCJzdWJqZWN0IjpbeyJuYW1lIjoiY3VybC03LjcyLjAudGFyLmJ6MiIsImRpZ2VzdCI6eyJzaGEyNTYiOiJkNGQ1ODk5YTM4NjhmYmI2YWUxODU2YzNlNTVhMzJjZTM1OTEzZGUzOTU2ZDE5NzNjYWNjZDM3YmQwMTc0ZmEyIn19XSwicHJlZGljYXRlVHlwZSI6Imh0dHBzOi8vc2xzYS5kZXYvcHJvdmVuYW5jZS92MC4xIiwicHJlZGljYXRlIjp7ImJ1aWxkZXIiOnsiaWQiOiJtYWlsdG86cGVyc29uQGV4YW1wbGUuY29tIn0sInJlY2lwZSI6eyJ0eXBlIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9NYWtlZmlsZSIsImRlZmluZWRJbk1hdGVyaWFsIjowLCJlbnRyeVBvaW50Ijoic3JjOmZvbyJ9LCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV19fQ==\",\n"
             + "    \"keyid\" : \"Fake-Signer-Key-ID\"\n"
             + "  } ]\n"
             + "}";
@@ -583,14 +605,14 @@ public class IntotoHelperTest {
   @Test
   @DisplayName("Test creating envelope with simple encryption")
   public void
-      createPreAuthenticationEncoding_shouldCorrectlyCreateAnEnvelope_whenUsingSimpleEncryption()
+      produceIntotoEnvelope_shouldCorrectlyCreateEncryptedSignature_whenUsingSimpleEncryption()
           throws Exception {
     // ** The subject  **
     Subject subject = new Subject();
     subject.setName("curl-7.72.0.tar.bz2");
     subject.setDigest(
         Map.of(
-            DigestSetAlgorithmType.SHA256.toString(),
+            DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
     // Prepare the Builder
@@ -617,36 +639,49 @@ public class IntotoHelperTest {
     statement.setPredicate(provenancePredicate);
 
     // Generate a key pair
-    Security.addProvider(new BouncyCastleProvider());
-
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
-    keyGen.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
-    KeyPair pair = keyGen.generateKeyPair();
-    PrivateKey privateKey = pair.getPrivate();
-    PublicKey publicKey = pair.getPublic();
-
-    SimpleECDSASigner signer = new SimpleECDSASigner(privateKey, "MyKey");
+    KeyPair keyPair = getKeyPairFromFile();
+    SimpleECDSASigner signer = new SimpleECDSASigner(keyPair.getPrivate(), "MyKey");
 
     IntotoEnvelope intotoEnvelope = IntotoHelper.produceIntotoEnvelope(statement, signer);
     System.out.println(intotoEnvelope);
     assertNotNull(intotoEnvelope);
 
     final String EXPECTED_DSSE_PAYLOAD =
-        "DSSEv1 28 application/vnd.in-toto+json 656 eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7IlNIQTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjEiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwicmVjaXBlIjp7InR5cGUiOiJodHRwczovL2V4YW1wbGUuY29tL01ha2VmaWxlIiwiZGVmaW5lZEluTWF0ZXJpYWwiOjAsImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn0sIm1ldGFkYXRhIjpudWxsLCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV19fQ==";
+        "DSSEv1 28 application/vnd.in-toto+json 474 {\"_type\":\"https://in-toto.io/Statement/v0.1\",\"subject\":[{\"name\":\"curl-7.72.0.tar.bz2\",\"digest\":{\"sha256\":\"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"}}],\"predicateType\":\"https://slsa.dev/provenance/v0.1\",\"predicate\":{\"builder\":{\"id\":\"mailto:person@example.com\"},\"recipe\":{\"type\":\"https://example.com/Makefile\",\"definedInMaterial\":0,\"entryPoint\":\"src:foo\"},\"materials\":[{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"1234...\"}}]}}";
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();
 
     boolean result =
         verifier.verify(
-            publicKey.getEncoded(),
-            Base64.getDecoder()
-                .decode(
-                    intotoEnvelope
-                        .getSignatures()
-                        .get(0)
-                        .getSig()
-                        .getBytes(StandardCharsets.UTF_8)),
+            keyPair.getPublic().getEncoded(),
+            Base64.decode(intotoEnvelope.getSignatures().get(0).getSig().getBytes()),
             EXPECTED_DSSE_PAYLOAD);
     Assertions.assertTrue(result);
+  }
+
+  /**
+   * Gets the keys from the resources directory (public.key and private.key) and loads them up as a
+   * {@link KeyPair}
+   */
+  private KeyPair getKeyPairFromFile()
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    Security.addProvider(new BouncyCastleProvider());
+    // Getting ClassLoader obj
+    ClassLoader classLoader = this.getClass().getClassLoader();
+
+    // Getting public key
+    File filePublicKey = new File(classLoader.getResource("public.key").getFile());
+    byte[] encodedPublicKey = Files.readAllBytes(filePublicKey.toPath());
+    PublicKey publicKey =
+        KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(encodedPublicKey));
+    System.out.println(publicKey.toString());
+
+    // Getting private key
+    File filePrivateKey = new File(classLoader.getResource("private.key").getFile());
+    byte[] encodedPrivateKey = Files.readAllBytes(filePrivateKey.toPath());
+    PrivateKey privateKey =
+        KeyFactory.getInstance("EC").generatePrivate(new PKCS8EncodedKeySpec(encodedPrivateKey));
+    System.out.println(privateKey.toString());
+    return new KeyPair(publicKey, privateKey);
   }
 }

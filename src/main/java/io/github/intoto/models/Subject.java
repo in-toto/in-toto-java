@@ -30,6 +30,9 @@ public class Subject {
    * <p>Two DigestSets are considered matching if ANY of the fields match. The producer and consumer
    * must agree on acceptable algorithms. If there are no overlapping algorithms, the subject is
    * considered not matching.
+   *
+   * <p>This implementation 2 Strings instead of an enum as the key in order to facilitate future
+   * extensions.
    */
   @NotEmpty(message = "digest must not be empty")
   private Map<

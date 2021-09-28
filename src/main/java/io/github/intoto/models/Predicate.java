@@ -1,5 +1,7 @@
 package io.github.intoto.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * A generic attestation type with a schema isomorphic to in-toto 0.9. This allows existing in-toto
  * users to make minimal changes to upgrade to the new attestation format.
@@ -11,5 +13,6 @@ public abstract class Predicate {
   /**
    * Method that should return a String that contains an URI identifying the type of the Predicate.
    */
+  @JsonIgnore
   public abstract String getPredicateType();
 }

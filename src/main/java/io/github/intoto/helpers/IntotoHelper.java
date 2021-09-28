@@ -9,6 +9,7 @@ import io.github.dsse.models.Signature;
 import io.github.dsse.models.Signer;
 import io.github.intoto.exceptions.InvalidModelException;
 import io.github.intoto.models.Statement;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -81,9 +82,9 @@ public class IntotoHelper {
 
     IntotoEnvelope envelope = new IntotoEnvelope();
     // Create the signed payload with the DSSEv1 format and sign it!
-    byte[] signedDsseV1Payload =
-        signer.sign(
-            createPreAuthenticationEncoding(envelope.getPayloadType(), base64EncodedStatement));
+    byte[] paeByteArray =
+        createPreAuthenticationEncoding(envelope.getPayloadType(), jsonStatement.getBytes());
+    byte[] signedDsseV1Payload = signer.sign(paeByteArray);
     Signature signature = new Signature();
     signature.setKeyId(signer.getKeyId());
     // The sig contains the base64 encoded version of the signedDsseV1Payload
@@ -106,12 +107,17 @@ public class IntotoHelper {
    * LEN(s) = ASCII decimal encoding of the byte length of s, with no leading zeros
    *<pre/>
    * @param payloadType the type of payload. Fixed for in-toto Envelopes
-   * @param payload the base64 encoded Statement in JSON
+   * @param payload raw payload in bytes
    * @return will return a Pre Authentication Encoding String.
    */
-  public static String createPreAuthenticationEncoding(String payloadType, String payload) {
+  public static byte[] createPreAuthenticationEncoding(String payloadType, byte[] payload) {
     return String.format(
-        "DSSEv1 %d %s %d %s", payloadType.length(), payloadType, payload.length(), payload);
+            "DSSEv1 %d %s %d %s",
+            payloadType.length(),
+            payloadType,
+            payload.length,
+            new String(payload, StandardCharsets.UTF_8))
+        .getBytes(StandardCharsets.UTF_8);
   }
 
   /**

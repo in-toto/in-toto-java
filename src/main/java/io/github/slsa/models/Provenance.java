@@ -1,5 +1,7 @@
 package io.github.slsa.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.github.intoto.models.Predicate;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +28,7 @@ public class Provenance extends Predicate {
   private @Valid Recipe recipe;
 
   /** Other properties of the build. */
+  @JsonInclude(Include.NON_NULL)
   private Metadata metadata;
 
   /**

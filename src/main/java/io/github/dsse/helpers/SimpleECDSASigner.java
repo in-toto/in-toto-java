@@ -18,11 +18,11 @@ public class SimpleECDSASigner implements Signer {
   }
 
   @Override
-  public byte[] sign(String payload)
+  public byte[] sign(byte[] payload)
       throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
     Signature signature = Signature.getInstance("SHA256withECDSA");
     signature.initSign(privateKey);
-    signature.update(payload.getBytes());
+    signature.update(payload);
     return signature.sign();
   }
 

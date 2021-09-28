@@ -12,7 +12,7 @@ public interface Signer {
    *
    * @param payload the message that you want to sign.
    */
-  byte[] sign(String payload)
+  byte[] sign(byte[] payload)
       throws NoSuchAlgorithmException, InvalidKeyException, SignatureException;
 
   /** Returns the ID of this key, or null if not supported. */
