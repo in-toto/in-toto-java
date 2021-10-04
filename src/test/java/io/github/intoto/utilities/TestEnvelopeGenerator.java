@@ -10,7 +10,9 @@ import io.github.intoto.models.Statement;
 import io.github.intoto.models.StatementType;
 import io.github.intoto.models.Subject;
 import io.github.slsa.models.Builder;
+import io.github.slsa.models.Completeness;
 import io.github.slsa.models.Material;
+import io.github.slsa.models.Metadata;
 import io.github.slsa.models.Provenance;
 import io.github.slsa.models.Recipe;
 import java.io.File;
@@ -20,6 +22,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,11 +55,25 @@ public class TestEnvelopeGenerator {
     Material material = new Material();
     material.setUri("https://example.com/example-1.2.3.tar.gz");
     material.setDigest(Map.of("sha256", "1234..."));
+    // Prepare Metadata
+    Metadata metadata = new Metadata();
+    metadata.setBuildInvocationId("SomeBuildId");
+    metadata.setBuildStartedOn(OffsetDateTime.parse("1986-12-18T15:20:30+08:00"));
+    metadata.setBuildFinishedOn(OffsetDateTime.parse("1986-12-18T16:20:30+08:00"));
+
+    Completeness completeness = new Completeness();
+    completeness.setArguments(true);
+    completeness.setMaterials(true);
+    completeness.setEnvironment(false);
+    metadata.setCompleteness(completeness);
+
     // Putting the Provenance together
     Provenance provenancePredicate = new Provenance();
     provenancePredicate.setBuilder(builder);
     provenancePredicate.setRecipe(recipe);
     provenancePredicate.setMaterials(List.of(material));
+    provenancePredicate.setMetadata(metadata);
+
     // ** Putting the Statement together **
     Statement statement = new Statement();
     statement.set_type(StatementType.STATEMENT_V_0_1);
