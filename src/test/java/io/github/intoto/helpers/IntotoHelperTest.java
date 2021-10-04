@@ -16,7 +16,6 @@ import io.github.intoto.implementations.FakeSigner;
 import io.github.intoto.models.DigestSetAlgorithmType;
 import io.github.intoto.models.Predicate;
 import io.github.intoto.models.Statement;
-import io.github.intoto.models.StatementType;
 import io.github.intoto.models.Subject;
 import io.github.intoto.utilities.IntotoStubFactory;
 import io.github.slsa.models.Builder;
@@ -76,7 +75,6 @@ public class IntotoHelperTest {
     provenancePredicate.setMaterials(List.of(material));
     // ** Putting the Statement together **
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(provenancePredicate);
 
@@ -143,7 +141,6 @@ public class IntotoHelperTest {
     Provenance provenancePredicate = IntotoStubFactory.createProvenancePredicateWithMetadata();
     // ** Putting the Statement together **
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(provenancePredicate);
 
@@ -193,32 +190,6 @@ public class IntotoHelperTest {
   }
 
   @Test
-  @DisplayName("Testing Statement Type can't be null")
-  public void validateAndTransformToJson_shouldThrowException_whenStatementTypeIsMissing() {
-    Subject subject = new Subject();
-    subject.setName("curl-7.72.0.tar.bz2");
-    subject.setDigest(
-        Map.of(
-            DigestSetAlgorithmType.SHA256.getValue(),
-            "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
-
-    Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
-
-    Statement statement = new Statement();
-    statement.setSubject(List.of(subject));
-    statement.setPredicate(predicate);
-
-    InvalidModelException thrown =
-        assertThrows(
-            InvalidModelException.class,
-            () -> {
-              IntotoHelper.validateAndTransformToJson(statement, true);
-            });
-
-    assertEquals("_type may not be null", thrown.getMessage());
-  }
-
-  @Test
   @DisplayName("Testing Statement Subject can't be null")
   public void toJson_shouldThrowException_whenStatementSubjectIsNull() {
     Subject subject = new Subject();
@@ -229,7 +200,6 @@ public class IntotoHelperTest {
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setPredicate(predicate);
 
     InvalidModelException thrown =
@@ -253,7 +223,6 @@ public class IntotoHelperTest {
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(Collections.emptyList());
     statement.setPredicate(predicate);
 
@@ -277,7 +246,6 @@ public class IntotoHelperTest {
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(predicate);
 
@@ -302,7 +270,6 @@ public class IntotoHelperTest {
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(predicate);
 
@@ -323,7 +290,6 @@ public class IntotoHelperTest {
     subject.setName("curl-7.72.0.tar.bz2");
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(predicate);
 
@@ -347,7 +313,6 @@ public class IntotoHelperTest {
         Map.of("", "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(predicate);
 
@@ -370,7 +335,6 @@ public class IntotoHelperTest {
     subject.setDigest(Map.of(DigestSetAlgorithmType.SHA256.getValue(), ""));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(predicate);
 
@@ -409,7 +373,6 @@ public class IntotoHelperTest {
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject, subject2, subject3));
     statement.setPredicate(predicate);
 
@@ -450,7 +413,6 @@ public class IntotoHelperTest {
     provenancePredicate.setMaterials(List.of(material));
     // ** Putting the Statement together **
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(provenancePredicate);
 
@@ -494,7 +456,6 @@ public class IntotoHelperTest {
     provenancePredicate.setMaterials(List.of(material));
     // ** Putting the Statement together **
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(provenancePredicate);
 
@@ -580,7 +541,7 @@ public class IntotoHelperTest {
     provenancePredicate.setMaterials(List.of(material));
     // ** Putting the Statement together **
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
+
     statement.setSubject(List.of(subject));
     statement.setPredicate(provenancePredicate);
     String intotoEnvelope =
@@ -631,7 +592,7 @@ public class IntotoHelperTest {
     provenancePredicate.setMaterials(List.of(material));
     // ** Putting the Statement together **
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
+
     statement.setSubject(List.of(subject));
     statement.setPredicate(provenancePredicate);
 

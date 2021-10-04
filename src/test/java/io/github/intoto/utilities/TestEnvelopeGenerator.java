@@ -7,7 +7,6 @@ import io.github.dsse.helpers.SimpleECDSASigner;
 import io.github.intoto.helpers.IntotoHelper;
 import io.github.intoto.models.DigestSetAlgorithmType;
 import io.github.intoto.models.Statement;
-import io.github.intoto.models.StatementType;
 import io.github.intoto.models.Subject;
 import io.github.slsa.models.Builder;
 import io.github.slsa.models.Completeness;
@@ -76,7 +75,6 @@ public class TestEnvelopeGenerator {
 
     // ** Putting the Statement together **
     Statement statement = new Statement();
-    statement.set_type(StatementType.STATEMENT_V_0_1);
     statement.setSubject(List.of(subject));
     statement.setPredicate(provenancePredicate);
 
@@ -86,7 +84,7 @@ public class TestEnvelopeGenerator {
 
     String intotoJsonEnvelope = IntotoHelper.produceIntotoEnvelopeAsJson(statement, signer, false);
 
-    Files.writeString(Path.of(".", "intoto_test.attestation"), intotoJsonEnvelope);
+    Files.writeString(Path.of(".", "intoto_example.intoto.jsonl"), intotoJsonEnvelope);
   }
 
   /**

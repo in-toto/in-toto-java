@@ -6,7 +6,6 @@ import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 /**
  * The Statement is the middle layer of the attestation, binding it to a particular subject and
@@ -15,8 +14,7 @@ import javax.validation.constraints.NotNull;
 public class Statement {
 
   /** Identifier for the schema of the Statement. */
-  @NotNull(message = "_type may not be null")
-  private StatementType _type;
+  private final String _type = "https://in-toto.io/Statement/v0.1";
 
   /**
    * Set of software artifacts that the attestation applies to. Each element represents a single
@@ -39,14 +37,6 @@ public class Statement {
    */
   private @Valid Predicate predicate;
 
-  public StatementType get_type() {
-    return _type;
-  }
-
-  public void set_type(StatementType _type) {
-    this._type = _type;
-  }
-
   public List<Subject> getSubject() {
     return subject;
   }
@@ -61,6 +51,10 @@ public class Statement {
 
   public Predicate getPredicate() {
     return predicate;
+  }
+
+  public String get_type() {
+    return _type;
   }
 
   public void setPredicate(Predicate predicate) {

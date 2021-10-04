@@ -50,9 +50,10 @@ public class SimpleECDSATest {
   }
 
   @Test
-  @DisplayName("Test simple ECDSA signing with DSAA String")
+  @DisplayName("Test simple ECDSA signing against a fix Pre-Authentication Encoding String")
   public void test() throws Exception {
-    String message =
+    // The following is a fixed Pre-Authentication Encoding String used for testing
+    String effectiveTestMessage =
         "DSSEv1 28 application/vnd.in-toto+json 656 eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7IlNIQTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjEiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwicmVjaXBlIjp7InR5cGUiOiJodHRwczovL2V4YW1wbGUuY29tL01ha2VmaWxlIiwiZGVmaW5lZEluTWF0ZXJpYWwiOjAsImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn0sIm1ldGFkYXRhIjpudWxsLCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV19fQ==";
     // Generate a key pair
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
@@ -62,10 +63,11 @@ public class SimpleECDSATest {
     PublicKey publicKey = pair.getPublic();
 
     SimpleECDSASigner signer = new SimpleECDSASigner(privateKey, "MyKey");
-    byte[] encryptedMessage = signer.sign(message.getBytes(StandardCharsets.UTF_8));
+    byte[] encryptedMessage = signer.sign(effectiveTestMessage.getBytes(StandardCharsets.UTF_8));
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();
-    boolean result = verifier.verify(publicKey.getEncoded(), encryptedMessage, message);
+    boolean result =
+        verifier.verify(publicKey.getEncoded(), encryptedMessage, effectiveTestMessage);
     Assertions.assertTrue(result);
   }
 }

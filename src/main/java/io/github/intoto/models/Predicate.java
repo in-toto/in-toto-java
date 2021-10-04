@@ -3,10 +3,8 @@ package io.github.intoto.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * A generic attestation type with a schema isomorphic to in-toto 0.9. This allows existing in-toto
- * users to make minimal changes to upgrade to the new attestation format.
- *
- * <p>Most users should migrate to a more specific attestation type, such as Provenance.
+ * The Predicate is the innermost layer of the attestation, containing arbitrary metadata about the
+ * Statement's subject.
  */
 public abstract class Predicate {
 

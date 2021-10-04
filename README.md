@@ -42,9 +42,7 @@ DigestSetAlgorithmType.SHA256.toString(),
 "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"))
 Predicate predicate=createPredicate();
 Statement statement=new Statement();
-statement.set_type(StatementType.STATEMENT_V_0_1);
 statement.setSubject(List.of(subject));
-statement.setPredicateType(PredicateType.SLSA_PROVENANCE_V_0_1);
 statement.setPredicate(predicate);
 ```
 
