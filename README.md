@@ -58,7 +58,7 @@ String jsonStatement=IntotoHelper.validateAndTransformToJson(statement);
 If the statement passed to the method is malformed the library will throw
 an `InvalidModelException` that will contain a message with the errors.
 
-If you, however wish to create a DSSE based In-toto envelope, The library
+If you, however wish to create a DSSE based In-toto envelope, the library
 features a convenience method:
 
 ```java
@@ -90,6 +90,17 @@ Predicate.
 
 The library will use the Predicate type and automatically fill in the
 Statement's predicateType field with its value.
+
+
+### Generating keys
+
+The keys in the project where generated with:
+
+```
+openssl ecparam -genkey -name secp521r1 -noout -out private.pem #generate private key
+openssl ec -in private.pem -pubout -out public.pem #generate public key
+openssl pkcs8 -topk8 -nocrypt -in private.pem -out p8private.pem #convert to pkcs8 format
+```
 
 ## Using the legacy Link library
 

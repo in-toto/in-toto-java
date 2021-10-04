@@ -1,5 +1,7 @@
 package io.github.intoto.helpers;
 
+import static io.github.intoto.utilities.KeyUtilities.readPrivateKey;
+import static io.github.intoto.utilities.KeyUtilities.readPublicKey;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,23 +24,18 @@ import io.github.slsa.models.Material;
 import io.github.slsa.models.Provenance;
 import io.github.slsa.models.Recipe;
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.jupiter.api.Assertions;
@@ -663,24 +660,22 @@ public class IntotoHelperTest {
    * Gets the keys from the resources directory (public.key and private.key) and loads them up as a
    * {@link KeyPair}
    */
-  private KeyPair getKeyPairFromFile()
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+  private KeyPair getKeyPairFromFile() throws Exception {
     Security.addProvider(new BouncyCastleProvider());
     // Getting ClassLoader obj
     ClassLoader classLoader = this.getClass().getClassLoader();
 
     // Getting public key
-    File filePublicKey = new File(classLoader.getResource("public.key").getFile());
-    byte[] encodedPublicKey = Files.readAllBytes(filePublicKey.toPath());
-    PublicKey publicKey =
-        KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(encodedPublicKey));
+    File publicKeyFile =
+        new File(Objects.requireNonNull(classLoader.getResource("public.pem")).getFile());
+    PublicKey publicKey = readPublicKey(publicKeyFile);
     System.out.println(publicKey.toString());
 
     // Getting private key
-    File filePrivateKey = new File(classLoader.getResource("private.key").getFile());
-    byte[] encodedPrivateKey = Files.readAllBytes(filePrivateKey.toPath());
-    PrivateKey privateKey =
-        KeyFactory.getInstance("EC").generatePrivate(new PKCS8EncodedKeySpec(encodedPrivateKey));
+    File privateKeyFile =
+        new File(Objects.requireNonNull(classLoader.getResource("p8private.pem")).getFile());
+    PrivateKey privateKey = readPrivateKey(privateKeyFile);
+
     System.out.println(privateKey.toString());
     return new KeyPair(publicKey, privateKey);
   }
