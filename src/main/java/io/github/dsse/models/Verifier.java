@@ -15,10 +15,12 @@ public interface Verifier {
    * @param encryptedMessage the encrypted message
    * @param message the message we are validating against.
    * @return true if the given message matches the encryptedMessage
-   * @throws NoSuchAlgorithmException
-   * @throws SignatureException
-   * @throws InvalidKeySpecException
-   * @throws InvalidKeyException
+   * @throws NoSuchAlgorithmException thrown when a particular cryptographic algorithm is requested
+   *     but is not available in the environment.
+   * @throws SignatureException This is the generic Signature exception.
+   * @throws InvalidKeySpecException This is the exception for invalid key specifications.
+   * @throws InvalidKeyException This is the exception for invalid Keys (invalid encoding, wrong
+   *     length, uninitialized, etc).
    */
   boolean verify(byte[] publicKey, byte[] encryptedMessage, String message)
       throws NoSuchAlgorithmException, SignatureException, InvalidKeySpecException,

@@ -97,7 +97,8 @@ public class IntotoHelper {
 
   /**
    * Generates the Pre-Authentication Encoding
-   *<pre>
+   *
+   * <pre>
    * "DSSEv1" + SP + LEN(type) + SP + type + SP + LEN(body) + SP + body
    *
    * where:
@@ -105,7 +106,8 @@ public class IntotoHelper {
    * SP = ASCII space [0x20]
    * "DSSEv1" = ASCII [0x44, 0x53, 0x53, 0x45, 0x76, 0x31]
    * LEN(s) = ASCII decimal encoding of the byte length of s, with no leading zeros
-   *<pre/>
+   * </pre>
+   *
    * @param payloadType the type of payload. Fixed for in-toto Envelopes
    * @param payload raw payload in bytes
    * @return will return a Pre Authentication Encoding String.
