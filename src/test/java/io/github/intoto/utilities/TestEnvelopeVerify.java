@@ -5,8 +5,8 @@ import static io.github.intoto.utilities.KeyUtilities.readPublicKey;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import io.github.dsse.helpers.SimpleECDSAVerifier;
-import io.github.dsse.models.IntotoEnvelope;
+import io.github.intoto.dsse.helpers.SimpleECDSAVerifier;
+import io.github.intoto.dsse.models.IntotoEnvelope;
 import io.github.intoto.helpers.IntotoHelper;
 import java.io.File;
 import java.nio.file.Files;

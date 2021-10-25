@@ -1,11 +1,11 @@
 package io.github.intoto.utilities;
 
-import io.github.slsa.models.Builder;
-import io.github.slsa.models.Completeness;
-import io.github.slsa.models.Material;
-import io.github.slsa.models.Metadata;
-import io.github.slsa.models.Provenance;
-import io.github.slsa.models.Recipe;
+import io.github.intoto.slsa.models.Builder;
+import io.github.intoto.slsa.models.Completeness;
+import io.github.intoto.slsa.models.Material;
+import io.github.intoto.slsa.models.Metadata;
+import io.github.intoto.slsa.models.Provenance;
+import io.github.intoto.slsa.models.Recipe;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;

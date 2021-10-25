@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 0.3.3
+## Version 0.4.0
 
 - Added implementation for in-toto 0.1.0
 - Moved Link to legacy directory

@@ -1,6 +1,6 @@
 package io.github.intoto.implementations;
 
-import io.github.dsse.models.Signer;
+import io.github.intoto.dsse.models.Signer;
 
 /** Fake Signer implementation for testing only. */
 public class FakeSigner implements Signer {

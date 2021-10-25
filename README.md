@@ -17,7 +17,7 @@ your mvn project edit the pom.xml file to add:
     <dependency>
     <groupId>io.github.in-toto</groupId>
     <artifactId>in-toto</artifactId>
-    <version>0.3.3</version>
+    <version>0.4.0</version>
     </dependency>
     ...
 ```
@@ -64,14 +64,15 @@ IntotoEnvelope intotoEnvelope=IntotoHelper.produceIntotoEnvelope(statement,signe
 ```
 
 This method accepts a `io.github.intoto.models.Statement` and an implementation
-of the ` io.github.dsse.models.Signer` interface.
+of the ` io.github.intoto.dsse.models.Signer` interface.
 
 ### Implementing a Signer and a Verifier
 
 The Signer and Verifier are used to abstract away the sign and verify mechanism
 from this library. This allows the user to implement their own Signer/Verifier.
 An example of such an implementation is available in
-the [io.github.dsse.helpers](/src/main/java/io/github/dsse/helpers) package.
+the [io.github.intoto.dsse.helpers](/src/main/java/io/github/dsse/helpers)
+package.
 
 ### Creating a new Predicate
 
@@ -89,7 +90,6 @@ Predicate.
 The library will use the Predicate type and automatically fill in the
 Statement's predicateType field with its value.
 
-
 ### Generating keys
 
 The keys in the project where generated with:
@@ -106,8 +106,8 @@ The library exposes a series of objects and convenience methods to create, sign,
 and serialize in-toto metadata. As of now, only Link metadata is supported (see
 the Limitations section to see what exactly is supported as of now).
 
-Metadata classes are located in the `io.github.legacy.models.*` package. You
-can, for example create a link as follows:
+Metadata classes are located in the `io.github.intoto.legacy.models.*` package.
+You can, for example create a link as follows:
 
 ```java
     Link link = new Link(null,null,"test",null,null);
