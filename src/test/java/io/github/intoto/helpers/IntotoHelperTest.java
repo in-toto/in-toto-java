@@ -509,6 +509,24 @@ public class IntotoHelperTest {
   }
 
   @Test
+  @DisplayName("Test createPreAuthenticationEncoding with UTF 8 characters 2")
+  public void createPreAuthenticationEncoding_shouldCorrectlyEncode_withUtfCharacters2() {
+    String utf8String = "ಠ";
+    byte[] paeString =
+        IntotoHelper.createPreAuthenticationEncoding(
+            "application/example", utf8String.getBytes(StandardCharsets.UTF_8));
+
+    System.out.println("paeString: " + new String(paeString, StandardCharsets.UTF_8));
+
+    assertArrayEquals(
+        new byte[] {
+          68, 83, 83, 69, 118, 49, 32, 49, 57, 32, 97, 112, 112, 108, 105, 99, 97, 116, 105, 111,
+          110, 47, 101, 120, 97, 109, 112, 108, 101, 32, 51, 32, -32, -78, -96
+        },
+        paeString);
+  }
+
+  @Test
   @DisplayName("Test creating envelope from Statement")
   public void
       produceIntotoEnvelopeAsJson_shouldCorrectlyCreateAnEnvelope_whenCompleteStatementIsPassed()
