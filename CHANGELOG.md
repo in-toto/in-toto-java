@@ -2,7 +2,7 @@
 
 ## Version 0.4.0
 
-- Added implementation for in-toto 0.1.0
+- Added implementation for the new version (in-toto/attestation)[https://github.com/in-toto/attestation]
 - Moved Link to legacy directory
 - Update Dependencies for validation
 
