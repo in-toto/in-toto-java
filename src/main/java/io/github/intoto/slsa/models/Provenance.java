@@ -25,6 +25,7 @@ public class Provenance extends Predicate {
    *
    * <p>MAY be unset/null if unknown, but this is DISCOURAGED.
    */
+  @JsonInclude(Include.NON_NULL)
   private @Valid Recipe recipe;
 
   /** Other properties of the build. */
