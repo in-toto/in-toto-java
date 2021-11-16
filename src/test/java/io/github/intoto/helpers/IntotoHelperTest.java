@@ -4,6 +4,7 @@ import static io.github.intoto.utilities.KeyUtilities.readPrivateKey;
 import static io.github.intoto.utilities.KeyUtilities.readPublicKey;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -467,6 +468,40 @@ public class IntotoHelperTest {
             });
 
     assertEquals("recipe type must not be blank", thrown.getMessage());
+  }
+
+  @Test
+  @DisplayName("Test Provenance with no Recipe should not have a null")
+  public void
+  validateAndTransformToJson_shouldNotIncludeNullRecipe_whenNonIsPassed()
+      throws InvalidModelException, JsonProcessingException {
+    // ** The subject  **
+    Subject subject = new Subject();
+    subject.setName("curl-7.72.0.tar.bz2");
+    subject.setDigest(
+        Map.of(
+            DigestSetAlgorithmType.SHA256.getValue(),
+            "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
+    // ** The predicate  **
+    // Prepare the Builder
+    Builder builder = new Builder();
+    builder.setId("mailto:person@example.com");
+    // Prepare the Recipe
+    // Prepare the Materials
+    Material material = new Material();
+    material.setUri("https://example.com/example-1.2.3.tar.gz");
+    material.setDigest(Map.of("sha256", "1234..."));
+    // Putting the Provenance together
+    Provenance provenancePredicate = new Provenance();
+    provenancePredicate.setBuilder(builder);
+    provenancePredicate.setMaterials(List.of(material));
+    // ** Putting the Statement together **
+    Statement statement = new Statement();
+    statement.setSubject(List.of(subject));
+    statement.setPredicate(provenancePredicate);
+
+    String jsonResponse= IntotoHelper.validateAndTransformToJson(statement, true);
+    assertFalse(jsonResponse.contains("null"));
   }
 
   @Test
