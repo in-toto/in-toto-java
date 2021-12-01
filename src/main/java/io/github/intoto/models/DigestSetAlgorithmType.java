@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 /** Helper Enum with common algorithm types, could be used to populate the {@link Subject} digest */
 public enum DigestSetAlgorithmType {
-  @JsonProperty("sha256")
   SHA256("sha256"),
   SHA224("sha224"),
   SHA384("sha384"),
