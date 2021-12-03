@@ -19,7 +19,7 @@ jobs:
       run: |
           cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
     - name: Publish package
-      run: mvn --batch-mode deploy
+      run: mvn --batch-mode deploy -P release
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
