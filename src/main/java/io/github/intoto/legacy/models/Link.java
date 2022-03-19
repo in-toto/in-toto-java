@@ -18,9 +18,9 @@ public class Link extends Metablock<LinkSignable> {
   transient String defaultExcludePattern = "**.{git,link}**";
 
   /**
-   * Constuctor method used to populate the signable payload
+   * Constructor method used to populate the signable payload
    *
-   * @param materials a HashMap keyed by artifact URI's and with hash objects as values represeting
+   * @param materials a HashMap keyed by artifact URI's and with hash objects as values representing
    *     the artifacts used as materials in this step
    * @param products a HashMap keyed by artifact URI's and with hash objects as values representing
    *     the artifacts created as products in this step.
@@ -44,7 +44,7 @@ public class Link extends Metablock<LinkSignable> {
   }
 
   /**
-   * convenience method to save the Link metdata file using the name defined by the specification
+   * convenience method to save the Link metadata file using the name defined by the specification
    */
   public void dump() {
     dump(getFullName());
