@@ -92,7 +92,7 @@ Statement's predicateType field with its value.
 
 ### Generating keys
 
-The keys in the project where generated with:
+The keys in the project were generated with:
 
 ```
 openssl ecparam -genkey -name secp521r1 -noout -out private.pem #generate private key

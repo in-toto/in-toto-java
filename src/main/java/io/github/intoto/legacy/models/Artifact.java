@@ -10,7 +10,7 @@ import org.bouncycastle.util.encoders.Hex;
 /**
  * A class representing an Artifact (that is, a material or a product).
  *
- * <p>Used by the Link metdata type on the .add method. Can be also used to pre-populate the Link's
+ * <p>Used by the Link metadata type on the .add method. Can be also used to pre-populate the Link's
  * artifact fields before instantiating a link.
  */
 @Deprecated

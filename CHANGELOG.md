@@ -18,7 +18,7 @@
 
 ## Version 0.1.1
 
-- Fix dependency handle to improve compatbility with travis plugin
+- Fix dependency handle to improve compatibility with travis plugin
 
 ## Version 0.1
 

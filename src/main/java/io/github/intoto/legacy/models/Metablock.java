@@ -114,7 +114,7 @@ abstract class Metablock<S extends Signable> {
     try {
       sig = Hex.toHexString(signer.generateSignature());
     } catch (CryptoException e) {
-      System.out.println("Coudln't sign payload!");
+      System.out.println("Couldn't sign payload!");
       return;
     }
 
