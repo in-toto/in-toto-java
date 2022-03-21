@@ -71,7 +71,7 @@ of the ` io.github.intoto.dsse.models.Signer` interface.
 The Signer and Verifier are used to abstract away the sign and verify mechanism
 from this library. This allows the user to implement their own Signer/Verifier.
 An example of such an implementation is available in
-the [io.github.intoto.dsse.helpers](/src/main/java/io/github/dsse/helpers)
+the [io.github.intoto.dsse.helpers](https://github.com/in-toto/in-toto-java/tree/master/src/main/java/io/github/intoto/dsse/helpers)
 package.
 
 ### Creating a new Predicate
