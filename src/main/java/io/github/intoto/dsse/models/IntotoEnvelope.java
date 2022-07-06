@@ -2,8 +2,8 @@ package io.github.intoto.dsse.models;
 
 import java.util.List;
 import java.util.Objects;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 /**
  * Implementation of the a DSSE Envelope. The Envelope is the outermost layer of the attestation,

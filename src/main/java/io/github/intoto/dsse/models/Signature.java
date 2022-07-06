@@ -2,7 +2,7 @@ package io.github.intoto.dsse.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * Implementation of a DSSE signature as described in:

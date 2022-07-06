@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.github.intoto.models.Predicate;
 import java.util.List;
 import java.util.Objects;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 /** Implementation of the https://slsa.dev/provenance/v0.1 */
 public class Provenance extends Predicate {
