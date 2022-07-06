@@ -5,6 +5,10 @@ updates:
   schedule:
     interval: daily
     time: '14:00'
+  - ignore:
+    - dependency-name: org.hibernate.validator
+      versions:
+        - ">=7.0.0"
   commit-message:
     prefix: "chore"
     include: "scope"
