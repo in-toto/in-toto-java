@@ -2,8 +2,8 @@ package io.github.intoto.models;
 
 import java.util.Map;
 import java.util.Objects;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 /**
  * Set of software artifacts that the attestation applies to. Each element represents a single *

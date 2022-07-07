@@ -1,7 +1,7 @@
 package io.github.intoto.slsa.models;
 
 import java.util.Objects;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Identifies the configuration used for the build. When combined with materials, this SHOULD fully

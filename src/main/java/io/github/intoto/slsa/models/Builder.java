@@ -1,7 +1,7 @@
 package io.github.intoto.slsa.models;
 
 import java.util.Objects;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * Identifies the entity that executed the recipe, which is trusted to have correctly performed the

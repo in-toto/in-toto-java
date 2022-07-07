@@ -3,9 +3,9 @@ package io.github.intoto.models;
 import io.github.intoto.validators.UniqueSubject;
 import java.util.List;
 import java.util.Objects;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 /**
  * The Statement is the middle layer of the attestation, binding it to a particular subject and
