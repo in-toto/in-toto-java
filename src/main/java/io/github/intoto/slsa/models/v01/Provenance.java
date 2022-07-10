@@ -1,4 +1,4 @@
-package io.github.intoto.slsa.models;
+package io.github.intoto.slsa.models.v01;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

@@ -3,7 +3,7 @@ package io.github.intoto.dsse.helpers;
 import static io.github.intoto.utilities.KeyUtilities.readPrivateKey;
 import static io.github.intoto.utilities.KeyUtilities.readPublicKey;
 
-import io.github.intoto.utilities.TestEnvelopeGenerator;
+import io.github.intoto.utilities.provenancev01.TestEnvelopeGenerator;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;

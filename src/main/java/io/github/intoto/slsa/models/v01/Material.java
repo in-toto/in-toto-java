@@ -1,4 +1,4 @@
-package io.github.intoto.slsa.models;
+package io.github.intoto.slsa.models.v01;
 
 import java.util.Map;
 import java.util.Objects;

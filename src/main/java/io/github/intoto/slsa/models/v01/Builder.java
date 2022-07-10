@@ -1,4 +1,4 @@
-package io.github.intoto.slsa.models;
+package io.github.intoto.slsa.models.v01;
 
 import java.util.Objects;
 import jakarta.validation.constraints.NotBlank;
