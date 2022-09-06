@@ -1,4 +1,4 @@
-package io.github.intoto.utilities;
+package io.github.intoto.utilities.provenancev01;
 
 import static io.github.intoto.utilities.KeyUtilities.readPrivateKey;
 import static io.github.intoto.utilities.KeyUtilities.readPublicKey;
@@ -8,12 +8,12 @@ import io.github.intoto.helpers.IntotoHelper;
 import io.github.intoto.models.DigestSetAlgorithmType;
 import io.github.intoto.models.Statement;
 import io.github.intoto.models.Subject;
-import io.github.intoto.slsa.models.Builder;
-import io.github.intoto.slsa.models.Completeness;
-import io.github.intoto.slsa.models.Material;
-import io.github.intoto.slsa.models.Metadata;
-import io.github.intoto.slsa.models.Provenance;
-import io.github.intoto.slsa.models.Recipe;
+import io.github.intoto.slsa.models.v01.Builder;
+import io.github.intoto.slsa.models.v01.Completeness;
+import io.github.intoto.slsa.models.v01.Material;
+import io.github.intoto.slsa.models.v01.Metadata;
+import io.github.intoto.slsa.models.v01.Provenance;
+import io.github.intoto.slsa.models.v01.Recipe;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;

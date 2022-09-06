@@ -1,4 +1,4 @@
-package io.github.intoto.slsa.models;
+package io.github.intoto.slsa.models.v01;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.OffsetDateTime;
