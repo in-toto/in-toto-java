@@ -1,5 +1,12 @@
 # Changelog
 
+## version 0.5.0
+
+- Added support for SLSA v2 attestation type
+- Bump misc. dependencies
+- Misc readability fixes
+- Change from deprecated base depenndencies (javax -> jakarta)
+
 ## Version 0.4.0
 
 - Added implementation for the new version (in-toto/attestation)[https://github.com/in-toto/attestation]
