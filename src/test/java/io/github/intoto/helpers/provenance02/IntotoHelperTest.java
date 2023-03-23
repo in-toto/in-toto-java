@@ -156,7 +156,7 @@ public class IntotoHelperTest {
     assertNotNull(jsonStatement);
     String EXPECTED_JSON_STATEMENT =
         "{\n"
-            + "  \"_type\" : \"https://in-toto.io/Statement/v0.2\",\n"
+            + "  \"_type\" : \"https://in-toto.io/Statement/v0.1\",\n"
             + "  \"subject\" : [ {\n"
             + "    \"name\" : \"curl-7.72.0.tar.bz2\",\n"
             + "    \"digest\" : {\n"
@@ -674,7 +674,7 @@ public class IntotoHelperTest {
     assertNotNull(intotoEnvelope);
 
     final String EXPECTED_DSSE_PAYLOAD =
-        "DSSEv1 28 application/vnd.in-toto+json 562 {\"_type\":\"https://in-toto.io/Statement/v0.2\",\"subject\":[{\"name\":\"curl-7.72.0.tar.bz2\",\"digest\":{\"sha256\":\"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"}}],\"predicateType\":\"https://slsa.dev/provenance/v0.2\",\"predicate\":{\"builder\":{\"id\":\"mailto:person@example.com\"},\"buildType\":\"https://example.com/Makefile\",\"invocation\":{\"configSource\":{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"323d323edvgd\"},\"entryPoint\":\"src:foo\"}},\"materials\":[{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"1234...\"}}]}}";
+        "DSSEv1 28 application/vnd.in-toto+json 562 {\"_type\":\"https://in-toto.io/Statement/v0.1\",\"subject\":[{\"name\":\"curl-7.72.0.tar.bz2\",\"digest\":{\"sha256\":\"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"}}],\"predicateType\":\"https://slsa.dev/provenance/v0.2\",\"predicate\":{\"builder\":{\"id\":\"mailto:person@example.com\"},\"buildType\":\"https://example.com/Makefile\",\"invocation\":{\"configSource\":{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"323d323edvgd\"},\"entryPoint\":\"src:foo\"}},\"materials\":[{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"1234...\"}}]}}";
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();
 
