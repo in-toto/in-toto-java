@@ -84,7 +84,7 @@ public class IntotoHelperTest {
     assertNotNull(jsonStatement);
     String JSON_STATEMENT =
         "{\n"
-            + "  \"_type\" : \"https://in-toto.io/Statement/v0.2\",\n"
+            + "  \"_type\" : \"https://in-toto.io/Statement/v0.1\",\n"
             + "  \"subject\" : [ {\n"
             + "    \"name\" : \"curl-7.72.0.tar.bz2\",\n"
             + "    \"digest\" : {\n"
