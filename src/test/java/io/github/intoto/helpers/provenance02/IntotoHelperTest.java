@@ -91,7 +91,7 @@ public class IntotoHelperTest {
             + "      \"sha256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
             + "    }\n"
             + "  } ],\n"
-            + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.1\",\n"
+            + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.2\",\n"
             + "  \"predicate\" : {\n"
             + "    \"builder\" : {\n"
             + "      \"id\" : \"mailto:person@example.com\"\n"
@@ -163,7 +163,7 @@ public class IntotoHelperTest {
             + "      \"sha256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
             + "    }\n"
             + "  } ],\n"
-            + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.1\",\n"
+            + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.2\",\n"
             + "  \"predicate\" : {\n"
             + "    \"builder\" : {\n"
             + "      \"id\" : \"mailto:person@example.com\"\n"
@@ -618,9 +618,9 @@ public class IntotoHelperTest {
     final String EXPECTED_JSON_ENVELOPE =
         "{\n"
             + "  \"payloadType\" : \"application/vnd.in-toto+json\",\n"
-            + "  \"payload\" : \"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7InNoYTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjEiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwiYnVpbGRUeXBlIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9NYWtlZmlsZSIsImludm9jYXRpb24iOnsiY29uZmlnU291cmNlIjp7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMzIzZDMyM2VkdmdkIn0sImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn19LCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV19fQ==\",\n"
+            + "  \"payload\" : \"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7InNoYTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjIiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwiYnVpbGRUeXBlIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9NYWtlZmlsZSIsImludm9jYXRpb24iOnsiY29uZmlnU291cmNlIjp7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMzIzZDMyM2VkdmdkIn0sImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn19LCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV19fQ==\",\n"
             + "  \"signatures\" : [ {\n"
-            + "    \"sig\" : \"RFNTRXYxIDI4IGFwcGxpY2F0aW9uL3ZuZC5pbi10b3RvK2pzb24gNTYyIHsiX3R5cGUiOiJodHRwczovL2luLXRvdG8uaW8vU3RhdGVtZW50L3YwLjEiLCJzdWJqZWN0IjpbeyJuYW1lIjoiY3VybC03LjcyLjAudGFyLmJ6MiIsImRpZ2VzdCI6eyJzaGEyNTYiOiJkNGQ1ODk5YTM4NjhmYmI2YWUxODU2YzNlNTVhMzJjZTM1OTEzZGUzOTU2ZDE5NzNjYWNjZDM3YmQwMTc0ZmEyIn19XSwicHJlZGljYXRlVHlwZSI6Imh0dHBzOi8vc2xzYS5kZXYvcHJvdmVuYW5jZS92MC4xIiwicHJlZGljYXRlIjp7ImJ1aWxkZXIiOnsiaWQiOiJtYWlsdG86cGVyc29uQGV4YW1wbGUuY29tIn0sImJ1aWxkVHlwZSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vTWFrZWZpbGUiLCJpbnZvY2F0aW9uIjp7ImNvbmZpZ1NvdXJjZSI6eyJ1cmkiOiJodHRwczovL2V4YW1wbGUuY29tL2V4YW1wbGUtMS4yLjMudGFyLmd6IiwiZGlnZXN0Ijp7InNoYTI1NiI6IjMyM2QzMjNlZHZnZCJ9LCJlbnRyeVBvaW50Ijoic3JjOmZvbyJ9fSwibWF0ZXJpYWxzIjpbeyJ1cmkiOiJodHRwczovL2V4YW1wbGUuY29tL2V4YW1wbGUtMS4yLjMudGFyLmd6IiwiZGlnZXN0Ijp7InNoYTI1NiI6IjEyMzQuLi4ifX1dfX0=\",\n"
+            + "    \"sig\" : \"RFNTRXYxIDI4IGFwcGxpY2F0aW9uL3ZuZC5pbi10b3RvK2pzb24gNTYyIHsiX3R5cGUiOiJodHRwczovL2luLXRvdG8uaW8vU3RhdGVtZW50L3YwLjEiLCJzdWJqZWN0IjpbeyJuYW1lIjoiY3VybC03LjcyLjAudGFyLmJ6MiIsImRpZ2VzdCI6eyJzaGEyNTYiOiJkNGQ1ODk5YTM4NjhmYmI2YWUxODU2YzNlNTVhMzJjZTM1OTEzZGUzOTU2ZDE5NzNjYWNjZDM3YmQwMTc0ZmEyIn19XSwicHJlZGljYXRlVHlwZSI6Imh0dHBzOi8vc2xzYS5kZXYvcHJvdmVuYW5jZS92MC4yIiwicHJlZGljYXRlIjp7ImJ1aWxkZXIiOnsiaWQiOiJtYWlsdG86cGVyc29uQGV4YW1wbGUuY29tIn0sImJ1aWxkVHlwZSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vTWFrZWZpbGUiLCJpbnZvY2F0aW9uIjp7ImNvbmZpZ1NvdXJjZSI6eyJ1cmkiOiJodHRwczovL2V4YW1wbGUuY29tL2V4YW1wbGUtMS4yLjMudGFyLmd6IiwiZGlnZXN0Ijp7InNoYTI1NiI6IjMyM2QzMjNlZHZnZCJ9LCJlbnRyeVBvaW50Ijoic3JjOmZvbyJ9fSwibWF0ZXJpYWxzIjpbeyJ1cmkiOiJodHRwczovL2V4YW1wbGUuY29tL2V4YW1wbGUtMS4yLjMudGFyLmd6IiwiZGlnZXN0Ijp7InNoYTI1NiI6IjEyMzQuLi4ifX1dfX0=\",\n"
             + "    \"keyid\" : \"Fake-Signer-Key-ID\"\n"
             + "  } ]\n"
             + "}";
@@ -674,7 +674,7 @@ public class IntotoHelperTest {
     assertNotNull(intotoEnvelope);
 
     final String EXPECTED_DSSE_PAYLOAD =
-        "DSSEv1 28 application/vnd.in-toto+json 562 {\"_type\":\"https://in-toto.io/Statement/v0.1\",\"subject\":[{\"name\":\"curl-7.72.0.tar.bz2\",\"digest\":{\"sha256\":\"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"}}],\"predicateType\":\"https://slsa.dev/provenance/v0.1\",\"predicate\":{\"builder\":{\"id\":\"mailto:person@example.com\"},\"buildType\":\"https://example.com/Makefile\",\"invocation\":{\"configSource\":{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"323d323edvgd\"},\"entryPoint\":\"src:foo\"}},\"materials\":[{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"1234...\"}}]}}";
+        "DSSEv1 28 application/vnd.in-toto+json 562 {\"_type\":\"https://in-toto.io/Statement/v0.1\",\"subject\":[{\"name\":\"curl-7.72.0.tar.bz2\",\"digest\":{\"sha256\":\"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"}}],\"predicateType\":\"https://slsa.dev/provenance/v0.2\",\"predicate\":{\"builder\":{\"id\":\"mailto:person@example.com\"},\"buildType\":\"https://example.com/Makefile\",\"invocation\":{\"configSource\":{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"323d323edvgd\"},\"entryPoint\":\"src:foo\"}},\"materials\":[{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"1234...\"}}]}}";
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();
 
