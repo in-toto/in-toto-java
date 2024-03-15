@@ -1,4 +1,4 @@
-package io.github.intoto.utilities.provenance02;
+package io.github.intoto.utilities.provenancev02;
 
 import static io.github.intoto.utilities.KeyUtilities.readPrivateKey;
 import static io.github.intoto.utilities.KeyUtilities.readPublicKey;

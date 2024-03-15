@@ -1,4 +1,4 @@
-package io.github.intoto.utilities.provenance02;
+package io.github.intoto.utilities.provenancev02;
 
 import io.github.intoto.slsa.models.v02.*;
 

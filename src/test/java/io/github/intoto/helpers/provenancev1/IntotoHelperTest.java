@@ -1,4 +1,4 @@
-package io.github.intoto.helpers.provenance02;
+package io.github.intoto.helpers.provenancev1;
 
 import static io.github.intoto.utilities.KeyUtilities.readPrivateKey;
 import static io.github.intoto.utilities.KeyUtilities.readPublicKey;
@@ -19,8 +19,13 @@ import io.github.intoto.models.DigestSetAlgorithmType;
 import io.github.intoto.models.Predicate;
 import io.github.intoto.models.Statement;
 import io.github.intoto.models.Subject;
-import io.github.intoto.slsa.models.v02.*;
-import io.github.intoto.utilities.provenance02.IntotoStubFactory;
+import io.github.intoto.slsa.models.v1.BuildDefinition;
+import io.github.intoto.slsa.models.v1.BuildMetadata;
+import io.github.intoto.slsa.models.v1.Builder;
+import io.github.intoto.slsa.models.v1.Provenance;
+import io.github.intoto.slsa.models.v1.ResourceDescriptor;
+import io.github.intoto.slsa.models.v1.RunDetails;
+import io.github.intoto.utilities.provenancev1.IntotoStubFactory;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -30,7 +35,10 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.SignatureException;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,32 +63,40 @@ public class IntotoHelperTest {
             DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
-    // Prepare the Builder
+    // Prepare BuildDefinition
+    BuildDefinition buildDefinition = new BuildDefinition();
+    buildDefinition.setBuildType("https://example.com/Makefile");
+    // Prepare ExternalParameters
+    Map<String, Object> externalParameters = new HashMap<>();
+    externalParameters.put("entryPoint", "src:foo");
+    externalParameters.put("source", "https://example.com/example-1.2.3.tar.gz");
+    buildDefinition.setExternalParameters(externalParameters);
+    // Prepare ResolvedDependencies
+    List<ResourceDescriptor> resolvedDependencies = new ArrayList<>();
+    ResourceDescriptor configSourceResourceDescriptor = new ResourceDescriptor();
+    configSourceResourceDescriptor.setUri("https://example.com/example-1.2.3.tar.gz");
+    configSourceResourceDescriptor.setDigest(Map.of("sha256","323d323edvgd"));
+    resolvedDependencies.add(configSourceResourceDescriptor);
+    buildDefinition.setResolvedDependencies(resolvedDependencies);
+
+    // Prepare RunDetails
+    RunDetails runDetails = new RunDetails();
+    // Prepare Builder
     Builder builder = new Builder();
     builder.setId("mailto:person@example.com");
-    // Prepare the Invocation
-    Invocation invocation = new Invocation();
-    ConfigSource configSource=new ConfigSource();
-    configSource.setUri("https://example.com/example-1.2.3.tar.gz");
-    configSource.setDigest(Map.of("sha256","323d323edvgd"));
-    configSource.setEntryPoint("src:foo");
-    invocation.setConfigSource(configSource);
-    // Prepare the Materials
-    Material material = new Material();
-    material.setUri("https://example.com/example-1.2.3.tar.gz");
-    material.setDigest(Map.of("sha256", "1234..."));
+    runDetails.setBuilder(builder);
+
     // Putting the Provenance together
     Provenance provenancePredicate = new Provenance();
-    provenancePredicate.setBuilder(builder);
-    provenancePredicate.setBuildType("https://example.com/Makefile");
-    provenancePredicate.setInvocation(invocation);
-    provenancePredicate.setMaterials(List.of(material));
+    provenancePredicate.setBuildDefinition(buildDefinition);
+    provenancePredicate.setRunDetails(runDetails);
     // ** Putting the Statement together **
     Statement statement = new Statement();
     statement.setSubject(List.of(subject));
     statement.setPredicate(provenancePredicate);
 
     String jsonStatement = IntotoHelper.validateAndTransformToJson(statement, true);
+    System.out.println(jsonStatement);
     assertNotNull(jsonStatement);
     String JSON_STATEMENT =
         "{\n"
@@ -91,27 +107,30 @@ public class IntotoHelperTest {
             + "      \"sha256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
             + "    }\n"
             + "  } ],\n"
-            + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.1\",\n"
+            + "  \"predicateType\" : \"https://slsa.dev/provenance/v1\",\n"
             + "  \"predicate\" : {\n"
-            + "    \"builder\" : {\n"
-            + "      \"id\" : \"mailto:person@example.com\"\n"
-            + "    },\n"
-            + "    \"buildType\" : \"https://example.com/Makefile\",\n"
-            + "    \"invocation\" : {\n"
-            + "      \"configSource\" : {\n"
+            + "    \"buildDefinition\" : {\n"
+            + "      \"buildType\" : \"https://example.com/Makefile\",\n"
+            + "      \"externalParameters\" : {\n"
+            + "        \"entryPoint\" : \"src:foo\",\n"
+            + "        \"source\" : \"https://example.com/example-1.2.3.tar.gz\"\n"
+            + "      },\n"
+            + "      \"resolvedDependencies\" : [ {\n"
+            + "        \"name\" : null,\n"
             + "        \"uri\" : \"https://example.com/example-1.2.3.tar.gz\",\n"
             + "        \"digest\" : {\n"
             + "          \"sha256\" : \"323d323edvgd\"\n"
-            + "        },\n"
-            + "        \"entryPoint\" : \"src:foo\"\n"
-            + "      }\n"
+            + "        }\n"
+            + "      } ]\n"
             + "    },\n"
-            + "    \"materials\" : [ {\n"
-            + "      \"uri\" : \"https://example.com/example-1.2.3.tar.gz\",\n"
-            + "      \"digest\" : {\n"
-            + "        \"sha256\" : \"1234...\"\n"
-            + "      }\n"
-            + "    } ]\n"
+            + "    \"runDetails\" : {\n"
+            + "      \"builder\" : {\n"
+            + "        \"id\" : \"mailto:person@example.com\",\n"
+            + "        \"builderDependencies\" : null,\n"
+            + "        \"version\" : null\n"
+            + "      },\n"
+            + "      \"metadata\" : null\n"
+            + "    }\n"
             + "  }\n"
             + "}";
 
@@ -130,21 +149,6 @@ public class IntotoHelperTest {
             DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
-    // Prepare the Builder
-    Builder builder = new Builder();
-    builder.setId("mailto:person@example.com");
-    // Prepare the Invocation
-    Invocation invocation = new Invocation();
-    ConfigSource configSource=new ConfigSource();
-    configSource.setUri("https://example.com/example-1.2.3.tar.gz");
-    configSource.setDigest(Map.of("sha256","323d323edvgd"));
-    configSource.setEntryPoint("src:foo");
-    invocation.setConfigSource(configSource);
-    // Prepare the Materials
-    Material material = new Material();
-    material.setUri("https://example.com/example-1.2.3.tar.gz");
-    material.setDigest(Map.of("sha256", "1234..."));
-
     // Putting the Provenance together
     Provenance provenancePredicate = IntotoStubFactory.createProvenancePredicateWithMetadata();
     // ** Putting the Statement together **
@@ -153,6 +157,7 @@ public class IntotoHelperTest {
     statement.setPredicate(provenancePredicate);
 
     String jsonStatement = IntotoHelper.validateAndTransformToJson(statement, true);
+    System.out.println(jsonStatement);
     assertNotNull(jsonStatement);
     String EXPECTED_JSON_STATEMENT =
         "{\n"
@@ -163,38 +168,34 @@ public class IntotoHelperTest {
             + "      \"sha256\" : \"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"\n"
             + "    }\n"
             + "  } ],\n"
-            + "  \"predicateType\" : \"https://slsa.dev/provenance/v0.1\",\n"
+            + "  \"predicateType\" : \"https://slsa.dev/provenance/v1\",\n"
             + "  \"predicate\" : {\n"
-            + "    \"builder\" : {\n"
-            + "      \"id\" : \"mailto:person@example.com\"\n"
-            + "    },\n"
-            + "    \"buildType\" : \"https://example.com/Makefile\",\n"
-            + "    \"invocation\" : {\n"
-            + "      \"configSource\" : {\n"
+            + "    \"buildDefinition\" : {\n"
+            + "      \"buildType\" : \"https://example.com/Makefile\",\n"
+            + "      \"externalParameters\" : {\n"
+            + "        \"entryPoint\" : \"src:foo\",\n"
+            + "        \"source\" : \"https://example.com/example-1.2.3.tar.gz\"\n"
+            + "      },\n"
+            + "      \"resolvedDependencies\" : [ {\n"
+            + "        \"name\" : null,\n"
             + "        \"uri\" : \"https://example.com/example-1.2.3.tar.gz\",\n"
             + "        \"digest\" : {\n"
             + "          \"sha256\" : \"323d323edvgd\"\n"
-            + "        },\n"
-            + "        \"entryPoint\" : \"src:foo\"\n"
-            + "      }\n"
+            + "        }\n"
+            + "      } ]\n"
             + "    },\n"
-            + "    \"metadata\" : {\n"
-            + "      \"buildInvocationId\" : \"SomeBuildId\",\n"
-            + "      \"buildStartedOn\" : \"1986-12-18T15:20:30+08:00\",\n"
-            + "      \"buildFinishedOn\" : \"1986-12-18T16:20:30+08:00\",\n"
-            + "      \"completeness\" : {\n"
-            + "        \"parameters\" : true,\n"
-            + "        \"environment\" : false,\n"
-            + "        \"materials\" : true\n"
+            + "    \"runDetails\" : {\n"
+            + "      \"builder\" : {\n"
+            + "        \"id\" : \"mailto:person@example.com\",\n"
+            + "        \"builderDependencies\" : null,\n"
+            + "        \"version\" : null\n"
             + "      },\n"
-            + "      \"reproducible\" : false\n"
-            + "    },\n"
-            + "    \"materials\" : [ {\n"
-            + "      \"uri\" : \"https://example.com/example-1.2.3.tar.gz\",\n"
-            + "      \"digest\" : {\n"
-            + "        \"sha256\" : \"1234...\"\n"
+            + "      \"metadata\" : {\n"
+            + "        \"invocationId\" : \"SomeBuildId\",\n"
+            + "        \"startedOn\" : \"1986-12-18T15:20:30+08:00\",\n"
+            + "        \"finishedOn\" : \"1986-12-18T16:20:30+08:00\"\n"
             + "      }\n"
-            + "    } ]\n"
+            + "    }\n"
             + "  }\n"
             + "}";
 
@@ -204,12 +205,6 @@ public class IntotoHelperTest {
   @Test
   @DisplayName("Testing Statement Subject can't be null")
   public void toJson_shouldThrowException_whenStatementSubjectIsNull() {
-    Subject subject = new Subject();
-    subject.setName("curl-7.72.0.tar.bz2");
-    subject.setDigest(
-        Map.of(
-            DigestSetAlgorithmType.SHA256.getValue(),
-            "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.setPredicate(predicate);
@@ -227,12 +222,6 @@ public class IntotoHelperTest {
   @Test
   @DisplayName("Testing Statement Subject can't be empty")
   public void toJson_shouldThrowException_whenStatementSubjectIsEmpty() {
-    Subject subject = new Subject();
-    subject.setName("curl-7.72.0.tar.bz2");
-    subject.setDigest(
-        Map.of(
-            DigestSetAlgorithmType.SHA256.getValue(),
-            "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     Predicate predicate = IntotoStubFactory.createSimpleProvenancePredicate();
     Statement statement = new Statement();
     statement.setSubject(Collections.emptyList());
@@ -410,22 +399,29 @@ public class IntotoHelperTest {
             DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
-    // Prepare the Invocation
-    Invocation invocation = new Invocation();
-    ConfigSource configSource=new ConfigSource();
-    configSource.setUri("https://example.com/example-1.2.3.tar.gz");
-    configSource.setDigest(Map.of("sha256","323d323edvgd"));
-    configSource.setEntryPoint("src:foo");
-    invocation.setConfigSource(configSource);
-    // Prepare the Materials
-    Material material = new Material();
-    material.setUri("https://example.com/example-1.2.3.tar.gz");
-    material.setDigest(Map.of("sha256", "1234..."));
+    // Prepare BuildDefinition
+    BuildDefinition buildDefinition = new BuildDefinition();
+    buildDefinition.setBuildType("https://example.com/Makefile");
+    // Prepare ExternalParameters
+    Map<String, Object> externalParameters = new HashMap<>();
+    externalParameters.put("entryPoint", "src:foo");
+    externalParameters.put("source", "https://example.com/example-1.2.3.tar.gz");
+    buildDefinition.setExternalParameters(externalParameters);
+    // Prepare ResolvedDependencies
+    List<ResourceDescriptor> resolvedDependencies = new ArrayList<>();
+    ResourceDescriptor configSourceResourceDescriptor = new ResourceDescriptor();
+    configSourceResourceDescriptor.setUri("https://example.com/example-1.2.3.tar.gz");
+    configSourceResourceDescriptor.setDigest(Map.of("sha256","323d323edvgd"));
+    resolvedDependencies.add(configSourceResourceDescriptor);
+    buildDefinition.setResolvedDependencies(resolvedDependencies);
+
+    // Prepare RunDetails
+    RunDetails runDetails = new RunDetails();
+
     // Putting the Provenance together
     Provenance provenancePredicate = new Provenance();
-    provenancePredicate.setBuildType("https://example.com/Makefile");
-    provenancePredicate.setInvocation(invocation);
-    provenancePredicate.setMaterials(List.of(material));
+    provenancePredicate.setBuildDefinition(buildDefinition);
+    provenancePredicate.setRunDetails(runDetails);
     // ** Putting the Statement together **
     Statement statement = new Statement();
     statement.setSubject(List.of(subject));
@@ -453,25 +449,32 @@ public class IntotoHelperTest {
             DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
-    // Prepare the Builder
+    // Prepare BuildDefinition
+    BuildDefinition buildDefinition = new BuildDefinition();
+    // Prepare ExternalParameters
+    Map<String, Object> externalParameters = new HashMap<>();
+    externalParameters.put("entryPoint", "src:foo");
+    externalParameters.put("source", "https://example.com/example-1.2.3.tar.gz");
+    buildDefinition.setExternalParameters(externalParameters);
+    // Prepare ResolvedDependencies
+    List<ResourceDescriptor> resolvedDependencies = new ArrayList<>();
+    ResourceDescriptor configSourceResourceDescriptor = new ResourceDescriptor();
+    configSourceResourceDescriptor.setUri("https://example.com/example-1.2.3.tar.gz");
+    configSourceResourceDescriptor.setDigest(Map.of("sha256","323d323edvgd"));
+    resolvedDependencies.add(configSourceResourceDescriptor);
+    buildDefinition.setResolvedDependencies(resolvedDependencies);
+
+    // Prepare RunDetails
+    RunDetails runDetails = new RunDetails();
+    // Prepare Builder
     Builder builder = new Builder();
     builder.setId("mailto:person@example.com");
-    // Prepare the Invocation
-    Invocation invocation = new Invocation();
-    ConfigSource configSource=new ConfigSource();
-    configSource.setUri("https://example.com/example-1.2.3.tar.gz");
-    configSource.setDigest(Map.of("sha256","323d323edvgd"));
-    configSource.setEntryPoint("src:foo");
-    invocation.setConfigSource(configSource);
-    // Prepare the Materials
-    Material material = new Material();
-    material.setUri("https://example.com/example-1.2.3.tar.gz");
-    material.setDigest(Map.of("sha256", "1234..."));
+    runDetails.setBuilder(builder);
+
     // Putting the Provenance together
     Provenance provenancePredicate = new Provenance();
-    provenancePredicate.setBuilder(builder);
-    provenancePredicate.setInvocation(invocation);
-    provenancePredicate.setMaterials(List.of(material));
+    provenancePredicate.setBuildDefinition(buildDefinition);
+    provenancePredicate.setRunDetails(runDetails);
     // ** Putting the Statement together **
     Statement statement = new Statement();
     statement.setSubject(List.of(subject));
@@ -488,9 +491,9 @@ public class IntotoHelperTest {
   }
 
   @Test
-  @DisplayName("Test Provenance with no Invocation should not have a null")
+  @DisplayName("Test Provenance with no externalParameters")
   public void
-  validateAndTransformToJson_shouldNotIncludeNullInvocation_whenNonIsPassed()
+  validateAndTransformToJson_shouldThrowException_whenStatementContainsProvenanceWithNoExternalParameters()
       throws InvalidModelException, JsonProcessingException {
     // ** The subject  **
     Subject subject = new Subject();
@@ -500,26 +503,40 @@ public class IntotoHelperTest {
             DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
-    // Prepare the Builder
+    // Prepare BuildDefinition
+    BuildDefinition buildDefinition = new BuildDefinition();
+    buildDefinition.setBuildType("https://example.com/Makefile");
+    // Prepare ResolvedDependencies
+    List<ResourceDescriptor> resolvedDependencies = new ArrayList<>();
+    ResourceDescriptor configSourceResourceDescriptor = new ResourceDescriptor();
+    configSourceResourceDescriptor.setUri("https://example.com/example-1.2.3.tar.gz");
+    configSourceResourceDescriptor.setDigest(Map.of("sha256","323d323edvgd"));
+    resolvedDependencies.add(configSourceResourceDescriptor);
+    buildDefinition.setResolvedDependencies(resolvedDependencies);
+
+    // Prepare RunDetails
+    RunDetails runDetails = new RunDetails();
+    // Prepare Builder
     Builder builder = new Builder();
     builder.setId("mailto:person@example.com");
-    // Prepare the Invocation
-    // Prepare the Materials
-    Material material = new Material();
-    material.setUri("https://example.com/example-1.2.3.tar.gz");
-    material.setDigest(Map.of("sha256", "1234..."));
+    runDetails.setBuilder(builder);
+
     // Putting the Provenance together
     Provenance provenancePredicate = new Provenance();
-    provenancePredicate.setBuilder(builder);
-    provenancePredicate.setBuildType("https://example.com/Makefile");
-    provenancePredicate.setMaterials(List.of(material));
+    provenancePredicate.setBuildDefinition(buildDefinition);
+    provenancePredicate.setRunDetails(runDetails);
     // ** Putting the Statement together **
     Statement statement = new Statement();
     statement.setSubject(List.of(subject));
     statement.setPredicate(provenancePredicate);
 
-    String jsonResponse= IntotoHelper.validateAndTransformToJson(statement, true);
-    assertFalse(jsonResponse.contains("null"));
+    InvalidModelException thrown =
+        assertThrows(
+            InvalidModelException.class,
+            () -> {
+              IntotoHelper.validateAndTransformToJson(statement, true);
+            });
+    assertEquals("externalParameters must not be empty", thrown.getMessage());
   }
 
   @Test
@@ -529,6 +546,8 @@ public class IntotoHelperTest {
     byte[] paeString =
         IntotoHelper.createPreAuthenticationEncoding(
             "http://example.com/HelloWorld", helloWordString.getBytes(StandardCharsets.UTF_8));
+
+    System.out.println("paeString: " + new String(paeString, StandardCharsets.UTF_8));
 
     assertArrayEquals(
         new byte[] {
@@ -547,6 +566,8 @@ public class IntotoHelperTest {
         IntotoHelper.createPreAuthenticationEncoding(
             "http://example.com/HelloWorld", utf8String.getBytes(StandardCharsets.UTF_8));
 
+    System.out.println("paeString: " + new String(paeString, StandardCharsets.UTF_8));
+
     assertArrayEquals(
         new byte[] {
           68, 83, 83, 69, 118, 49, 32, 50, 57, 32, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
@@ -564,6 +585,8 @@ public class IntotoHelperTest {
     byte[] paeString =
         IntotoHelper.createPreAuthenticationEncoding(
             "application/example", utf8String.getBytes(StandardCharsets.UTF_8));
+
+    System.out.println("paeString: " + new String(paeString, StandardCharsets.UTF_8));
 
     assertArrayEquals(
         new byte[] {
@@ -587,26 +610,33 @@ public class IntotoHelperTest {
             DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
-    // Prepare the Builder
+    // Prepare BuildDefinition
+    BuildDefinition buildDefinition = new BuildDefinition();
+    buildDefinition.setBuildType("https://example.com/Makefile");
+    // Prepare ExternalParameters
+    Map<String, Object> externalParameters = new HashMap<>();
+    externalParameters.put("entryPoint", "src:foo");
+    externalParameters.put("source", "https://example.com/example-1.2.3.tar.gz");
+    buildDefinition.setExternalParameters(externalParameters);
+    // Prepare ResolvedDependencies
+    List<ResourceDescriptor> resolvedDependencies = new ArrayList<>();
+    ResourceDescriptor configSourceResourceDescriptor = new ResourceDescriptor();
+    configSourceResourceDescriptor.setUri("https://example.com/example-1.2.3.tar.gz");
+    configSourceResourceDescriptor.setDigest(Map.of("sha256","323d323edvgd"));
+    resolvedDependencies.add(configSourceResourceDescriptor);
+    buildDefinition.setResolvedDependencies(resolvedDependencies);
+
+    // Prepare RunDetails
+    RunDetails runDetails = new RunDetails();
+    // Prepare Builder
     Builder builder = new Builder();
     builder.setId("mailto:person@example.com");
-    // Prepare the Invocation
-    Invocation invocation = new Invocation();
-    ConfigSource configSource=new ConfigSource();
-    configSource.setUri("https://example.com/example-1.2.3.tar.gz");
-    configSource.setDigest(Map.of("sha256","323d323edvgd"));
-    configSource.setEntryPoint("src:foo");
-    invocation.setConfigSource(configSource);
-    // Prepare the Materials
-    Material material = new Material();
-    material.setUri("https://example.com/example-1.2.3.tar.gz");
-    material.setDigest(Map.of("sha256", "1234..."));
+    runDetails.setBuilder(builder);
+
     // Putting the Provenance together
     Provenance provenancePredicate = new Provenance();
-    provenancePredicate.setBuilder(builder);
-    provenancePredicate.setBuildType("https://example.com/Makefile");
-    provenancePredicate.setInvocation(invocation);
-    provenancePredicate.setMaterials(List.of(material));
+    provenancePredicate.setBuildDefinition(buildDefinition);
+    provenancePredicate.setRunDetails(runDetails);
     // ** Putting the Statement together **
     Statement statement = new Statement();
 
@@ -614,13 +644,14 @@ public class IntotoHelperTest {
     statement.setPredicate(provenancePredicate);
     String intotoEnvelope =
         IntotoHelper.produceIntotoEnvelopeAsJson(statement, new FakeSigner(), true);
+    System.out.println(intotoEnvelope);
     assertNotNull(intotoEnvelope);
     final String EXPECTED_JSON_ENVELOPE =
         "{\n"
             + "  \"payloadType\" : \"application/vnd.in-toto+json\",\n"
-            + "  \"payload\" : \"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7InNoYTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YwLjEiLCJwcmVkaWNhdGUiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20ifSwiYnVpbGRUeXBlIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9NYWtlZmlsZSIsImludm9jYXRpb24iOnsiY29uZmlnU291cmNlIjp7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMzIzZDMyM2VkdmdkIn0sImVudHJ5UG9pbnQiOiJzcmM6Zm9vIn19LCJtYXRlcmlhbHMiOlt7InVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMTIzNC4uLiJ9fV19fQ==\",\n"
+            + "  \"payload\" : \"eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjAuMSIsInN1YmplY3QiOlt7Im5hbWUiOiJjdXJsLTcuNzIuMC50YXIuYnoyIiwiZGlnZXN0Ijp7InNoYTI1NiI6ImQ0ZDU4OTlhMzg2OGZiYjZhZTE4NTZjM2U1NWEzMmNlMzU5MTNkZTM5NTZkMTk3M2NhY2NkMzdiZDAxNzRmYTIifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YxIiwicHJlZGljYXRlIjp7ImJ1aWxkRGVmaW5pdGlvbiI6eyJidWlsZFR5cGUiOiJodHRwczovL2V4YW1wbGUuY29tL01ha2VmaWxlIiwiZXh0ZXJuYWxQYXJhbWV0ZXJzIjp7ImVudHJ5UG9pbnQiOiJzcmM6Zm9vIiwic291cmNlIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9leGFtcGxlLTEuMi4zLnRhci5neiJ9LCJyZXNvbHZlZERlcGVuZGVuY2llcyI6W3sibmFtZSI6bnVsbCwidXJpIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9leGFtcGxlLTEuMi4zLnRhci5neiIsImRpZ2VzdCI6eyJzaGEyNTYiOiIzMjNkMzIzZWR2Z2QifX1dfSwicnVuRGV0YWlscyI6eyJidWlsZGVyIjp7ImlkIjoibWFpbHRvOnBlcnNvbkBleGFtcGxlLmNvbSIsImJ1aWxkZXJEZXBlbmRlbmNpZXMiOm51bGwsInZlcnNpb24iOm51bGx9LCJtZXRhZGF0YSI6bnVsbH19fQ==\",\n"
             + "  \"signatures\" : [ {\n"
-            + "    \"sig\" : \"RFNTRXYxIDI4IGFwcGxpY2F0aW9uL3ZuZC5pbi10b3RvK2pzb24gNTYyIHsiX3R5cGUiOiJodHRwczovL2luLXRvdG8uaW8vU3RhdGVtZW50L3YwLjEiLCJzdWJqZWN0IjpbeyJuYW1lIjoiY3VybC03LjcyLjAudGFyLmJ6MiIsImRpZ2VzdCI6eyJzaGEyNTYiOiJkNGQ1ODk5YTM4NjhmYmI2YWUxODU2YzNlNTVhMzJjZTM1OTEzZGUzOTU2ZDE5NzNjYWNjZDM3YmQwMTc0ZmEyIn19XSwicHJlZGljYXRlVHlwZSI6Imh0dHBzOi8vc2xzYS5kZXYvcHJvdmVuYW5jZS92MC4xIiwicHJlZGljYXRlIjp7ImJ1aWxkZXIiOnsiaWQiOiJtYWlsdG86cGVyc29uQGV4YW1wbGUuY29tIn0sImJ1aWxkVHlwZSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vTWFrZWZpbGUiLCJpbnZvY2F0aW9uIjp7ImNvbmZpZ1NvdXJjZSI6eyJ1cmkiOiJodHRwczovL2V4YW1wbGUuY29tL2V4YW1wbGUtMS4yLjMudGFyLmd6IiwiZGlnZXN0Ijp7InNoYTI1NiI6IjMyM2QzMjNlZHZnZCJ9LCJlbnRyeVBvaW50Ijoic3JjOmZvbyJ9fSwibWF0ZXJpYWxzIjpbeyJ1cmkiOiJodHRwczovL2V4YW1wbGUuY29tL2V4YW1wbGUtMS4yLjMudGFyLmd6IiwiZGlnZXN0Ijp7InNoYTI1NiI6IjEyMzQuLi4ifX1dfX0=\",\n"
+            + "    \"sig\" : \"RFNTRXYxIDI4IGFwcGxpY2F0aW9uL3ZuZC5pbi10b3RvK2pzb24gNjQwIHsiX3R5cGUiOiJodHRwczovL2luLXRvdG8uaW8vU3RhdGVtZW50L3YwLjEiLCJzdWJqZWN0IjpbeyJuYW1lIjoiY3VybC03LjcyLjAudGFyLmJ6MiIsImRpZ2VzdCI6eyJzaGEyNTYiOiJkNGQ1ODk5YTM4NjhmYmI2YWUxODU2YzNlNTVhMzJjZTM1OTEzZGUzOTU2ZDE5NzNjYWNjZDM3YmQwMTc0ZmEyIn19XSwicHJlZGljYXRlVHlwZSI6Imh0dHBzOi8vc2xzYS5kZXYvcHJvdmVuYW5jZS92MSIsInByZWRpY2F0ZSI6eyJidWlsZERlZmluaXRpb24iOnsiYnVpbGRUeXBlIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9NYWtlZmlsZSIsImV4dGVybmFsUGFyYW1ldGVycyI6eyJlbnRyeVBvaW50Ijoic3JjOmZvbyIsInNvdXJjZSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oifSwicmVzb2x2ZWREZXBlbmRlbmNpZXMiOlt7Im5hbWUiOm51bGwsInVyaSI6Imh0dHBzOi8vZXhhbXBsZS5jb20vZXhhbXBsZS0xLjIuMy50YXIuZ3oiLCJkaWdlc3QiOnsic2hhMjU2IjoiMzIzZDMyM2VkdmdkIn19XX0sInJ1bkRldGFpbHMiOnsiYnVpbGRlciI6eyJpZCI6Im1haWx0bzpwZXJzb25AZXhhbXBsZS5jb20iLCJidWlsZGVyRGVwZW5kZW5jaWVzIjpudWxsLCJ2ZXJzaW9uIjpudWxsfSwibWV0YWRhdGEiOm51bGx9fX0=\",\n"
             + "    \"keyid\" : \"Fake-Signer-Key-ID\"\n"
             + "  } ]\n"
             + "}";
@@ -640,26 +671,39 @@ public class IntotoHelperTest {
             DigestSetAlgorithmType.SHA256.getValue(),
             "d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2"));
     // ** The predicate  **
-    // Prepare the Builder
+    // Prepare BuildDefinition
+    BuildDefinition buildDefinition = new BuildDefinition();
+    buildDefinition.setBuildType("https://example.com/Makefile");
+    // Prepare ExternalParameters
+    Map<String, Object> externalParameters = new HashMap<>();
+    externalParameters.put("entryPoint", "src:foo");
+    externalParameters.put("source", "https://example.com/example-1.2.3.tar.gz");
+    buildDefinition.setExternalParameters(externalParameters);
+    // Prepare ResolvedDependencies
+    List<ResourceDescriptor> resolvedDependencies = new ArrayList<>();
+    ResourceDescriptor configSourceResourceDescriptor = new ResourceDescriptor();
+    configSourceResourceDescriptor.setUri("https://example.com/example-1.2.3.tar.gz");
+    configSourceResourceDescriptor.setDigest(Map.of("sha256","323d323edvgd"));
+    resolvedDependencies.add(configSourceResourceDescriptor);
+    buildDefinition.setResolvedDependencies(resolvedDependencies);
+
+    // Prepare RunDetails
+    RunDetails runDetails = new RunDetails();
+    // Prepare Builder
     Builder builder = new Builder();
     builder.setId("mailto:person@example.com");
-    // Prepare the Invocation
-    Invocation invocation = new Invocation();
-    ConfigSource configSource=new ConfigSource();
-    configSource.setUri("https://example.com/example-1.2.3.tar.gz");
-    configSource.setDigest(Map.of("sha256","323d323edvgd"));
-    configSource.setEntryPoint("src:foo");
-    invocation.setConfigSource(configSource);
-    // Prepare the Materials
-    Material material = new Material();
-    material.setUri("https://example.com/example-1.2.3.tar.gz");
-    material.setDigest(Map.of("sha256", "1234..."));
+    runDetails.setBuilder(builder);
+    // Prepare Metadata
+    BuildMetadata metadata = new BuildMetadata();
+    metadata.setInvocationId("SomeBuildId");
+    metadata.setStartedOn(OffsetDateTime.parse("1986-12-18T15:20:30+08:00"));
+    metadata.setFinishedOn(OffsetDateTime.parse("1986-12-18T16:20:30+08:00"));
+    runDetails.setMetadata(metadata);
+
     // Putting the Provenance together
     Provenance provenancePredicate = new Provenance();
-    provenancePredicate.setBuilder(builder);
-    provenancePredicate.setBuildType("https://example.com/Makefile");
-    provenancePredicate.setInvocation(invocation);
-    provenancePredicate.setMaterials(List.of(material));
+    provenancePredicate.setBuildDefinition(buildDefinition);
+    provenancePredicate.setRunDetails(runDetails);
     // ** Putting the Statement together **
     Statement statement = new Statement();
 
@@ -671,10 +715,11 @@ public class IntotoHelperTest {
     SimpleECDSASigner signer = new SimpleECDSASigner(keyPair.getPrivate(), "MyKey");
 
     IntotoEnvelope intotoEnvelope = IntotoHelper.produceIntotoEnvelope(statement, signer);
+    System.out.println(intotoEnvelope);
     assertNotNull(intotoEnvelope);
 
     final String EXPECTED_DSSE_PAYLOAD =
-        "DSSEv1 28 application/vnd.in-toto+json 562 {\"_type\":\"https://in-toto.io/Statement/v0.1\",\"subject\":[{\"name\":\"curl-7.72.0.tar.bz2\",\"digest\":{\"sha256\":\"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"}}],\"predicateType\":\"https://slsa.dev/provenance/v0.1\",\"predicate\":{\"builder\":{\"id\":\"mailto:person@example.com\"},\"buildType\":\"https://example.com/Makefile\",\"invocation\":{\"configSource\":{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"323d323edvgd\"},\"entryPoint\":\"src:foo\"}},\"materials\":[{\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"1234...\"}}]}}";
+        "DSSEv1 28 application/vnd.in-toto+json 747 {\"_type\":\"https://in-toto.io/Statement/v0.1\",\"subject\":[{\"name\":\"curl-7.72.0.tar.bz2\",\"digest\":{\"sha256\":\"d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2\"}}],\"predicateType\":\"https://slsa.dev/provenance/v1\",\"predicate\":{\"buildDefinition\":{\"buildType\":\"https://example.com/Makefile\",\"externalParameters\":{\"entryPoint\":\"src:foo\",\"source\":\"https://example.com/example-1.2.3.tar.gz\"},\"resolvedDependencies\":[{\"name\":null,\"uri\":\"https://example.com/example-1.2.3.tar.gz\",\"digest\":{\"sha256\":\"323d323edvgd\"}}]},\"runDetails\":{\"builder\":{\"id\":\"mailto:person@example.com\",\"builderDependencies\":null,\"version\":null},\"metadata\":{\"invocationId\":\"SomeBuildId\",\"startedOn\":\"1986-12-18T15:20:30+08:00\",\"finishedOn\":\"1986-12-18T16:20:30+08:00\"}}}}";
 
     SimpleECDSAVerifier verifier = new SimpleECDSAVerifier();
 

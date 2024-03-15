@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-/** Implementation of the https://slsa.dev/provenance/v0.1 */
+/** Implementation of the https://slsa.dev/provenance/v0.2 */
 public class Provenance extends Predicate {
 
   /**
@@ -109,6 +109,6 @@ public class Provenance extends Predicate {
 
   @Override
   public String getPredicateType() {
-    return "https://slsa.dev/provenance/v0.1";
+    return "https://slsa.dev/provenance/v0.2";
   }
 }

@@ -4,7 +4,7 @@
   <groupId>io.github.in-toto</groupId>
   <artifactId>in-toto</artifactId>
   <packaging>jar</packaging>
-  <version>0.5.0</version>
+  <version>0.6.0</version>
   <name>in-toto</name>
   <url>https://maven.apache.org</url>
   <description>A framework to secure software supply chains.</description>
