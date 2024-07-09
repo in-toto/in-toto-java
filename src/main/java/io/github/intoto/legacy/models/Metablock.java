@@ -122,6 +122,19 @@ abstract class Metablock<S extends Signable> {
   }
 
   /**
+   * Signs the current signed payload using KeylessSign from sigstore-java
+   */
+
+  public void sign() {
+    String payload;
+    try {
+      payload = this.signed.JSONEncodeCanonical(true);
+    } catch (Exception e) {
+
+    }
+  }
+
+  /**
    * Public shortcut to call JSONEncodeCanonical on the signed field of this metablock.
    *
    * @param serializeNulls if nulls should be included or not when encoding
