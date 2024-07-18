@@ -119,6 +119,13 @@
       <artifactId>jakarta.el</artifactId>
       <version>4.0.2</version>
     </dependency>
+    <!-- sigstore-java -->
+    <dependency>
+      <groupId>dev.sigstore</groupId>
+      <artifactId>sigstore-java</artifactId>
+      <version>0.10.0</version>
+    </dependency>
+
 
   </dependencies>
   <properties>

@@ -1,8 +1,14 @@
 package io.github.intoto.dsse.models;
 
+import dev.sigstore.KeylessVerificationException;
+import dev.sigstore.bundle.BundleParseException;
+
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 
 /** Interface for a DSSE Verifier */
@@ -23,8 +29,8 @@ public interface Verifier {
    *     length, uninitialized, etc).
    */
   boolean verify(byte[] publicKey, byte[] encryptedMessage, String message)
-      throws NoSuchAlgorithmException, SignatureException, InvalidKeySpecException,
-          InvalidKeyException;
+          throws NoSuchAlgorithmException, SignatureException, InvalidKeySpecException,
+          InvalidKeyException, BundleParseException, InvalidAlgorithmParameterException, CertificateException, IOException, KeylessVerificationException;
 
   /** Returns the ID of this key, or null if not supported. */
   String getKeyId();
