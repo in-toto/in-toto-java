@@ -50,7 +50,7 @@ Finally, you can use the built-in `IntotoHelper` class to validate and transform
 it into its JSON representation as follows:
 
 ```java
-String jsonStatement=IntotoHelper.validateAndTransformToJson(statement);
+String jsonStatement=IntotoHelper.validateAndTransformToJson(statement, true);
 ```
 
 If the statement passed to the method is malformed the library will throw
@@ -134,7 +134,7 @@ Finally, you can sign and dump a link by calling sign and dump respectively.
 
     ...
     Link link = new Link(null,null,"test",null,null,null);
-    link.addMaterialt("alice");
+    link.addMaterial("alice");
 
     link.sign(thiskey);
     link.dump(somelink);
