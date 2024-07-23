@@ -4,15 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import dev.sigstore.KeylessSignerException;
 import io.github.intoto.dsse.models.IntotoEnvelope;
 import io.github.intoto.dsse.models.Signature;
 import io.github.intoto.dsse.models.Signer;
 import io.github.intoto.exceptions.InvalidModelException;
+import io.github.intoto.legacy.models.Link;
 import io.github.intoto.models.Statement;
+
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
@@ -49,8 +55,8 @@ public class IntotoHelper {
    */
   public static String produceIntotoEnvelopeAsJson(
       Statement statement, Signer signer, boolean prettyPrint)
-      throws InvalidModelException, JsonProcessingException, NoSuchAlgorithmException,
-          SignatureException, InvalidKeyException {
+          throws InvalidModelException, IOException, NoSuchAlgorithmException,
+          SignatureException, InvalidKeyException, InvalidAlgorithmParameterException, CertificateException, KeylessSignerException {
     IntotoEnvelope envelope = produceIntotoEnvelope(statement, signer);
     if (prettyPrint) {
       return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(envelope);
@@ -74,23 +80,38 @@ public class IntotoHelper {
    *     algorithm
    */
   public static IntotoEnvelope produceIntotoEnvelope(Statement statement, Signer signer)
-      throws InvalidModelException, JsonProcessingException, NoSuchAlgorithmException,
-          SignatureException, InvalidKeyException {
+          throws InvalidModelException, IOException, NoSuchAlgorithmException,
+          SignatureException, InvalidKeyException, InvalidAlgorithmParameterException, CertificateException, KeylessSignerException {
     // Get the Base64 encoded Statement to use as the payload
     String jsonStatement = validateAndTransformToJson(statement, false);
-    String base64EncodedStatement = Base64.getEncoder().encodeToString(jsonStatement.getBytes());
+    return createAndFillEnvelope(jsonStatement, signer);
+  }
+
+  public static IntotoEnvelope produceIntotoEnvelope(Link link, Signer signer)
+          throws NoSuchAlgorithmException, SignatureException, IOException,
+          InvalidAlgorithmParameterException, CertificateException, InvalidKeyException,
+          KeylessSignerException {
+    String jsonLink = link.getCanonicalJSON(true);
+    return createAndFillEnvelope(jsonLink, signer);
+  }
+
+  private static IntotoEnvelope createAndFillEnvelope(String jsonPayload, Signer signer)
+          throws NoSuchAlgorithmException, SignatureException, InvalidKeyException,
+          InvalidAlgorithmParameterException, CertificateException, IOException,
+          KeylessSignerException {
+    String base64Payload = Base64.getEncoder().encodeToString(jsonPayload.getBytes());
 
     IntotoEnvelope envelope = new IntotoEnvelope();
-    // Create the signed payload with the DSSEv1 format and sign it!
+    // Create the payload with the DSSEv1 format and sign it!
     byte[] paeByteArray =
-        createPreAuthenticationEncoding(envelope.getPayloadType(), jsonStatement.getBytes());
-    byte[] signedDsseV1Payload = signer.sign(paeByteArray);
+            createPreAuthenticationEncoding(envelope.getPayloadType(), jsonPayload.getBytes());
+    byte[] signedDSSeV1Payload = signer.sign(paeByteArray);
     Signature signature = new Signature();
     signature.setKeyId(signer.getKeyId());
-    // The sig contains the base64 encoded version of the signedDsseV1Payload
-    signature.setSig(Base64.getEncoder().encodeToString(signedDsseV1Payload));
+    // The sig contains the base64 encoded version of the signedDsseV1Paylaod
+    signature.setSig(Base64.getEncoder().encodeToString(signedDSSeV1Payload));
     // Let's complete the envelope
-    envelope.setPayload(base64EncodedStatement);
+    envelope.setPayload(base64Payload);
     envelope.setSignatures(List.of(signature));
     return envelope;
   }
