@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import dev.sigstore.KeylessSignerException;
 import io.github.intoto.dsse.helpers.SimpleECDSASigner;
 import io.github.intoto.dsse.helpers.SimpleECDSAVerifier;
 import io.github.intoto.dsse.models.IntotoEnvelope;
@@ -25,14 +26,11 @@ import io.github.intoto.slsa.models.v01.Provenance;
 import io.github.intoto.slsa.models.v01.Recipe;
 import io.github.intoto.utilities.provenancev01.IntotoStubFactory;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.SignatureException;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -566,8 +564,8 @@ public class IntotoHelperTest {
   @DisplayName("Test creating envelope from Statement")
   public void
       produceIntotoEnvelopeAsJson_shouldCorrectlyCreateAnEnvelope_whenCompleteStatementIsPassed()
-          throws InvalidModelException, JsonProcessingException, NoSuchAlgorithmException,
-              SignatureException, InvalidKeyException {
+          throws InvalidModelException, IOException, NoSuchAlgorithmException,
+          SignatureException, InvalidKeyException, InvalidAlgorithmParameterException, CertificateException, InvalidKeySpecException, KeylessSignerException {
     // ** The subject  **
     Subject subject = new Subject();
     subject.setName("curl-7.72.0.tar.bz2");

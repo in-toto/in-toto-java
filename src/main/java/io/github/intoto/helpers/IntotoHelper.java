@@ -4,15 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import dev.sigstore.KeylessSignerException;
 import io.github.intoto.dsse.models.IntotoEnvelope;
 import io.github.intoto.dsse.models.Signature;
 import io.github.intoto.dsse.models.Signer;
 import io.github.intoto.exceptions.InvalidModelException;
 import io.github.intoto.models.Statement;
+
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
@@ -49,8 +55,8 @@ public class IntotoHelper {
    */
   public static String produceIntotoEnvelopeAsJson(
       Statement statement, Signer signer, boolean prettyPrint)
-      throws InvalidModelException, JsonProcessingException, NoSuchAlgorithmException,
-          SignatureException, InvalidKeyException {
+          throws InvalidModelException, IOException, NoSuchAlgorithmException,
+          SignatureException, InvalidKeyException, InvalidAlgorithmParameterException, CertificateException, InvalidKeySpecException, KeylessSignerException {
     IntotoEnvelope envelope = produceIntotoEnvelope(statement, signer);
     if (prettyPrint) {
       return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(envelope);
@@ -74,8 +80,8 @@ public class IntotoHelper {
    *     algorithm
    */
   public static IntotoEnvelope produceIntotoEnvelope(Statement statement, Signer signer)
-      throws InvalidModelException, JsonProcessingException, NoSuchAlgorithmException,
-          SignatureException, InvalidKeyException {
+          throws InvalidModelException, IOException, NoSuchAlgorithmException,
+          SignatureException, InvalidKeyException, InvalidAlgorithmParameterException, CertificateException, InvalidKeySpecException, KeylessSignerException {
     // Get the Base64 encoded Statement to use as the payload
     String jsonStatement = validateAndTransformToJson(statement, false);
     String base64EncodedStatement = Base64.getEncoder().encodeToString(jsonStatement.getBytes());
